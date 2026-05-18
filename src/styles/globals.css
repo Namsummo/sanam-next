@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+/* ─── Site (Emanu) — default tokens ─── */
+:root,
+[data-theme="site"] {
+  --primary: #010101;
+  --secondary: #ffffff;
+  --accent: #b0061f;
+  --background: #f5f3ec;
+  --foreground: #676565;
+
+  --card: #ffffff;
+  --card-foreground: #010101;
+  --muted: #f5f3ec;
+  --muted-foreground: #676565;
+  --border: rgba(1, 1, 1, 0.1);
+  --border-dark: rgba(255, 255, 255, 0.1);
+  --destructive: rgb(230, 87, 87);
+
+  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-display: var(--font-phudu), system-ui, sans-serif;
+
+  --radius-sm: 10px;
+  --radius-md: 20px;
+  --radius-full: 9999px;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-default: 400ms;
+  --ring: rgba(176, 6, 31, 0.25);
+
+  /* Sticky nav bar (logo + padding); used for overlay pull on hero / page header */
+  --site-header-h: 100px;
+}
+
+@media (max-width: 1023px) {
+  [data-theme="site"] {
+    --site-header-h: 73px;
+  }
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--primary);
+  --color-accent: var(--accent);
+  --color-accent-foreground: #ffffff;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-display: var(--font-phudu), system-ui, sans-serif;
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-md);
+  --radius-full: var(--radius-full);
+
+  --animate-preloader-spin: preloader-spin 1.5s linear infinite;
+}
+
+@keyframes preloader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Site: text selection */
+[data-theme="site"] ::selection {
+  color: #ffffff;
+  background-color: var(--accent);
+}
+
+/* Scrollbar — track đen (primary), thumb đỏ (accent) */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--primary);
+}
+
+html::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+html::-webkit-scrollbar-track {
+  background-color: var(--primary);
+}
+
+html::-webkit-scrollbar-thumb {
+  background-color: var(--accent);
+  border-radius: var(--radius-full);
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background-color: #c40723;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--primary);
+}
+
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: var(--primary);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--accent);
+  border-radius: var(--radius-full);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="site"] h1,
+[data-theme="site"] h2,
+[data-theme="site"] h3,
+[data-theme="site"] h4,
+[data-theme="site"] h5,
+[data-theme="site"] h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--primary);
+  line-height: 1;
+}
+
+[data-theme="site"] footer h1,
+[data-theme="site"] footer h2,
+[data-theme="site"] footer h3,
+[data-theme="site"] footer h4,
+[data-theme="site"] footer h5,
+[data-theme="site"] footer h6,
+[data-theme="site"] .dark-section h1,
+[data-theme="site"] .dark-section h2,
+[data-theme="site"] .dark-section h3,
+[data-theme="site"] .dark-section h4,
+[data-theme="site"] .dark-section h5,
+[data-theme="site"] .dark-section h6 {
+  color: #ffffff;
+}
