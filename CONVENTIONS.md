@@ -75,3 +75,59 @@ PRs: single goal; pnpm lint + pnpm build must pass; include a screenshot if the 
 - [ ] Ảnh: `public/images/` + `next/image`
 
 ---
+
+## 8. Shared & shadcn/ui
+
+Use `src/shared/` for all common and reusable code across the app:
+
+- reusable UI components
+- shared hooks
+- utilities/helpers
+- types/interfaces
+- constants/configs
+- providers
+- shared services/API logic
+
+Example:
+
+```txt
+src/shared/
+├── ui/
+├── hooks/
+├── lib/
+├── types/
+├── constants/
+├── providers/
+└── services/
+```
+
+### shadcn/ui
+
+All shadcn/ui components must be placed inside:
+
+```txt
+src/shared/ui/
+```
+
+Each component should have its own folder.
+
+Example:
+
+```txt
+shared/ui/
+├── button/
+├── dialog/
+├── input/
+└── tooltip/
+```
+
+### Rules
+
+- Shared code must be generic, reusable, and feature-agnostic
+- Feature/page-specific code should stay inside the feature folder
+- Use `@/` imports only
+- Avoid deep relative imports
+- Use `cn()` from `@/shared/lib/utils`
+- shadcn/ui components may be customized, but keep their API predictable and reusable
+- Prefer barrel exports with `index.ts`
+- Do not place business logic inside shared UI components
