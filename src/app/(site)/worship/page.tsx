@@ -1,6 +1,6 @@
 
 export default function WorshipPage() {
-    return (
-        <div>WorshipPage</div>
-    )
+  return (
+    <div>WorshipPage</div>
+  )
 }

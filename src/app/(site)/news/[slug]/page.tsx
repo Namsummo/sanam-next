@@ -6,8 +6,8 @@ import { notFound, redirect } from "next/navigation";
 import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { getNewsCategoryLabel } from "@/lib/news/categories";
-import { getNewsImageAlt, getNewsImageSrc } from "@/lib/news/cover-image";
-import { formatNewsDate } from "@/lib/news/format-published-at";
+import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
+import { formatNewsDate } from "@/lib/format";
 import { getNewsById, getNewsBySlug, getVisibleNews } from "@/lib/news/mock-news";
 import type { NewsArticle } from "@/lib/news/types";
 
@@ -67,8 +67,6 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
     notFound();
   }
 
-  const imageSrc = getNewsImageSrc(article.image);
-  const imageAlt = getNewsImageAlt(article.imageAlt);
   const categoryLabel = getNewsCategoryLabel(article.categoryId);
 
   return (
@@ -105,8 +103,8 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
           <div className="mb-8 overflow-hidden rounded-[20px]">
             <figure className="block overflow-hidden rounded-[20px]">
               <Image
-                src={imageSrc}
-                alt={imageAlt}
+                src={DEFAULT_COVER}
+                alt={article.title || DEFAULT_COVER_ALT}
                 width={1100}
                 height={550}
                 priority

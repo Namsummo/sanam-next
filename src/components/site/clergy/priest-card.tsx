@@ -1,18 +1,18 @@
 import Image from "next/image";
-import { getClergyAvatarSrc } from "@/lib/clergy/avatar-image";
+import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { ClergyMember } from "@/lib/clergy/types";
 import { cn } from "@/lib/utils";
 
 type PriestCardProps = {
   member: ClergyMember;
   className?: string;
+  onClick?: () => void;
 };
 
-export function PriestCard({ member, className }: PriestCardProps) {
-  const avatarSrc = getClergyAvatarSrc(member.avatar);
-
+export function PriestCard({ member, className, onClick }: PriestCardProps) {
   return (
     <article
+      onClick={onClick}
       className={cn(
         "flex flex-col sm:flex-row gap-6 p-6 items-center sm:items-start rounded-[24px] bg-card border border-border/40 shadow-[0_10px_30px_rgba(0,0,0,0.03)] transition-all duration-300 hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 cursor-pointer",
         className,
@@ -20,7 +20,7 @@ export function PriestCard({ member, className }: PriestCardProps) {
     >
       <figure className="relative w-[160px] sm:w-[150px] md:w-[170px] lg:w-[190px] aspect-4/5 shrink-0 overflow-hidden rounded-[16px] shadow-sm">
         <Image
-          src={avatarSrc}
+          src={DEFAULT_COVER}
           alt={`Chân dung ${member.fullName}`}
           width={300}
           height={375}
