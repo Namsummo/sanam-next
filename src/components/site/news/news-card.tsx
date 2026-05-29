@@ -1,9 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
-import { NewsCoverImage } from "@/components/site/news/news-cover-image";
 import { NewsReadMoreLink } from "@/components/site/news/news-read-more-link";
 import { getNewsCategoryLabel } from "@/lib/news/categories";
-import { getNewsImageAlt, getNewsImageSrc } from "@/lib/news/cover-image";
-import { formatNewsDate } from "@/lib/news/format-published-at";
+import { formatNewsDate } from "@/lib/format";
+import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import type { NewsArticle } from "@/lib/news/types";
 import { cn } from "@/lib/utils";
 
@@ -26,9 +26,9 @@ export function NewsCard({ article, className }: NewsCardProps) {
       <div className="mb-5 overflow-hidden rounded-[20px]">
         <Link href={href} className="block">
           <figure className="overflow-hidden rounded-[20px]">
-            <NewsCoverImage
-              src={getNewsImageSrc(article.image)}
-              alt={getNewsImageAlt(article.imageAlt)}
+            <Image
+              src={DEFAULT_COVER}
+              alt={article.title || DEFAULT_COVER_ALT}
               width={640}
               height={556}
               className="aspect-[1/0.87] w-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.06]"
@@ -39,7 +39,6 @@ export function NewsCard({ article, className }: NewsCardProps) {
 
       <div className="flex flex-1 flex-col px-[15px]">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-
           {categoryLabel ? (
             <span className="rounded-[10px] bg-accent px-3 py-1.5 font-sans text-sm font-medium text-white">
               {categoryLabel}

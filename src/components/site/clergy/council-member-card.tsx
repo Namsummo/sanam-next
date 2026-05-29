@@ -1,18 +1,18 @@
 import Image from "next/image";
-import { getClergyAvatarSrc } from "@/lib/clergy/avatar-image";
+import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { ClergyMember } from "@/lib/clergy/types";
 import { cn } from "@/lib/utils";
 
 type CouncilMemberCardProps = {
   member: ClergyMember;
   className?: string;
+  onClick?: () => void;
 };
 
-export function CouncilMemberCard({ member, className }: CouncilMemberCardProps) {
-  const avatarSrc = getClergyAvatarSrc(member.avatar);
-
+export function CouncilMemberCard({ member, className, onClick }: CouncilMemberCardProps) {
   return (
     <article
+      onClick={onClick}
       className={cn(
         "p-2 text-center flex flex-col items-center cursor-pointer",
         className,
@@ -20,7 +20,7 @@ export function CouncilMemberCard({ member, className }: CouncilMemberCardProps)
     >
       <figure className="mx-auto mb-3 size-[110px] md:size-[130px] overflow-hidden rounded-[20px] shadow-sm transition-transform duration-300 hover:scale-[1.03]">
         <Image
-          src={avatarSrc}
+          src={DEFAULT_COVER}
           alt={`Chân dung ${member.fullName}`}
           width={130}
           height={130}

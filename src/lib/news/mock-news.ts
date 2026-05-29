@@ -27,8 +27,6 @@ export const mockNewsArticles: NewsArticle[] = [
       <p>Xin cộng đoàn hiệp lời cầu nguyện để Năm Thánh trở thành dịp canh tân đời sống đức tin và tình hiệp nhất trong giáo xứ.</p>
     `,
     categoryId: "le-kinh",
-    image: "/images/news/le-khai-mac-nam-thanh.jpg",
-    imageAlt: "Cộng đoàn tập trung trước khuôn viên nhà thờ trong ngày đại lễ",
     publishedAt: "2026-05-20T08:00:00+07:00",
     isFeatured: true,
     isVisible: true,
@@ -55,8 +53,6 @@ export const mockNewsArticles: NewsArticle[] = [
       <p>Trân trọng kính mời.</p>
     `,
     categoryId: "su-kien",
-    image: "/images/news/dai-hoi-giao-ly-vien.jpg",
-    imageAlt: "Các giáo lý viên trong buổi sinh hoạt chung tại hội trường",
     publishedAt: "2026-05-18T09:00:00+07:00",
     isFeatured: true,
     isVisible: true,
@@ -78,8 +74,6 @@ export const mockNewsArticles: NewsArticle[] = [
       <p>Xin cộng đoàn sắp xếp thời gian tham dự và hiệp ý cầu nguyện.</p>
     `,
     categoryId: "thong-bao",
-    image: "/images/news/lich-xung-toi.jpg",
-    imageAlt: "Nhà thờ được thắp sáng trong giờ cầu nguyện buổi tối",
     publishedAt: "2026-05-17T07:30:00+07:00",
     isFeatured: true,
     isVisible: true,
@@ -96,8 +90,6 @@ export const mockNewsArticles: NewsArticle[] = [
     content:
       "Sáng ngày 16/5/2026, đoàn thiện nguyện Giáo xứ Thánh Giuse gồm 35 thành viên đã đến thăm và tặng quà cho 80 cụ cao niên tại Viện dưỡng lão Bình An.\n\nChương trình gồm:\n- Gặp gỡ, thăm hỏi\n- Trao 80 phần quà\n- Văn nghệ với các bài thánh ca\n\nXin cộng đoàn tiếp tục hiệp lời cầu nguyện cho các cụ và cho những hoạt động bác ái của giáo xứ.",
     categoryId: "hoat-dong",
-    image: "/images/news/tham-vien-duong-lao.jpg",
-    imageAlt: "Các tình nguyện viên trao quà và trò chuyện cùng các cụ",
     publishedAt: "2026-05-16T15:00:00+07:00",
     isFeatured: false,
     isVisible: true,
@@ -112,9 +104,6 @@ export const mockNewsArticles: NewsArticle[] = [
     content:
       "Thánh lễ Rước lễ lần đầu — Khóa 2026\n\n- Thời gian: 8h00, Chúa Nhật 10/5/2026\n- Địa điểm: Nhà thờ chính xứ\n\nXin chúc mừng các em và gia đình. Xin cộng đoàn hiệp lời cầu nguyện để các em luôn gắn bó với Thánh Thể và lớn lên trong đời sống đức tin.",
     categoryId: "le-kinh",
-    image: "/images/news/ruoc-le-lan-dau.jpg",
-    imageAlt:
-      "Các em thiếu nhi trong trang phục trắng tinh tại ngày Rước lễ lần đầu",
     publishedAt: "2026-05-10T12:00:00+07:00",
     isFeatured: false,
     isVisible: true,

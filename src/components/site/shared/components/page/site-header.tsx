@@ -8,8 +8,11 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/site/shared/ui/button/button";
 import {
   NavigationMenu,
+  NavigationMenuContent,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuTrigger,
 } from "@/components/site/shared/ui/navigation-menu/navigation-menu";
 import {
   isSiteNavActive,
@@ -17,6 +20,15 @@ import {
   siteWorshipLiveCta,
 } from "@/lib/site-navigation";
 import { cn } from "@/lib/utils";
+
+function isNavGroup(item: unknown): item is { label: string; children: { label: string; href: string }[] } {
+  return (
+    !!item &&
+    typeof item === "object" &&
+    "children" in item &&
+    Array.isArray((item as { children?: unknown }).children)
+  );
+}
 
 function SiteNavLink({
   href,
@@ -90,15 +102,53 @@ export function SiteHeader() {
 
         <NavigationMenu className="hidden max-w-none flex-1 lg:flex">
           <NavigationMenuList className="gap-1">
-            {siteMainNav.map((item) => (
-              <NavigationMenuItem key={item.href}>
-                <SiteNavLink
-                  href={item.href}
-                  label={item.label}
-                  active={isSiteNavActive(pathname, item.href)}
-                />
-              </NavigationMenuItem>
-            ))}
+            {siteMainNav.map((item) => {
+              if (!isNavGroup(item)) {
+                return (
+                  <NavigationMenuItem key={item.href}>
+                    <SiteNavLink
+                      href={item.href}
+                      label={item.label}
+                      active={isSiteNavActive(pathname, item.href)}
+                    />
+                  </NavigationMenuItem>
+                );
+              }
+
+              const anyChildActive = item.children.some((c) =>
+                isSiteNavActive(pathname, c.href),
+              );
+
+              return (
+                <NavigationMenuItem key={item.label}>
+                  <NavigationMenuTrigger
+                    className={cn(
+                      "bg-transparent text-white hover:bg-white/10 data-open:bg-white/10",
+                      anyChildActive && "text-accent font-bold",
+                    )}
+                  >
+                    {item.label}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent className="min-w-[280px]">
+                    <div className="grid gap-1 p-2">
+                      {item.children.map((child) => (
+                        <NavigationMenuLink
+                          key={child.href}
+                          href={child.href}
+                          className={cn(
+                            "px-3 py-2 font-sans text-sm",
+                            isSiteNavActive(pathname, child.href) &&
+                            "bg-muted/70",
+                          )}
+                        >
+                          {child.label}
+                        </NavigationMenuLink>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              );
+            })}
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -139,20 +189,47 @@ export function SiteHeader() {
       >
         <NavigationMenu className="w-full max-w-none">
           <NavigationMenuList className="flex w-full flex-col items-stretch gap-0 px-4 py-4 sm:px-6">
-            {siteMainNav.map((item) => (
-              <NavigationMenuItem
-                key={item.href}
-                className="w-full border-b border-white/10 last:border-0"
-              >
-                <SiteNavLink
-                  href={item.href}
-                  label={item.label}
-                  active={isSiteNavActive(pathname, item.href)}
-                  onNavigate={closeMobile}
-                  className="block w-full py-3.5"
-                />
-              </NavigationMenuItem>
-            ))}
+            {siteMainNav.map((item) => {
+              if (!isNavGroup(item)) {
+                return (
+                  <NavigationMenuItem
+                    key={item.href}
+                    className="w-full border-b border-white/10 last:border-0"
+                  >
+                    <SiteNavLink
+                      href={item.href}
+                      label={item.label}
+                      active={isSiteNavActive(pathname, item.href)}
+                      onNavigate={closeMobile}
+                      className="block w-full py-3.5"
+                    />
+                  </NavigationMenuItem>
+                );
+              }
+
+              return (
+                <NavigationMenuItem
+                  key={item.label}
+                  className="w-full border-b border-white/10 last:border-0"
+                >
+                  <div className="px-2.5 py-3 text-base font-bold text-white">
+                    {item.label}
+                  </div>
+                  <div className="pb-3">
+                    {item.children.map((child) => (
+                      <SiteNavLink
+                        key={child.href}
+                        href={child.href}
+                        label={child.label}
+                        active={isSiteNavActive(pathname, child.href)}
+                        onNavigate={closeMobile}
+                        className="block w-full py-2 pl-5 text-sm opacity-95"
+                      />
+                    ))}
+                  </div>
+                </NavigationMenuItem>
+              );
+            })}
           </NavigationMenuList>
         </NavigationMenu>
         <div className="px-4 pb-6 sm:px-6">

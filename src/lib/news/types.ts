@@ -14,8 +14,6 @@ export type NewsArticle = {
   content: string;
   contentFormat: NewsContentFormat;
   categoryId?: string;
-  image?: string;
-  imageAlt?: string;
   publishedAt: string; // ISO 8601
   isFeatured: boolean;
   isVisible: boolean; // Admin can turn web display on/off.

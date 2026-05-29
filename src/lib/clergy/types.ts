@@ -10,11 +10,15 @@ export type ClergyMember = {
   type: ClergyMemberType;
   fullName: string;
   position: string;
-  avatar: string;
   motto?: string;
   description?: string;
   /** ISO date YYYY-MM-DD */
   birthday?: string;
   sortOrder?: number;
   isVisible?: boolean;
+  ordinationDate?: string; // Ngày thụ phong Linh mục
+  patronSaint?: string;    // Thánh bổn mạng
+  patronDate?: string;     // Ngày lễ bổn mạng
+  hometown?: string;       // Quê quán / Giáo họ
 };
+
