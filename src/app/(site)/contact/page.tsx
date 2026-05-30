@@ -3,6 +3,7 @@ import { ContactForm } from "@/components/site/contact/contact-form";
 import { ContactInfoList } from "@/components/site/contact/contact-info-list";
 import { ContactMapSection } from "@/components/site/contact/contact-map-section";
 import { ContactSectionSubtitle } from "@/components/site/contact/contact-section-subtitle";
+import { DonationSection } from "@/components/site/contact/donation-section";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import {
   siteContactInfo,
@@ -11,7 +12,8 @@ import {
 
 export const metadata: Metadata = {
   title: "Liên hệ",
-  description: "Thông tin liên hệ và gửi lời nhắn tới Giáo xứ Sa Nam",
+  description:
+    "Thông tin liên hệ, quyên góp và gửi lời nhắn tới Giáo xứ Sa Nam",
 };
 
 export default function ContactPage() {
@@ -44,6 +46,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <DonationSection />
 
       <ContactMapSection
         subtitle={siteContactInfo.mapSubtitle}
