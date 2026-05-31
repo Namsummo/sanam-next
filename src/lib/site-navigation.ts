@@ -15,6 +15,7 @@ export const siteMainNav: NavLink[] = [
   { label: "Giới thiệu", href: "/introduce" },
   { label: "Đoàn thể", href: "/organization" },
   { label: "Tin tức", href: "/news" },
+  { label: "Sự kiện", href: "/events" },
   { label: "Phụng vụ", href: "/worship" },
   { label: "Liên hệ", href: "/contact" },
 ];
@@ -30,6 +31,7 @@ export const siteFooterQuickLinks: NavLink[] = [
   { label: "Giới thiệu", href: "/introduce" },
   { label: "Đoàn thể", href: "/organization" },
   { label: "Tin tức", href: "/news" },
+  { label: "Sự kiện", href: "/events" },
   { label: "Phụng vụ", href: "/worship" },
   { label: "Liên hệ", href: "/contact" },
 ];
