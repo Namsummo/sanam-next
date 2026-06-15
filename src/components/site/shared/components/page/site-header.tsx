@@ -8,11 +8,14 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/site/shared/ui/button/button";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
+  NavigationMenuSubmenu,
+  NavigationMenuSubmenuContent,
+  NavigationMenuSubmenuItem,
+  NavigationMenuSubmenuLink,
+  NavigationMenuSubmenuTrigger,
 } from "@/components/site/shared/ui/navigation-menu/navigation-menu";
 import {
   isSiteNavActive,
@@ -27,35 +30,6 @@ function isNavGroup(item: unknown): item is { label: string; children: { label: 
     typeof item === "object" &&
     "children" in item &&
     Array.isArray((item as { children?: unknown }).children)
-  );
-}
-
-function SiteNavLink({
-  href,
-  label,
-  active,
-  onNavigate,
-  className,
-}: {
-  href: string;
-  label: string;
-  active: boolean;
-  onNavigate?: () => void;
-  className?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "inline-flex px-2.5 py-3 text-base font-medium capitalize outline-none ring-0 focus-visible:outline-none focus-visible:ring-0",
-        active ? "text-accent font-bold" : "text-white",
-        className,
-      )}
-    >
-      {label}
-    </Link>
   );
 }
 
@@ -80,6 +54,52 @@ export function SiteHeader() {
     ? {}
     : ({ "aria-hidden": "true" } as const);
 
+  const renderMobileNavItems = () =>
+    siteMainNav.map((item) => {
+      if (!isNavGroup(item)) {
+        return (
+          <li
+            key={item.href}
+            className="w-full border-b border-white/10 last:border-0"
+          >
+            <NavigationMenuLink
+              href={item.href}
+              active={isSiteNavActive(pathname, item.href)}
+              onClick={closeMobile}
+              className="block w-full py-3.5"
+            >
+              {item.label}
+            </NavigationMenuLink>
+          </li>
+        );
+      }
+
+      return (
+        <li
+          key={item.label}
+          className="w-full border-b border-white/10 last:border-0"
+        >
+          <div className="px-2.5 py-3 text-base font-bold text-white">
+            {item.label}
+          </div>
+          <ul className="list-none pb-3">
+            {item.children.map((child) => (
+              <li key={child.href}>
+                <NavigationMenuLink
+                  href={child.href}
+                  active={isSiteNavActive(pathname, child.href, { exact: true })}
+                  onClick={closeMobile}
+                  className="block w-full py-2 pl-5 text-sm opacity-95"
+                >
+                  {child.label}
+                </NavigationMenuLink>
+              </li>
+            ))}
+          </ul>
+        </li>
+      );
+    });
+
   return (
     <header className="sticky top-0 z-50 w-full">
       <nav
@@ -100,53 +120,48 @@ export function SiteHeader() {
           />
         </Link>
 
-        <NavigationMenu className="hidden max-w-none flex-1 lg:flex">
-          <NavigationMenuList className="gap-1">
+        <NavigationMenu className="hidden flex-1 justify-center lg:flex">
+          <NavigationMenuList>
             {siteMainNav.map((item) => {
               if (!isNavGroup(item)) {
                 return (
                   <NavigationMenuItem key={item.href}>
-                    <SiteNavLink
+                    <NavigationMenuLink
                       href={item.href}
-                      label={item.label}
                       active={isSiteNavActive(pathname, item.href)}
-                    />
+                    >
+                      {item.label}
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                 );
               }
 
               const anyChildActive = item.children.some((c) =>
-                isSiteNavActive(pathname, c.href),
+                isSiteNavActive(pathname, c.href, { exact: true }),
               );
+              const parentHref = item.children[0]?.href ?? "/";
 
               return (
-                <NavigationMenuItem key={item.label}>
-                  <NavigationMenuTrigger
-                    className={cn(
-                      "bg-transparent text-white hover:bg-white/10 data-open:bg-white/10",
-                      anyChildActive && "text-accent font-bold",
-                    )}
+                <NavigationMenuSubmenu key={item.label}>
+                  <NavigationMenuSubmenuTrigger
+                    href={parentHref}
+                    active={anyChildActive}
                   >
                     {item.label}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent className="min-w-[280px]">
-                    <div className="grid gap-1 p-2">
-                      {item.children.map((child) => (
-                        <NavigationMenuLink
-                          key={child.href}
+                  </NavigationMenuSubmenuTrigger>
+                  <NavigationMenuSubmenuContent>
+                    {item.children.map((child) => (
+                      <NavigationMenuSubmenuItem key={child.href}>
+                        <NavigationMenuSubmenuLink
                           href={child.href}
-                          className={cn(
-                            "px-3 py-2 font-sans text-sm",
-                            isSiteNavActive(pathname, child.href) &&
-                            "bg-muted/70",
-                          )}
+                          active={isSiteNavActive(pathname, child.href, { exact: true })}
                         >
                           {child.label}
-                        </NavigationMenuLink>
-                      ))}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+                        </NavigationMenuSubmenuLink>
+                      </NavigationMenuSubmenuItem>
+                    ))}
+                  </NavigationMenuSubmenuContent>
+                </NavigationMenuSubmenu>
               );
             })}
           </NavigationMenuList>
@@ -187,51 +202,9 @@ export function SiteHeader() {
         )}
         {...mobilePanelA11y}
       >
-        <NavigationMenu className="w-full max-w-none">
-          <NavigationMenuList className="flex w-full flex-col items-stretch gap-0 px-4 py-4 sm:px-6">
-            {siteMainNav.map((item) => {
-              if (!isNavGroup(item)) {
-                return (
-                  <NavigationMenuItem
-                    key={item.href}
-                    className="w-full border-b border-white/10 last:border-0"
-                  >
-                    <SiteNavLink
-                      href={item.href}
-                      label={item.label}
-                      active={isSiteNavActive(pathname, item.href)}
-                      onNavigate={closeMobile}
-                      className="block w-full py-3.5"
-                    />
-                  </NavigationMenuItem>
-                );
-              }
-
-              return (
-                <NavigationMenuItem
-                  key={item.label}
-                  className="w-full border-b border-white/10 last:border-0"
-                >
-                  <div className="px-2.5 py-3 text-base font-bold text-white">
-                    {item.label}
-                  </div>
-                  <div className="pb-3">
-                    {item.children.map((child) => (
-                      <SiteNavLink
-                        key={child.href}
-                        href={child.href}
-                        label={child.label}
-                        active={isSiteNavActive(pathname, child.href)}
-                        onNavigate={closeMobile}
-                        className="block w-full py-2 pl-5 text-sm opacity-95"
-                      />
-                    ))}
-                  </div>
-                </NavigationMenuItem>
-              );
-            })}
-          </NavigationMenuList>
-        </NavigationMenu>
+        <ul className="list-none px-4 py-4 sm:px-6">
+          {renderMobileNavItems()}
+        </ul>
         <div className="px-4 pb-6 sm:px-6">
           <Button
             variant="primary"

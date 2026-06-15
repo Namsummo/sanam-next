@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { CouncilMemberCard } from "@/components/site/clergy/council-member-card";
 import { PriestCard } from "@/components/site/clergy/priest-card";
 import { ClergyDetailModal } from "@/components/site/clergy/clergy-detail-modal";
 import {
-  getVisibleCouncilMembers,
+  getCurrentCouncilMembers,
   getVisiblePriests,
 } from "@/lib/clergy/mock-clergy";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,7 @@ export function ClergyHomeSection({ className }: ClergyHomeSectionProps) {
   const [selectedMember, setSelectedMember] = useState<ClergyMember | null>(null);
 
   const priests = getVisiblePriests();
-  const council = getVisibleCouncilMembers();
+  const council = getCurrentCouncilMembers();
 
   if (priests.length === 0 && council.length === 0) {
     return null;
@@ -73,19 +74,29 @@ export function ClergyHomeSection({ className }: ClergyHomeSectionProps) {
                 </h3>
               </div>
 
-              <div className="flex flex-wrap justify-center gap-6">
+              <ul className="flex list-none gap-4 overflow-x-auto pb-1 md:grid md:grid-cols-5 md:overflow-visible md:pb-0 md:gap-6">
                 {council.map((member) => (
-                  <div
+                  <li
                     key={member.id}
-                    className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(20%-20px)]"
+                    className="min-w-[42vw] shrink-0 sm:min-w-[28vw] md:min-w-0"
                   >
                     <CouncilMemberCard
                       member={member}
                       onClick={() => setSelectedMember(member)}
+                      className="w-full"
                     />
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
+
+              <p className="mt-10 text-center font-sans text-sm text-foreground/80">
+                <Link
+                  href="/introduce/ban-hanh-giao"
+                  className="font-semibold text-primary underline-offset-4 transition-colors hover:text-accent hover:underline"
+                >
+                  Xem Ban Hành Giáo các khóa trước
+                </Link>
+              </p>
             </div>
           ) : null}
         </div>
