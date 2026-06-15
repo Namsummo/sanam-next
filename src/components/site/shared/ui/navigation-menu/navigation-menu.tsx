@@ -1,6 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import {
+  createContext,
+  useContext,
+  useState,
+  type ComponentPropsWithoutRef,
+} from "react";
 import { cva } from "class-variance-authority";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -28,19 +36,28 @@ export const navigationSubmenuContentStyle = cva(
   cn(
     "absolute left-0 top-full z-50 m-0 w-[235px] list-none rounded-[10px] bg-accent py-0",
     "invisible origin-top scale-y-[0.8] opacity-0 transition-all duration-300 ease-in-out",
-    "group-hover/navigation-submenu:visible group-hover/navigation-submenu:scale-y-100 group-hover/navigation-submenu:opacity-100 group-hover/navigation-submenu:py-[5px]",
-    "group-focus-within/navigation-submenu:visible group-focus-within/navigation-submenu:scale-y-100 group-focus-within/navigation-submenu:opacity-100 group-focus-within/navigation-submenu:py-[5px]",
   ),
+  {
+    variants: {
+      open: {
+        true: "visible scale-y-100 opacity-100 py-[5px]",
+        false: "",
+      },
+    },
+    defaultVariants: {
+      open: false,
+    },
+  },
 );
 
 /** Dropdown item link — `.main-menu ul ul li a` */
 export const navigationSubmenuLinkStyle = cva(
-  "block bg-transparent px-5 py-2 text-base font-medium capitalize transition-all duration-300 ease-in-out hover:bg-transparent focus-visible:bg-transparent focus-visible:outline-none",
+  "mx-2 flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium capitalize transition-all duration-300 ease-in-out focus-visible:outline-none",
   {
     variants: {
       active: {
-        true: "pl-[23px] font-semibold text-primary hover:pl-[23px] hover:text-primary focus-visible:pl-[23px] focus-visible:text-primary",
-        false: "text-white hover:text-white focus-visible:text-white",
+        true: "bg-primary/40 font-semibold text-white",
+        false: "bg-transparent text-white/95 hover:bg-white/12 hover:text-white focus-visible:bg-white/12",
       },
     },
     defaultVariants: {
@@ -49,7 +66,22 @@ export const navigationSubmenuLinkStyle = cva(
   },
 );
 
-type NavigationMenuProps = React.ComponentPropsWithoutRef<"nav">;
+type SubmenuContextValue = {
+  close: () => void;
+  open: boolean;
+};
+
+const SubmenuContext = createContext<SubmenuContextValue | null>(null);
+
+function useSubmenuContext() {
+  const context = useContext(SubmenuContext);
+  if (!context) {
+    throw new Error("Submenu components must be used within NavigationMenuSubmenu");
+  }
+  return context;
+}
+
+type NavigationMenuProps = ComponentPropsWithoutRef<"nav">;
 
 function NavigationMenu({ className, ...props }: NavigationMenuProps) {
   return (
@@ -61,7 +93,7 @@ function NavigationMenu({ className, ...props }: NavigationMenuProps) {
   );
 }
 
-type NavigationMenuListProps = React.ComponentPropsWithoutRef<"ul">;
+type NavigationMenuListProps = ComponentPropsWithoutRef<"ul">;
 
 function NavigationMenuList({ className, ...props }: NavigationMenuListProps) {
   return (
@@ -73,7 +105,7 @@ function NavigationMenuList({ className, ...props }: NavigationMenuListProps) {
   );
 }
 
-type NavigationMenuItemProps = React.ComponentPropsWithoutRef<"li">;
+type NavigationMenuItemProps = ComponentPropsWithoutRef<"li">;
 
 function NavigationMenuItem({ className, ...props }: NavigationMenuItemProps) {
   return (
@@ -85,7 +117,7 @@ function NavigationMenuItem({ className, ...props }: NavigationMenuItemProps) {
   );
 }
 
-type NavigationMenuLinkProps = React.ComponentPropsWithoutRef<typeof Link> & {
+type NavigationMenuLinkProps = ComponentPropsWithoutRef<typeof Link> & {
   active?: boolean;
 };
 
@@ -104,21 +136,33 @@ function NavigationMenuLink({
   );
 }
 
-type NavigationMenuSubmenuProps = React.ComponentPropsWithoutRef<"li">;
+type NavigationMenuSubmenuProps = ComponentPropsWithoutRef<"li">;
 
 function NavigationMenuSubmenu({ className, ...props }: NavigationMenuSubmenuProps) {
+  const [open, setOpen] = useState(false);
+
+  const close = () => setOpen(false);
+
   return (
-    <li
-      data-slot="navigation-submenu"
-      className={cn("group/navigation-submenu relative mx-2.5", className)}
-      {...props}
-    />
+    <SubmenuContext.Provider value={{ open, close }}>
+      <li
+        data-slot="navigation-submenu"
+        className={cn("relative mx-2.5", className)}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocusCapture={() => setOpen(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setOpen(false);
+          }
+        }}
+        {...props}
+      />
+    </SubmenuContext.Provider>
   );
 }
 
-type NavigationMenuSubmenuTriggerProps = React.ComponentPropsWithoutRef<
-  typeof Link
-> & {
+type NavigationMenuSubmenuTriggerProps = ComponentPropsWithoutRef<typeof Link> & {
   active?: boolean;
 };
 
@@ -140,22 +184,24 @@ function NavigationMenuSubmenuTrigger({
   );
 }
 
-type NavigationMenuSubmenuContentProps = React.ComponentPropsWithoutRef<"ul">;
+type NavigationMenuSubmenuContentProps = ComponentPropsWithoutRef<"ul">;
 
 function NavigationMenuSubmenuContent({
   className,
   ...props
 }: NavigationMenuSubmenuContentProps) {
+  const { open } = useSubmenuContext();
+
   return (
     <ul
       data-slot="navigation-submenu-content"
-      className={cn(navigationSubmenuContentStyle(), className)}
+      className={cn(navigationSubmenuContentStyle({ open }), className)}
       {...props}
     />
   );
 }
 
-type NavigationMenuSubmenuItemProps = React.ComponentPropsWithoutRef<"li">;
+type NavigationMenuSubmenuItemProps = ComponentPropsWithoutRef<"li">;
 
 function NavigationMenuSubmenuItem({
   className,
@@ -170,24 +216,39 @@ function NavigationMenuSubmenuItem({
   );
 }
 
-type NavigationMenuSubmenuLinkProps = React.ComponentPropsWithoutRef<
-  typeof Link
-> & {
+type NavigationMenuSubmenuLinkProps = ComponentPropsWithoutRef<typeof Link> & {
   active?: boolean;
 };
 
 function NavigationMenuSubmenuLink({
   className,
   active = false,
+  onClick,
+  children,
   ...props
 }: NavigationMenuSubmenuLinkProps) {
+  const { close } = useSubmenuContext();
+
   return (
     <Link
       data-slot="navigation-submenu-link"
       aria-current={active ? "page" : undefined}
       className={cn(navigationSubmenuLinkStyle({ active }), className)}
+      onClick={(event) => {
+        close();
+        onClick?.(event);
+      }}
       {...props}
-    />
+    >
+      <Check
+        className={cn(
+          "size-3.5 shrink-0 transition-opacity",
+          active ? "opacity-100" : "opacity-0",
+        )}
+        aria-hidden
+      />
+      <span>{children}</span>
+    </Link>
   );
 }
 

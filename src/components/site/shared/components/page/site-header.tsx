@@ -142,7 +142,7 @@ export function SiteHeader() {
               const parentHref = item.children[0]?.href ?? "/";
 
               return (
-                <NavigationMenuSubmenu key={item.label}>
+                <NavigationMenuSubmenu key={`${item.label}-${pathname}`}>
                   <NavigationMenuSubmenuTrigger
                     href={parentHref}
                     active={anyChildActive}

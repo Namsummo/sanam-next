@@ -1,0 +1,115 @@
+import {
+  VOCATION_TYPE_BROTHER,
+  VOCATION_TYPE_PRIEST,
+  VOCATION_TYPE_SISTER,
+} from "@/lib/vocation/types";
+import type { VocationFruit } from "@/lib/vocation/types";
+
+export const mockVocationFruits: VocationFruit[] = [
+  {
+    id: 1,
+    fullName: "Linh mục Phaolô Nguyễn Văn Hữu",
+    vocationType: VOCATION_TYPE_PRIEST,
+    religiousOrder: "Hàng linh mục Giáo phận Vinh",
+    currentAssignment: "Cha Chánh Xứ Sa Nam",
+    hometown: "Giáo họ Trị Tin",
+    patronSaint: "Thánh Phaolô Tông Đồ",
+    vocationYear: 2000,
+    sortOrder: 1,
+    isVisible: true,
+  },
+  {
+    id: 2,
+    fullName: "Linh mục Vinh Sơn Trần Quý Sơn",
+    vocationType: VOCATION_TYPE_PRIEST,
+    religiousOrder: "Hàng linh mục Giáo phận Vinh",
+    currentAssignment: "Cha Phó Xứ Sa Nam",
+    hometown: "Giáo họ Kim Lâm",
+    patronSaint: "Thánh Vinh Sơn Linh Mục",
+    vocationYear: 2018,
+    sortOrder: 2,
+    isVisible: true,
+  },
+  {
+    id: 3,
+    fullName: "Linh mục Gioan Baotixita Lê Văn Thành",
+    vocationType: VOCATION_TYPE_PRIEST,
+    religiousOrder: "Hàng linh mục Giáo phận Vinh",
+    currentAssignment: "Cha phụ trách Giáo xứ Kẻ Mui",
+    hometown: "Giáo họ Kẻ Mui",
+    patronSaint: "Thánh Gioan Tẩy Giả",
+    vocationYear: 2012,
+    sortOrder: 3,
+    isVisible: true,
+  },
+  {
+    id: 4,
+    fullName: "Thầy Phanxicô Xaviê Nguyễn Văn Bình",
+    vocationType: VOCATION_TYPE_BROTHER,
+    religiousOrder: "Dòng Tên Việt Nam",
+    currentAssignment: "Phụ trách giáo dục tại Hà Nội",
+    hometown: "Giáo họ Trị Tin",
+    patronSaint: "Thánh Phanxicô Xaviê",
+    vocationYear: 2015,
+    sortOrder: 10,
+    isVisible: true,
+  },
+  {
+    id: 5,
+    fullName: "Thầy Giuse Maria Trần Đức Anh",
+    vocationType: VOCATION_TYPE_BROTHER,
+    religiousOrder: "Dòng Mến Thánh Giá",
+    currentAssignment: "Phục vụ tại Trung tâm Mục vụ",
+    hometown: "Giáo họ Kim Lâm",
+    patronSaint: "Thánh Giuse",
+    vocationYear: 2019,
+    sortOrder: 11,
+    isVisible: true,
+  },
+  {
+    id: 6,
+    fullName: "Dì Maria Têrêsa Nguyễn Thị Hương",
+    vocationType: VOCATION_TYPE_SISTER,
+    religiousOrder: "Dòng Con Đức Mẹ Nhận Nuôi",
+    currentAssignment: "Phục vụ trẻ em và người nghèo",
+    hometown: "Giáo họ Kẻ Mui",
+    patronSaint: "Thánh Têrêsa Hài Đồng Giêsu",
+    vocationYear: 2010,
+    sortOrder: 20,
+    isVisible: true,
+  },
+  {
+    id: 7,
+    fullName: "Dì Phanxicô Ánh Nguyễn Thị Lan",
+    vocationType: VOCATION_TYPE_SISTER,
+    religiousOrder: "Dòng Nữ Tu Đồng Văn Hiến",
+    currentAssignment: "Giáo dục và chăm sóc bệnh nhân",
+    hometown: "Giáo họ Trị Tin",
+    patronSaint: "Thánh Phanxicô Assisi",
+    vocationYear: 2014,
+    sortOrder: 21,
+    isVisible: true,
+  },
+  {
+    id: 8,
+    fullName: "Dì Têrêsa Calcutta Phạm Thị Mai",
+    vocationType: VOCATION_TYPE_SISTER,
+    religiousOrder: "Dòng Mến Thánh Giá",
+    currentAssignment: "Phục vụ Caritas Giáo phận",
+    hometown: "Giáo họ Kim Lâm",
+    patronSaint: "Thánh Têrêsa Calcutta",
+    vocationYear: 2016,
+    sortOrder: 22,
+    isVisible: true,
+  },
+];
+
+function sortFruits(list: VocationFruit[]): VocationFruit[] {
+  return [...list].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
+export function getVisibleVocationFruits(): VocationFruit[] {
+  return sortFruits(
+    mockVocationFruits.filter((item) => item.isVisible !== false),
+  );
+}
