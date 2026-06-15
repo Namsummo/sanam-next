@@ -3,16 +3,38 @@ export type NavLink = {
   href: string;
 };
 
-export function isSiteNavActive(pathname: string, href: string) {
+export type NavGroup = {
+  label: string;
+  children: NavLink[];
+};
+
+export type SiteNavItem = NavLink | NavGroup;
+
+export function isSiteNavActive(
+  pathname: string,
+  href: string,
+  options?: { exact?: boolean },
+) {
   if (href === "/") {
     return pathname === "/";
   }
+
+  if (options?.exact) {
+    return pathname === href;
+  }
+
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export const siteMainNav: NavLink[] = [
+export const siteMainNav: SiteNavItem[] = [
   { label: "Trang chủ", href: "/" },
-  { label: "Giới thiệu", href: "/introduce" },
+  {
+    label: "Giới thiệu",
+    children: [
+      { label: "Giáo xứ", href: "/introduce" },
+      { label: "Ban Hành Giáo", href: "/introduce/ban-hanh-giao" },
+    ],
+  },
   { label: "Đoàn thể", href: "/organization" },
   { label: "Tin tức", href: "/news" },
   { label: "Sự kiện", href: "/events" },

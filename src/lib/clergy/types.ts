@@ -20,5 +20,7 @@ export type ClergyMember = {
   patronSaint?: string;    // Thánh bổn mạng
   patronDate?: string;     // Ngày lễ bổn mạng
   hometown?: string;       // Quê quán / Giáo họ
+  /** Ban Hành Giáo: khóa nhiệm kỳ, format YYYY-YYYY */
+  termId?: string;
 };
 
