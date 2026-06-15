@@ -62,14 +62,6 @@ export function CouncilMemberCard({
           className="size-full object-cover"
         />
       </figure>
-      <h3
-        className={cn(
-          "font-display font-bold tracking-tight text-primary leading-snug",
-          styles.name,
-        )}
-      >
-        {member.fullName}
-      </h3>
       <p
         className={cn(
           "mt-0.5 font-sans font-semibold tracking-wider text-accent uppercase",
@@ -78,6 +70,14 @@ export function CouncilMemberCard({
       >
         {member.position}
       </p>
+      <h3
+        className={cn(
+          "font-display font-bold tracking-tight text-primary leading-snug",
+          styles.name,
+        )}
+      >
+        {member.fullName}
+      </h3>
     </article>
   );
 }

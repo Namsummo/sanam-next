@@ -14,6 +14,12 @@ const introduceLinks = [
     description:
       "Danh sách Ban Hành Giáo qua các nhiệm kỳ — tìm kiếm và chọn khóa.",
   },
+  {
+    href: "/introduce/hoa-trai-on-goi",
+    title: "Hoa trái ơn gọi",
+    description:
+      "Danh sách các Cha, Thầy, Dì quê hương xuất thân từ giáo xứ Sa Nam.",
+  },
 ] as const;
 
 export default function IntroducePage() {
