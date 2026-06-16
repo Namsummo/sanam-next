@@ -36,7 +36,7 @@ export async function generateMetadata({
 
   if (!event) {
     const byId = getEventById(decoded);
-    if (byId?.isVisible && byId.status === "published" && byId.slug) {
+    if (byId?.status === "published" && byId.slug) {
       redirect(`/events/${byId.slug}`);
     }
     return { title: "Không tìm thấy" };
@@ -55,7 +55,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   if (!event) {
     const byId = getEventById(decoded);
-    if (byId?.isVisible && byId.status === "published" && byId.slug) {
+    if (byId?.status === "published" && byId.slug) {
       redirect(`/events/${byId.slug}`);
     }
     notFound();

@@ -5,7 +5,7 @@ export const mockParishEvents: ParishEvent[] = [
     id: "event-001",
     slug: "ruoc-kieu-chua-thanh-the-2026",
     name: "Rước kiệu Chúa Thánh Thể — Lễ Thánh Thể",
-    startDate: "2026-05-31",
+    startDate: "2026-06-16",
     startTime: "16:00",
     endTime: "18:30",
     location: "Nhà thờ Giáo xứ Sa Nam — quanh khuôn viên giáo xứ",
@@ -30,9 +30,9 @@ export const mockParishEvents: ParishEvent[] = [
     id: "event-002",
     slug: "hoi-cho-gia-dinh-giao-xu-2026",
     name: "Hội chợ gia đình Giáo xứ Sa Nam 2026",
-    startDate: "2026-06-07",
+    startDate: "2026-06-16",
     startTime: "08:00",
-    endDate: "2026-06-07",
+    endDate: "2026-06-16",
     endTime: "17:00",
     location: "Sân giáo xứ Sa Nam",
     contentFormat: "html",
@@ -56,7 +56,7 @@ export const mockParishEvents: ParishEvent[] = [
     id: "event-003",
     slug: "sinh-hoat-gioi-tre-cuoi-tuan",
     name: "Sinh hoạt Giới trẻ cuối tuần",
-    startDate: "2026-05-30",
+    startDate: "2026-06-16",
     startTime: "19:00",
     endTime: "21:00",
     location: "Phòng sinh hoạt Giới trẻ — Giáo xứ Sa Nam",
@@ -72,7 +72,7 @@ export const mockParishEvents: ParishEvent[] = [
     id: "event-004",
     slug: "thanh-le-le-hien-xuong-2026",
     name: "Thánh lễ Lễ Hiện Xuống",
-    startDate: "2026-05-31",
+    startDate: "2026-06-16",
     startTime: "19:00",
     location: "Nhà thờ chính Giáo xứ Sa Nam",
     contentFormat: "plain",
@@ -87,9 +87,9 @@ export const mockParishEvents: ParishEvent[] = [
     id: "event-005",
     slug: "giu-chan-thang-hoa-2026",
     name: "Giữ chân Tháng Hoa kính Đức Mẹ",
-    startDate: "2026-06-03",
+    startDate: "2026-06-16",
     startTime: "18:30",
-    endDate: "2026-06-03",
+    endDate: "2026-06-16",
     endTime: "20:00",
     location: "Nhà thờ Giáo xứ Sa Nam",
     contentFormat: "plain",
@@ -104,7 +104,7 @@ export const mockParishEvents: ParishEvent[] = [
     id: "event-006",
     slug: "hoat-dong-thien-nguyen-thang-6",
     name: "Chương trình thiện nguyện tháng 6",
-    startDate: "2026-06-14",
+    startDate: "2026-06-16",
     startTime: "07:00",
     endTime: "11:30",
     location: "Xã An Phú — huyện lân cận",
@@ -150,7 +150,7 @@ function getWeekRange(anchor: Date): { start: Date; end: Date } {
 }
 
 function isPublishedVisible(event: ParishEvent): boolean {
-  return event.isVisible && event.status === "published";
+  return event.status === "published";
 }
 
 function compareEventsByStart(a: ParishEvent, b: ParishEvent): number {
@@ -172,7 +172,10 @@ export function getVisibleEvents(anchor = new Date()): ParishEvent[] {
     .sort(compareEventsByStart);
 }
 
-export function getFeaturedEvents(limit = 2, anchor = new Date()): ParishEvent[] {
+export function getFeaturedEvents(
+  limit = 2,
+  anchor = new Date(),
+): ParishEvent[] {
   return getVisibleEvents(anchor)
     .filter((event) => event.isFeatured)
     .sort((a, b) => {
@@ -192,7 +195,10 @@ export function getEventsThisWeek(anchor = new Date()): ParishEvent[] {
   return getVisibleEvents(anchor).filter((event) => {
     const eventStart = parseDateOnly(event.startDate);
     const eventEnd = parseDateOnly(event.endDate ?? event.startDate);
-    return eventStart.getTime() <= end.getTime() && eventEnd.getTime() >= start.getTime();
+    return (
+      eventStart.getTime() <= end.getTime() &&
+      eventEnd.getTime() >= start.getTime()
+    );
   });
 }
 

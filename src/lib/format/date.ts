@@ -92,3 +92,52 @@ export function formatEventDateTime(event: EventDateTimeInput): string {
 
   return `${startDateLabel} – ${endDateLabel}`;
 }
+
+export function getEventDateTimeDisplay(event: EventDateTimeInput): {
+  date: string;
+  time?: string;
+} {
+  const startDateLabel = formatEventDate(event.startDate);
+
+  if (event.allDay) {
+    if (event.endDate && event.endDate !== event.startDate) {
+      return {
+        date: `${startDateLabel} – ${formatEventDate(event.endDate)}`,
+        time: "Cả ngày",
+      };
+    }
+
+    return { date: startDateLabel, time: "Cả ngày" };
+  }
+
+  const startTimeLabel = formatEventTime(event.startTime);
+  const endDate = event.endDate ?? event.startDate;
+  const sameDay = endDate === event.startDate;
+
+  if (sameDay) {
+    const endTimeLabel = formatEventTime(event.endTime);
+    let time: string | undefined;
+
+    if (startTimeLabel && endTimeLabel) {
+      time = `${startTimeLabel} – ${endTimeLabel}`;
+    } else if (startTimeLabel) {
+      time = startTimeLabel;
+    }
+
+    return { date: startDateLabel, time };
+  }
+
+  const endDateLabel = formatEventDate(endDate);
+  const endTimeLabel = formatEventTime(event.endTime);
+  const date = `${startDateLabel} – ${endDateLabel}`;
+
+  if (startTimeLabel && endTimeLabel) {
+    return { date, time: `${startTimeLabel} – ${endTimeLabel}` };
+  }
+
+  if (startTimeLabel) {
+    return { date, time: startTimeLabel };
+  }
+
+  return { date };
+}
