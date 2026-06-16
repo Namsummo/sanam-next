@@ -11,7 +11,7 @@ export const siteTokens = {
     borderDark: "rgba(255, 255, 255, 0.1)",
   },
   fonts: {
-    sans: "Instrument Sans",
+    sans: "Be Vietnam Pro",
     display: "Phudu",
   },
   radius: {

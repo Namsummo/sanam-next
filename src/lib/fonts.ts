@@ -1,8 +1,9 @@
-import { Instrument_Sans, Phudu } from "next/font/google";
+import { Be_Vietnam_Pro, Phudu } from "next/font/google";
 
-export const instrumentSans = Instrument_Sans({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-instrument-sans",
+export const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ["latin", "latin-ext", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-be-vietnam-pro",
   display: "swap",
 });
 
@@ -13,4 +14,4 @@ export const phudu = Phudu({
   display: "swap",
 });
 
-export const fontVariables = `${instrumentSans.variable} ${phudu.variable}`;
+export const fontVariables = `${beVietnamPro.variable} ${phudu.variable}`;

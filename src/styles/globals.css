@@ -17,7 +17,7 @@
   --border-dark: rgba(255, 255, 255, 0.1);
   --destructive: rgb(230, 87, 87);
 
-  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-sans: var(--font-be-vietnam-pro), system-ui, sans-serif;
   --font-display: var(--font-phudu), system-ui, sans-serif;
 
   --radius-sm: 10px;
@@ -54,7 +54,7 @@
   --color-destructive: var(--destructive);
   --color-ring: var(--ring);
 
-  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-sans: var(--font-be-vietnam-pro), system-ui, sans-serif;
   --font-display: var(--font-phudu), system-ui, sans-serif;
 
   --radius-sm: var(--radius-sm);

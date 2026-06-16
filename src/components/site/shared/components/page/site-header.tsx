@@ -79,7 +79,7 @@ export function SiteHeader() {
           key={item.label}
           className="w-full border-b border-white/10 last:border-0"
         >
-          <div className="px-2.5 py-3 text-base font-bold text-white">
+          <div className="px-2.5 py-3 font-sans text-base font-bold text-white">
             {item.label}
           </div>
           <ul className="list-none pb-3">

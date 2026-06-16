@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 /** Top-level nav link — matches Emanu `.main-menu ul li a` */
 export const navigationMenuLinkStyle = cva(
-  "inline-flex items-center px-2.5 py-3 text-base font-medium capitalize transition-colors duration-300 ease-in-out focus-visible:outline-none",
+  "inline-flex items-center px-2.5 py-3 font-sans text-base font-medium capitalize transition-colors duration-300 ease-in-out focus-visible:outline-none",
   {
     variants: {
       active: {
@@ -52,7 +52,7 @@ export const navigationSubmenuContentStyle = cva(
 
 /** Dropdown item link — `.main-menu ul ul li a` */
 export const navigationSubmenuLinkStyle = cva(
-  "mx-2 flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium capitalize transition-all duration-300 ease-in-out focus-visible:outline-none",
+  "mx-2 flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-sans text-base font-medium capitalize transition-all duration-300 ease-in-out focus-visible:outline-none",
   {
     variants: {
       active: {
