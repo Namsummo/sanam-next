@@ -1,19 +1,17 @@
 import type { ComponentProps } from "react";
 import { cn, getAriaInvalidProps } from "@/lib/utils";
 
-export function Input({
+export function Textarea({
   className,
-  type,
   "aria-invalid": ariaInvalid,
   ...props
-}: ComponentProps<"input">) {
+}: ComponentProps<"textarea">) {
   return (
-    <input
-      type={type}
-      data-slot="input"
+    <textarea
+      data-slot="textarea"
       className={cn(
-        "flex h-11 w-full min-w-0 rounded-[10px] border border-border bg-card px-4 py-3",
-        "font-sans text-sm text-card-foreground outline-none transition-colors",
+        "flex min-h-[132px] w-full resize-y rounded-[10px] border border-border bg-card px-4 py-3",
+        "text-sm leading-relaxed text-card-foreground outline-none transition-colors",
         "placeholder:text-muted-foreground",
         "focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring",
         "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",

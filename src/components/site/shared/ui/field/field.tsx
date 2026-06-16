@@ -181,6 +181,14 @@ type ControlledFieldProps<
     field: ControllerRenderProps<TFieldValues, TName>;
     fieldState: ControllerFieldState;
     id: string;
+    controlProps: ControllerRenderProps<TFieldValues, TName> & {
+      id: string;
+      "aria-invalid": boolean;
+    };
+    triggerProps: {
+      id: string;
+      "aria-invalid": boolean;
+    };
   }) => ReactNode;
 };
 
@@ -215,7 +223,20 @@ export function ControlledField<
         >
           <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
           <FieldContent>
-            {children({ field, fieldState, id: fieldId })}
+            {children({
+              field,
+              fieldState,
+              id: fieldId,
+              controlProps: {
+                ...field,
+                id: fieldId,
+                "aria-invalid": fieldState.invalid,
+              },
+              triggerProps: {
+                id: fieldId,
+                "aria-invalid": fieldState.invalid,
+              },
+            })}
             {description ? <FieldDescription>{description}</FieldDescription> : null}
             {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
           </FieldContent>

@@ -16,3 +16,11 @@ export function getEventCategoryLabel(categoryId?: string): string | undefined {
 
   return eventCategories.find((category) => category.id === categoryId)?.label;
 }
+
+export function getEventCategoryIdByLabel(label?: string): string | undefined {
+  if (!label) {
+    return undefined;
+  }
+
+  return eventCategories.find((category) => category.label === label)?.id;
+}

@@ -36,7 +36,7 @@ export const adminModules: AdminModule[] = [
     description: "Tạo và cập nhật sự kiện giáo xứ.",
     href: "/admin/events",
     icon: CalendarDays,
-    status: "coming-soon",
+    status: "available",
   },
   {
     id: "clergy",

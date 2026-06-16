@@ -1,10 +1,5 @@
-import { AdminModulePlaceholder } from "@/components/admin/admin-module-placeholder";
+import { AdminEventsManager } from "@/components/admin/events/admin-events-manager";
 
 export default function AdminEventsPage() {
-  return (
-    <AdminModulePlaceholder
-      title="Quản lý Sự kiện"
-      description="Quản lý sự kiện, lịch diễn ra và trạng thái công bố."
-    />
-  );
+  return <AdminEventsManager />;
 }
