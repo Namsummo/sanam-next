@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import { OrganizationCard } from "@/components/site/organization/organization-card";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
-import { getVisibleOrganizations } from "@/lib/organization/mock-organizations";
+import { getBackgroundSettings } from "@/shared/services/background-settings-api";
+import { getOrganizations } from "@/lib/organization/api";
 
 export const metadata: Metadata = {
   title: "Đoàn thể",
-  description: "Các hội đoàn và đoàn thể trong Giáo xứ Sa Nam",
+  description: "Các đoàn thể, hội đoàn đang hoạt động tại Giáo xứ Sa Nam",
 };
 
-export default function OrganizationPage() {
-  const organizations = getVisibleOrganizations();
+export default async function OrganizationPage() {
+  const [organizations, bgSettings] = await Promise.all([
+    getOrganizations(),
+    getBackgroundSettings().catch(() => null),
+  ]);
 
   return (
     <>
@@ -19,6 +23,7 @@ export default function OrganizationPage() {
           { label: "Trang chủ", href: "/" },
           { label: "Đoàn thể" },
         ]}
+        backgroundImage={bgSettings?.organizationBg}
       />
       <section className="px-6 py-16 md:py-[120px]">
         <div className="mx-auto max-w-[1300px]">
@@ -29,7 +34,7 @@ export default function OrganizationPage() {
           ) : (
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
               {organizations.map((organization) => (
-                <OrganizationCard key={organization.id} organization={organization} />
+                <OrganizationCard key={organization._id} organization={organization} />
               ))}
             </div>
           )}

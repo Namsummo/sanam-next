@@ -1,10 +1,5 @@
-import { AdminModulePlaceholder } from "@/components/admin/admin-module-placeholder";
+import { AdminHomepageEditor } from "@/components/admin/homepage/admin-homepage-editor";
 
 export default function AdminSettingsPage() {
-  return (
-    <AdminModulePlaceholder
-      title="Cấu hình chung"
-      description="Thiết lập các nội dung tĩnh và cấu hình website."
-    />
-  );
+  return <AdminHomepageEditor />;
 }

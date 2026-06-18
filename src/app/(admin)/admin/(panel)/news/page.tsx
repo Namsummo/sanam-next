@@ -1,10 +1,5 @@
-import { AdminModulePlaceholder } from "@/components/admin/admin-module-placeholder";
+import { NewsList } from "@/components/admin/news/news-list";
 
 export default function AdminNewsPage() {
-  return (
-    <AdminModulePlaceholder
-      title="Quản lý Tin tức"
-      description="Tạo, chỉnh sửa và ẩn/hiện bài viết tin tức giáo xứ."
-    />
-  );
+  return <NewsList />;
 }

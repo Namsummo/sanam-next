@@ -1,34 +1,61 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { getNewsCategoryLabel } from "@/lib/news/categories";
-import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
+import { DEFAULT_COVER } from "@/lib/image-constants";
 import { formatNewsDate } from "@/lib/format";
-import { getNewsById, getNewsBySlug, getVisibleNews } from "@/lib/news/mock-news";
+import { getPublicNewsBySlug, getPublicNews } from "@/shared/services/news-api";
 import type { NewsArticle } from "@/lib/news/types";
+import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 
 type NewsDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-function getVisibleArticleBySlug(slug: string): NewsArticle | undefined {
-  const article = getNewsBySlug(slug);
-  if (!article || !article.isVisible) {
-    return undefined;
+async function fetchArticleBySlug(slug: string): Promise<NewsArticle | undefined> {
+  try {
+    const data = await getPublicNewsBySlug(slug);
+    return {
+      id: data._id,
+      slug: data.slug,
+      title: data.title,
+      excerpt: data.excerpt,
+      content: data.content,
+      contentFormat: data.contentFormat,
+      categoryId: data.categoryId?.slug,
+      coverImage: data.coverImage ?? undefined,
+      publishedAt: data.publishedAt,
+      isFeatured: data.isFeatured,
+      isVisible: data.isVisible,
+    };
+  } catch {
+    const { getNewsBySlug, getNewsById } = await import("@/lib/news/mock-news");
+    const article = getNewsBySlug(slug);
+    if (!article || !article.isVisible) {
+      const byId = getNewsById(slug);
+      return byId?.isVisible ? byId : undefined;
+    }
+    return article;
   }
-  return article;
 }
 
-export function generateStaticParams() {
-  return getVisibleNews()
-    .filter((article) => !!article.slug)
-    .map((article) => ({
-      slug: article.slug!,
-    }));
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  try {
+    const data = await getPublicNews({ page: 1, limit: 100 });
+    return data.articles
+      .filter((a) => a.isVisible && a.slug)
+      .map((a) => ({ slug: a.slug }));
+  } catch {
+    const { getVisibleNews } = await import("@/lib/news/mock-news");
+    return getVisibleNews()
+      .filter((a) => !!a.slug)
+      .map((a) => ({ slug: a.slug! }));
+  }
 }
 
 export async function generateMetadata({
@@ -36,14 +63,9 @@ export async function generateMetadata({
 }: NewsDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const decoded = decodeURIComponent(slug);
-  const article = getVisibleArticleBySlug(decoded);
+  const article = await fetchArticleBySlug(decoded);
 
-  // Back-compat: old links might still point to id in this route.
   if (!article) {
-    const byId = getNewsById(decoded);
-    if (byId?.isVisible && byId.slug) {
-      redirect(`/news/${byId.slug}`);
-    }
     return { title: "Không tìm thấy" };
   }
 
@@ -56,10 +78,14 @@ export async function generateMetadata({
 export default async function NewsDetailBySlugPage({ params }: NewsDetailPageProps) {
   const { slug } = await params;
   const decoded = decodeURIComponent(slug);
-  const article = getVisibleArticleBySlug(decoded);
 
-  // Back-compat: if someone hits /news/{id} but route is slug-based
+  const [article, bgSettings] = await Promise.all([
+    fetchArticleBySlug(decoded),
+    getBackgroundSettings().catch(() => null),
+  ]);
+
   if (!article) {
+    const { getNewsById } = await import("@/lib/news/mock-news");
     const byId = getNewsById(decoded);
     if (byId?.isVisible && byId.slug) {
       redirect(`/news/${byId.slug}`);
@@ -68,11 +94,13 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
   }
 
   const categoryLabel = getNewsCategoryLabel(article.categoryId);
+  const coverImage = article.coverImage;
 
   return (
     <>
       <PageHeader
         title={article.title}
+        backgroundImage={coverImage || bgSettings?.newsBg || DEFAULT_COVER}
         breadcrumbs={[
           { label: "Trang chủ", href: "/" },
           { label: "Tin tức", href: "/news" },
@@ -92,7 +120,7 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
 
       <article className="px-6 py-16 md:py-[120px]">
         <div className="mx-auto max-w-[1100px]">
-          <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className="mb-8 flex flex-wrap items-center gap-2">
             {categoryLabel ? (
               <span className="rounded-[10px] bg-accent px-3 py-1.5 font-sans text-sm font-medium text-white">
                 {categoryLabel}
@@ -100,40 +128,28 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
             ) : null}
           </div>
 
-          <div className="mb-8 overflow-hidden rounded-[20px]">
-            <figure className="block overflow-hidden rounded-[20px]">
-              <Image
-                src={DEFAULT_COVER}
-                alt={article.title || DEFAULT_COVER_ALT}
-                width={1100}
-                height={550}
-                priority
-                className="aspect-1/0.5 w-full object-cover"
-              />
-            </figure>
-          </div>
+          <div className="w-full">
+            {article.contentFormat === "html" ? (
+              <NewsHtmlContent html={article.content} />
+            ) : (
+              <div className="border-b border-border pb-8">
+                <p className="font-sans text-lg leading-relaxed text-foreground whitespace-pre-line">
+                  {article.content}
+                </p>
+              </div>
+            )}
 
-          {article.contentFormat === "html" ? (
-            <NewsHtmlContent html={article.content} />
-          ) : (
-            <div className="border-b border-border pb-8">
-              <p className="font-sans text-lg leading-relaxed text-foreground whitespace-pre-line">
-                {article.content}
-              </p>
+            <div className="mt-10 border-border pt-8">
+              <Link
+                href="/news"
+                className="font-display text-base font-semibold uppercase text-primary transition-colors hover:text-accent"
+              >
+                ← Quay lại tin tức
+              </Link>
             </div>
-          )}
-
-          <div className="mt-10 border-border pt-8">
-            <Link
-              href="/news"
-              className="font-display text-base font-semibold uppercase text-primary transition-colors hover:text-accent"
-            >
-              ← Quay lại tin tức
-            </Link>
           </div>
         </div>
       </article>
     </>
   );
 }
-

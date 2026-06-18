@@ -1,16 +1,66 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MassWeekSchedule } from "@/components/site/mass/mass-schedule-panel";
-import { getMassScheduleGroups } from "@/lib/mass/mock-mass";
+import type { MassScheduleGroup } from "@/lib/mass/mock-mass";
+import { getMassScheduleGroups, getIsoDayOfWeek } from "@/lib/mass/mock-mass";
+import {
+  getPublicMassSchedule,
+  type MassScheduleGrouped,
+} from "@/shared/services/mass-schedule-api";
 import { cn } from "@/lib/utils";
 
 type MassHomeSectionProps = {
   className?: string;
 };
 
+function getTodayGroupIdFromApi(
+  today: ReturnType<typeof getIsoDayOfWeek>,
+): MassScheduleGroup["id"] {
+  if (today === 7) return "sunday";
+  if (today === 6) return "saturday";
+  return "weekday";
+}
+
+function buildGroupsFromApi(data: MassScheduleGrouped): MassScheduleGroup[] {
+  const groupDefs: { id: MassScheduleGroup["id"]; label: string }[] = [
+    { id: "weekday", label: "Ngày thường" },
+    { id: "saturday", label: "Thứ Bảy" },
+    { id: "sunday", label: "Chủ Nhật" },
+  ];
+
+  const groups: MassScheduleGroup[] = groupDefs.map((def) => ({
+    ...def,
+    entries: data[def.id].map((entry) => ({
+      time: entry.time,
+      title: entry.title || undefined,
+    })),
+  }));
+
+  const today = getIsoDayOfWeek(new Date());
+  const todayGroupId = getTodayGroupIdFromApi(today);
+  const todayGroup = groups.find((g) => g.id === todayGroupId);
+  const otherGroups = groups.filter((g) => g.id !== todayGroupId);
+
+  if (!todayGroup) return groups;
+  return [todayGroup, ...otherGroups];
+}
+
 export function MassHomeSection({ className }: MassHomeSectionProps) {
-  const groups = useMemo(() => getMassScheduleGroups(), []);
+  const [apiData, setApiData] = useState<MassScheduleGrouped | null>(null);
+
+  useEffect(() => {
+    getPublicMassSchedule()
+      .then(setApiData)
+      .catch(() => setApiData(null));
+  }, []);
+
+  const groups = useMemo(() => {
+    if (apiData) {
+      return buildGroupsFromApi(apiData);
+    }
+    return getMassScheduleGroups();
+  }, [apiData]);
 
   if (groups.every((group) => group.entries.length === 0)) {
     return null;

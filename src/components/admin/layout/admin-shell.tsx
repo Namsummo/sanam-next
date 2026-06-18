@@ -7,8 +7,9 @@ import { Menu, X } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/layout/admin-sidebar";
 import { cn } from "@/lib/utils";
 import {
-  getMockAdminSession,
-  subscribeMockAdminSession,
+  getToken,
+  getSessionUser,
+  subscribeSession,
 } from "@/lib/admin/mock-auth";
 import { Button } from "@/components/site/shared/ui/button/button";
 
@@ -19,17 +20,22 @@ type AdminShellProps = {
 export function AdminShell({ children }: AdminShellProps) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const email = useSyncExternalStore(
-    subscribeMockAdminSession,
-    getMockAdminSession,
+  const token = useSyncExternalStore(
+    subscribeSession,
+    getToken,
+    () => null,
+  );
+  const sessionUser = useSyncExternalStore(
+    subscribeSession,
+    getSessionUser,
     () => null,
   );
 
   useEffect(() => {
-    if (email === null) {
+    if (token === null) {
       router.replace("/admin/login");
     }
-  }, [email, router]);
+  }, [token, router]);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -55,7 +61,7 @@ export function AdminShell({ children }: AdminShellProps) {
     setMobileOpen(false);
   }
 
-  if (email === null) {
+  if (token === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <p className="text-sm text-muted-foreground">Đang tải...</p>
@@ -67,7 +73,10 @@ export function AdminShell({ children }: AdminShellProps) {
     <div className="flex min-h-screen bg-background">
       <div className="hidden w-72 shrink-0 lg:block">
         <div className="fixed inset-y-0 w-72">
-          <AdminSidebar email={email} />
+          <AdminSidebar
+            email={sessionUser?.email ?? ""}
+            name={sessionUser?.name ?? ""}
+          />
         </div>
       </div>
 
@@ -88,7 +97,8 @@ export function AdminShell({ children }: AdminShellProps) {
         )}
       >
         <AdminSidebar
-          email={email}
+          email={sessionUser?.email ?? ""}
+          name={sessionUser?.name ?? ""}
           onNavigate={closeMobileMenu}
           onClose={closeMobileMenu}
           showCloseButton
@@ -117,7 +127,7 @@ export function AdminShell({ children }: AdminShellProps) {
             <p className="truncate font-display text-lg font-semibold text-card-foreground">
               Sa Nam Admin
             </p>
-            <p className="truncate text-sm text-muted-foreground">{email}</p>
+            <p className="truncate text-sm text-muted-foreground">{sessionUser?.email}</p>
           </div>
         </header>
 

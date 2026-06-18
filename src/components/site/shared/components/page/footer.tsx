@@ -9,23 +9,17 @@ import {
   Send,
   Share2,
 } from "lucide-react";
-import {
-  siteFooterQuickLinks,
-  siteFooterServiceLinks,
-} from "@/lib/site-navigation";
 import { cn } from "@/lib/utils";
+import { getPublicContactSettings } from "@/shared/services/contact-api";
+import { getPublicFooterSettings } from "@/shared/services/footer-settings-api";
 
-const serviceTimes = [
-  "Sunday Worship: 9:00 AM - 11:00 AM",
-  "Bible Study: Wednesday - 7:00 PM",
-] as const;
-
-const socialLinks = [
-  { label: "Dribbble", href: "#", icon: Share2 },
-  { label: "Facebook", href: "#", icon: Globe },
-  { label: "Instagram", href: "#", icon: MessageCircle },
-  { label: "LinkedIn", href: "#", icon: Link2 },
-] as const;
+const getSocialIcon = (network: string) => {
+  const normalized = network.toLowerCase();
+  if (normalized.includes("facebook") || normalized.includes("globe")) return Globe;
+  if (normalized.includes("instagram") || normalized.includes("message") || normalized.includes("twitter")) return MessageCircle;
+  if (normalized.includes("dribbble") || normalized.includes("share")) return Share2;
+  return Link2;
+};
 
 const footerShell = cn(
   "mb-[15px] w-full rounded-[20px] bg-primary bg-[url('/images/dark-section-bg-image.png')] bg-cover bg-top bg-no-repeat pt-[120px]",
@@ -43,18 +37,62 @@ const linkItem =
 const linkAnchor =
   "transition-colors duration-400 hover:text-accent";
 
-export function SiteFooter() {
+import type { FooterSettingsPayload } from "@/shared/services/footer-settings-api";
+
+export async function SiteFooter() {
+  let contactItems: any[] = [];
+  try {
+    const data = await getPublicContactSettings();
+    contactItems = data.contactItems || [];
+  } catch {
+    // fallback
+  }
+
+  let footerSettings: FooterSettingsPayload = {
+    newsletterTitle: "Receive Spiritual Encouragement in Your Inbox Today!",
+    newsletterSubtitle: "Newsletter Subscription",
+    copyrightText: "Copyright © 2026 All Rights Reserved.",
+    newsletterPlaceholder: "Enter Your E-mail",
+    quickLinksTitle: "Quick Links",
+    ourServicesTitle: "Our Services",
+    serviceTimesTitle: "Service Times",
+    serviceTimes: [
+      "Sunday Worship: 9:00 AM - 11:00 AM",
+      "Bible Study: Wednesday - 7:00 PM",
+    ],
+    socialLinks: [
+      { network: "Dribbble", url: "#" },
+      { network: "Facebook", url: "#" },
+      { network: "Instagram", url: "#" },
+      { network: "LinkedIn", url: "#" },
+    ],
+    quickLinks: [],
+    ourServices: [],
+  };
+
+  try {
+    const data = await getPublicFooterSettings();
+    if (data && data.newsletterTitle) {
+      footerSettings = data;
+    }
+  } catch {
+    // fallback
+  }
+
+  const phoneItem = contactItems.find((i) => i.id === "phone");
+  const emailItem = contactItems.find((i) => i.id === "email");
+
   return (
     <footer className={footerShell}>
       <div className={container}>
         <div className="mb-[60px] flex flex-wrap items-center justify-between gap-5 border-b border-white/10 pb-[60px] max-lg:mb-[30px] max-lg:pb-[30px]">
           <h2 className="max-w-[750px] font-display text-3xl font-semibold uppercase leading-[1.2] text-white md:text-4xl lg:text-[42px]">
-            Receive Spiritual Encouragement in Your Inbox Today!
+            {footerSettings.newsletterTitle}
           </h2>
 
           <div className="w-full max-w-[415px] max-lg:max-w-full">
             <h3 className="mb-5 font-display text-xl font-semibold uppercase text-white max-lg:mb-[15px] max-md:text-lg">
-              Newsletter Subscription
+              {footerSettings.newsletterSubtitle}
             </h3>
             <form action="#" method="post">
               <div className="flex rounded-full bg-white/10 p-[5px] backdrop-blur-[30px]">
@@ -65,9 +103,9 @@ export function SiteFooter() {
                   id="footer-email"
                   type="email"
                   name="mail"
-                  placeholder="Enter Your E-mail"
+                  placeholder={footerSettings.newsletterPlaceholder || "Enter Your E-mail"}
                   required
-                  className="min-w-0 flex-1 bg-transparent px-6 py-1.5 text-base text-white outline-none placeholder:text-foreground"
+                  className="min-w-0 flex-1 bg-transparent px-6 py-1.5 text-base text-white outline-none placeholder:text-white/60"
                 />
                 <button
                   type="submit"
@@ -93,48 +131,80 @@ export function SiteFooter() {
               />
             </Link>
             <ul className="mt-[50px] space-y-5 max-lg:mt-5 max-lg:space-y-3">
-              <li>
-                <a
-                  href="tel:123456789"
-                  className={cn(
-                    "flex items-center gap-2.5 text-base text-white",
-                    linkAnchor,
-                  )}
-                >
-                  <Phone className="size-6 shrink-0 text-accent" aria-hidden />
-                  (+01) 123 456 789
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:info@domainname.com"
-                  className={cn(
-                    "flex items-center gap-2.5 text-base text-white",
-                    linkAnchor,
-                  )}
-                >
-                  <Mail className="size-6 shrink-0 text-accent" aria-hidden />
-                  info@domainname.com
-                </a>
-              </li>
+              {phoneItem && (
+                <li>
+                  <a
+                    href={phoneItem.href}
+                    className={cn(
+                      "flex items-center gap-2.5 text-base text-white",
+                      linkAnchor,
+                    )}
+                  >
+                    <Phone className="size-6 shrink-0 text-accent" aria-hidden />
+                    {phoneItem.value}
+                  </a>
+                </li>
+              )}
+              {emailItem && (
+                <li>
+                  <a
+                    href={emailItem.href}
+                    className={cn(
+                      "flex items-center gap-2.5 text-base text-white",
+                      linkAnchor,
+                    )}
+                  >
+                    <Mail className="size-6 shrink-0 text-accent" aria-hidden />
+                    {emailItem.value}
+                  </a>
+                </li>
+              )}
+              {!phoneItem && !emailItem && (
+                <>
+                  <li>
+                    <a
+                      href="tel:123456789"
+                      className={cn(
+                        "flex items-center gap-2.5 text-base text-white",
+                        linkAnchor,
+                      )}
+                    >
+                      <Phone className="size-6 shrink-0 text-accent" aria-hidden />
+                      (+01) 123 456 789
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="mailto:info@domainname.com"
+                      className={cn(
+                        "flex items-center gap-2.5 text-base text-white",
+                        linkAnchor,
+                      )}
+                    >
+                      <Mail className="size-6 shrink-0 text-accent" aria-hidden />
+                      info@domainname.com
+                    </a>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
           <div className="flex flex-wrap gap-[30px] max-md:justify-between xl:col-span-9 xl:ml-[4.167vw] xl:gap-[4.167vw]">
             <FooterLinkColumn
-              title="Quick Links"
-              links={siteFooterQuickLinks}
+              title={footerSettings.quickLinksTitle || "Quick Links"}
+              links={footerSettings.quickLinks || []}
               className="xl:w-[calc(25%-2.778vw)]"
             />
             <FooterLinkColumn
-              title="Our Services"
-              links={siteFooterServiceLinks}
+              title={footerSettings.ourServicesTitle || "Our Services"}
+              links={footerSettings.ourServices || []}
               className="xl:w-[calc(35%-2.778vw)]"
             />
             <div className="w-full xl:w-[calc(40%-2.778vw)]">
-              <h2 className={linkColumnTitle}>Service Times</h2>
+              <h2 className={linkColumnTitle}>{footerSettings.serviceTimesTitle || "Service Times"}</h2>
               <ul>
-                {serviceTimes.map((time) => (
+                {footerSettings.serviceTimes.map((time) => (
                   <li key={time} className={linkItem}>
                     {time}
                   </li>
@@ -142,17 +212,20 @@ export function SiteFooter() {
               </ul>
               <div className="mt-[30px] border-t border-white/10 pt-[30px] max-lg:mt-5 max-lg:pt-5">
                 <ul className="flex flex-wrap gap-[15px]">
-                  {socialLinks.map(({ label, href, icon: Icon }) => (
-                    <li key={label}>
-                      <a
-                        href={href}
-                        aria-label={label}
-                        className="flex size-10 items-center justify-center rounded-full border border-white/10 text-white transition-colors duration-400 hover:bg-accent"
-                      >
-                        <Icon className="size-[18px]" aria-hidden />
-                      </a>
-                    </li>
-                  ))}
+                  {footerSettings.socialLinks.map(({ network, url }) => {
+                    const Icon = getSocialIcon(network);
+                    return (
+                      <li key={network}>
+                        <a
+                          href={url}
+                          aria-label={network}
+                          className="flex size-10 items-center justify-center rounded-full border border-white/10 text-white transition-colors duration-400 hover:bg-accent"
+                        >
+                          <Icon className="size-[18px]" aria-hidden />
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             </div>
@@ -162,7 +235,7 @@ export function SiteFooter() {
 
       <div className="mt-[60px] border-t border-white/10 py-10 text-center max-lg:mt-[30px] max-lg:py-[30px]">
         <div className={container}>
-          <p className="text-base text-white">Copyright © 2026 All Rights Reserved.</p>
+          <p className="text-base text-white">{footerSettings.copyrightText}</p>
         </div>
       </div>
     </footer>
@@ -175,7 +248,7 @@ function FooterLinkColumn({
   className,
 }: {
   title: string;
-  links: readonly { label: string; href: string }[];
+  links: readonly { label: string; url?: string; href?: string }[];
   className?: string;
 }) {
   return (
@@ -188,13 +261,16 @@ function FooterLinkColumn({
     >
       <h2 className={linkColumnTitle}>{title}</h2>
       <ul>
-        {links.map(({ label, href }) => (
-          <li key={label} className={linkItem}>
-            <Link href={href} className={linkAnchor}>
-              {label}
-            </Link>
-          </li>
-        ))}
+        {links.map((link, idx) => {
+          const target = link.url || link.href || "#";
+          return (
+            <li key={idx} className={linkItem}>
+              <Link href={target} className={linkAnchor}>
+                {link.label}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

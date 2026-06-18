@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CouncilPageSection } from "@/components/site/clergy/council-page-section";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
+import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 
 export const metadata: Metadata = {
   title: "Ban Hành Giáo",
@@ -8,7 +9,9 @@ export const metadata: Metadata = {
     "Danh sách Ban Hành Giáo Giáo xứ Sa Nam qua các nhiệm kỳ — tìm kiếm và xem theo khóa.",
 };
 
-export default function BanHanhGiaoPage() {
+export default async function BanHanhGiaoPage() {
+  const bgSettings = await getBackgroundSettings().catch(() => null);
+
   return (
     <>
       <PageHeader
@@ -18,6 +21,7 @@ export default function BanHanhGiaoPage() {
           { label: "Giới thiệu", href: "/introduce" },
           { label: "Ban Hành Giáo" },
         ]}
+        backgroundImage={bgSettings?.introduceBg}
       />
 
       <article className="px-6 py-16 md:py-[120px]">

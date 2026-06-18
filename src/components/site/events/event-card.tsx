@@ -33,6 +33,7 @@ export function EventCard({ event, className }: EventCardProps) {
               alt={event.name || DEFAULT_COVER_ALT}
               width={640}
               height={556}
+              unoptimized={!!event.image}
               className="aspect-[1/0.87] w-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.06]"
             />
           </figure>

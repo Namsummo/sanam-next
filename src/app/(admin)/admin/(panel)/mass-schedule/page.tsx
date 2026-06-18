@@ -1,10 +1,5 @@
-import { AdminModulePlaceholder } from "@/components/admin/admin-module-placeholder";
+import { AdminMassScheduleManager } from "@/components/admin/mass-schedule/admin-mass-schedule-manager";
 
 export default function AdminMassSchedulePage() {
-  return (
-    <AdminModulePlaceholder
-      title="Lịch Thánh Lễ"
-      description="Cấu hình giờ lễ theo ngày thường, Thứ Bảy và Chủ Nhật."
-    />
-  );
+  return <AdminMassScheduleManager />;
 }

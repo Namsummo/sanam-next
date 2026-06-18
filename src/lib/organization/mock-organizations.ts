@@ -2,58 +2,76 @@ import type { Organization } from "@/lib/organization/types";
 
 export const mockOrganizations: Organization[] = [
   {
-    id: "org-001",
+    _id: "org-001",
     slug: "ca-doan",
     name: "Ca đoàn",
     memberCount: 48,
-    description:
+    history:
       "Ca đoàn phục vụ trong các Thánh lễ Chúa Nhật và các dịp lễ đặc biệt của giáo xứ, góp phần nâng cao phần ca tụng và tinh thần cầu nguyện của cộng đoàn.",
     isVisible: true,
+    terms: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: "org-002",
+    _id: "org-002",
     slug: "ban-giao-ly",
     name: "Ban Giáo lý",
     memberCount: 32,
-    description:
+    history:
       "Ban Giáo lý phụ trách giảng dạy, hướng dẫn và đồng hành với các lớp giáo lý từ lứa tuổi thiếu nhi đến thanh niên trong giáo xứ.",
     isVisible: true,
+    terms: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: "org-003",
+    _id: "org-003",
     slug: "gia-dinh-phuc-tu",
     name: "Gia đình Phụt từ",
     memberCount: 86,
-    description:
+    history:
       "Hội đoàn Gia đình Phụt từ sinh hoạt định kỳ, chia sẻ Tin Mừng và củng cố đời sống đức tin trong từng gia đình giáo dân.",
     isVisible: true,
+    terms: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: "org-004",
+    _id: "org-004",
     slug: "thieu-nhi-thanh-the",
     name: "Thiếu nhi Thánh Thể",
     memberCount: 120,
-    description:
+    history:
       "Thiếu nhi Thánh Thể tổ chức các buổi sinh hoạt, học hỏi đức tin và các hoạt động vui chơi lành mạnh cho các em trong giáo xứ.",
     isVisible: true,
+    terms: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: "org-005",
+    _id: "org-005",
     slug: "legio-mariae",
     name: "Legio Mariae",
     memberCount: 24,
-    description:
+    history:
       "Legio Mariae hiệp ý cầu nguyện, tông đồ và phục vụ theo tinh thần hiến dâng cho Đức Maria, hỗ trợ các hoạt động mục vụ của giáo xứ.",
     isVisible: true,
+    terms: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: "org-006",
+    _id: "org-006",
     slug: "hiep-hoi-ba-me",
     name: "Hiệp hội Bà mẹ",
     memberCount: 54,
-    description:
+    history:
       "Hiệp hội Bà mẹ quy tụ các bà mẹ giáo dân, cùng nhau cầu nguyện, chia sẻ kinh nghiệm nuôi dạy con cái theo đức tin.",
     isVisible: true,
+    terms: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
   },
 ];
 
@@ -66,5 +84,5 @@ export function getOrganizationBySlug(slug: string): Organization | undefined {
 }
 
 export function getOrganizationById(id: string): Organization | undefined {
-  return mockOrganizations.find((org) => org.id === id);
+  return mockOrganizations.find((org) => org._id === id);
 }

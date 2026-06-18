@@ -8,6 +8,7 @@ import {
   Settings,
   Users,
   Video,
+  Image as ImageIcon,
 } from "lucide-react";
 
 export type AdminModuleStatus = "available" | "coming-soon";
@@ -28,7 +29,7 @@ export const adminModules: AdminModule[] = [
     description: "Quản lý bài viết, danh mục và tin nổi bật.",
     href: "/admin/news",
     icon: Newspaper,
-    status: "coming-soon",
+    status: "available",
   },
   {
     id: "events",
@@ -44,7 +45,7 @@ export const adminModules: AdminModule[] = [
     description: "Cập nhật hồ sơ linh mục và ban hành giáo.",
     href: "/admin/clergy",
     icon: Church,
-    status: "coming-soon",
+    status: "available",
   },
   {
     id: "organizations",
@@ -52,7 +53,7 @@ export const adminModules: AdminModule[] = [
     description: "Quản lý hội đoàn và thành viên phục vụ.",
     href: "/admin/organizations",
     icon: Users,
-    status: "coming-soon",
+    status: "available",
   },
   {
     id: "worship",
@@ -68,7 +69,7 @@ export const adminModules: AdminModule[] = [
     description: "Cấu hình giờ lễ theo ngày trong tuần.",
     href: "/admin/mass-schedule",
     icon: CalendarDays,
-    status: "coming-soon",
+    status: "available",
   },
   {
     id: "contact",
@@ -76,15 +77,23 @@ export const adminModules: AdminModule[] = [
     description: "Thông tin liên hệ và tài khoản quyên góp.",
     href: "/admin/contact",
     icon: Contact,
-    status: "coming-soon",
+    status: "available",
   },
   {
     id: "settings",
     title: "Cấu hình chung",
-    description: "Thiết lập website và nội dung tĩnh.",
+    description: "Thiết lập website, nội dung tĩnh và giao diện trang chủ.",
     href: "/admin/settings",
     icon: Settings,
-    status: "coming-soon",
+    status: "available",
+  },
+  {
+    id: "library",
+    title: "Thư viện ảnh",
+    description: "Quản lý hình ảnh nền của các trang.",
+    href: "/admin/library",
+    icon: ImageIcon,
+    status: "available",
   },
 ];
 

@@ -1,12 +1,34 @@
-export type Organization = {
-  id: string;
-  slug: string;
-  name: string;
-  memberCount: number;
-  description: string;
-  isVisible: boolean;
+export type ExecutiveMember = {
+  _id?: string;
+  fullName: string;
+  birthday?: string;
+  patronSaint?: string;
+  position?: string;
+  parish?: string;
+  image?: string;
 };
 
+export type ExecutiveTerm = {
+  _id?: string;
+  name: string;
+  isCurrent: boolean;
+  members: ExecutiveMember[];
+};
+
+export type Organization = {
+  _id: string;
+  slug: string;
+  name: string;
+  image?: string;
+  memberCount: number;
+  history?: string;
+  terms: ExecutiveTerm[];
+  isVisible: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Legacy types (kept for mock files compatibility temporarily)
 export type OrganizationTerm = {
   id: string;
   startYear: number;
@@ -19,7 +41,6 @@ export type MemberPerson = {
   id: string;
   saintName: string;
   realName: string;
-  /** ISO 8601 date YYYY-MM-DD */
   dateOfBirth: string;
   address: string;
 };

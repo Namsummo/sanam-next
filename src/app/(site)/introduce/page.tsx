@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
+import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 
 export const metadata: Metadata = {
   title: "Giới thiệu",
@@ -22,7 +23,9 @@ const introduceLinks = [
   },
 ] as const;
 
-export default function IntroducePage() {
+export default async function IntroducePage() {
+  const bgSettings = await getBackgroundSettings().catch(() => null);
+
   return (
     <>
       <PageHeader
@@ -31,6 +34,7 @@ export default function IntroducePage() {
           { label: "Trang chủ", href: "/" },
           { label: "Giới thiệu" },
         ]}
+        backgroundImage={bgSettings?.introduceBg}
       />
 
       <article className="px-6 py-16 md:py-[120px]">

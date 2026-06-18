@@ -22,7 +22,7 @@ export type DonationBankAccount = {
 };
 
 export type DonationOption = {
-  id: "parish" | "developer";
+  id: string;
   tabLabel: string;
   headline: string;
   subtitle?: string;
@@ -40,11 +40,11 @@ export const siteDonationInfo = {
 } as const;
 
 const parishContact: DonationContactInfo = {
-  phone: "(028) 1234 5678",
-  phoneHref: "tel:+842812345678",
-  email: "lienhe@sanam.org",
-  website: "sanam.org",
-  websiteHref: "https://sanam.org",
+  phone: "",
+  phoneHref: "",
+  email: "",
+  website: "",
+  websiteHref: "",
 };
 
 export const siteDonationOptions: DonationOption[] = [

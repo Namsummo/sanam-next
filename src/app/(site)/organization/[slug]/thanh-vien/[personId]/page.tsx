@@ -8,6 +8,7 @@ import {
 } from "@/lib/organization/member-routes";
 import { getMemberPersonById } from "@/lib/organization/mock-member-persons";
 import { getOrganizationBySlug } from "@/lib/organization/mock-organizations";
+import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 
 type OrganizationMemberDetailPageProps = {
   params: Promise<{ slug: string; personId: string }>;
@@ -51,8 +52,11 @@ export default async function OrganizationMemberDetailPage({
   const decodedSlug = decodeURIComponent(slug);
   const decodedPersonId = decodeURIComponent(personId);
 
-  const organization = getVisibleOrganization(decodedSlug);
-  const person = getMemberPersonById(decodedPersonId);
+  const [organization, person, bgSettings] = await Promise.all([
+    Promise.resolve(getVisibleOrganization(decodedSlug)),
+    Promise.resolve(getMemberPersonById(decodedPersonId)),
+    getBackgroundSettings().catch(() => null),
+  ]);
 
   if (
     !organization ||
@@ -75,6 +79,7 @@ export default async function OrganizationMemberDetailPage({
           { label: organization.name, href: backHref },
           { label: "Chi tiết thành viên" },
         ]}
+        backgroundImage={bgSettings?.organizationBg}
         meta={
           <p className="font-sans text-lg text-white/90">{person.saintName}</p>
         }

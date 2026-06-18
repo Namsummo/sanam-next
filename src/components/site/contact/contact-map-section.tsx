@@ -24,7 +24,7 @@ export function ContactMapSection({
       )}
     >
       <div className="mx-auto max-w-[1300px]">
-        <div className="mb-10 text-center md:mb-12">
+        <div className="mb-10 text-center md:mb-12 wow fadeInUp" data-wow-delay="0.1s">
           <ContactSectionSubtitle centered>{subtitle}</ContactSectionSubtitle>
           <h2 className="font-display text-3xl font-semibold uppercase leading-none text-primary md:text-4xl lg:text-5xl">
             {title}
@@ -34,7 +34,7 @@ export function ContactMapSection({
           </p>
         </div>
 
-        <div className="h-[350px] overflow-hidden rounded-[20px] sm:h-[450px] lg:h-[600px]">
+        <div className="h-[350px] overflow-hidden rounded-[20px] sm:h-[450px] lg:h-[600px] wow fadeInUp" data-wow-delay="0.2s">
           <iframe
             title="Bản đồ Giáo xứ Sa Nam"
             src={mapEmbedUrl}

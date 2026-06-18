@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { ImagePlus, Trash2 } from "lucide-react";
-import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { Tag, X } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import {
   EMPTY_EVENT_CATEGORY_LABEL,
   EVENT_STATUS_OPTIONS,
   getEventStatusByLabel,
   getEventStatusLabel,
-  readImageFile,
   type EventFormValues,
 } from "@/components/admin/events/admin-event-form";
 import { AdminFormDialog } from "@/components/admin/shared/admin-form-dialog";
@@ -24,11 +22,14 @@ import {
   SelectValue,
 } from "@/components/site/shared/ui/select/select";
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
+import { AdminSelect } from "@/components/admin/shared/admin-select";
+import { ImageUploader } from "@/components/admin/news/image-uploader";
+import { getToken } from "@/lib/admin/mock-auth";
 import {
-  eventCategories,
-  getEventCategoryIdByLabel,
-  getEventCategoryLabel,
-} from "@/lib/events/categories";
+  createEventCategory,
+  getEventCategories,
+  type ApiEventCategory,
+} from "@/shared/services/events-api";
 
 type AdminEventFormModalProps = {
   open: boolean;
@@ -36,6 +37,7 @@ type AdminEventFormModalProps = {
   editingId: string | null;
   onClose: () => void;
   onSubmit: (values: EventFormValues) => void;
+  onUploadImage: (file: File) => Promise<string>;
 };
 
 export function AdminEventFormModal({
@@ -44,56 +46,64 @@ export function AdminEventFormModal({
   editingId,
   onClose,
   onSubmit,
+  onUploadImage,
 }: AdminEventFormModalProps) {
-  const imageInputRef = useRef<HTMLInputElement>(null);
   const form = useForm<EventFormValues>({
     defaultValues,
   });
 
   const isFeatured = useWatch({ control: form.control, name: "isFeatured" });
-  const imagePreview = useWatch({ control: form.control, name: "image" });
+  const imageValue = useWatch({ control: form.control, name: "image" });
+
+  const [categories, setCategories] = useState<ApiEventCategory[]>([]);
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [newCatLabel, setNewCatLabel] = useState("");
+  const [newCatSlug, setNewCatSlug] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [catError, setCatError] = useState("");
 
   useEffect(() => {
     if (open) {
       form.reset(defaultValues);
+      getEventCategories()
+        .then(setCategories)
+        .catch(() => {});
     }
   }, [defaultValues, form, open]);
 
-  function handleImageSelect(changeEvent: React.ChangeEvent<HTMLInputElement>) {
-    const file = changeEvent.target.files?.[0];
-    changeEvent.target.value = "";
+  const categoryOptions = useMemo(
+    () =>
+      categories.map((cat) => ({
+        value: cat._id,
+        label: cat.label,
+      })),
+    [categories],
+  );
 
-    if (!file) {
-      return;
-    }
+  const newCatAutoSlug = useMemo(
+    () =>
+      newCatLabel
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-"),
+    [newCatLabel],
+  );
 
-    if (!file.type.startsWith("image/")) {
-      form.setError("image", { message: "Vui lòng chọn file ảnh hợp lệ." });
-      return;
-    }
-
-    void readImageFile(file)
-      .then((dataUrl) => {
-        form.setValue("image", dataUrl, { shouldDirty: true });
-        form.clearErrors("image");
-      })
-      .catch(() => {
-        form.setError("image", { message: "Không thể đọc ảnh đã chọn." });
-      });
-  }
-
-  function handleRemoveImage() {
-    form.setValue("image", "", { shouldDirty: true });
-    form.clearErrors("image");
-  }
+  const sessionUser =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("sanam_admin_user") || "null")
+      : null;
+  const isAdmin = sessionUser?.role === "admin";
 
   return (
     <AdminFormDialog
       open={open}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) {
-          onClose();
-        }
+        if (!nextOpen) onClose();
       }}
       title={editingId ? "Chỉnh sửa sự kiện" : "Tạo sự kiện mới"}
       footer={
@@ -116,6 +126,7 @@ export function AdminEventFormModal({
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <input type="hidden" {...form.register("id")} />
+        <input type="hidden" {...form.register("slug")} />
 
         <FieldGroup>
           <ControlledField
@@ -128,15 +139,6 @@ export function AdminEventFormModal({
               <Input
                 {...controlProps}
                 placeholder="Ví dụ: Hội chợ Gia đình Giáo xứ 2026"
-              />
-            )}
-          </ControlledField>
-
-          <ControlledField control={form.control} name="slug" label="Slug">
-            {({ controlProps }) => (
-              <Input
-                {...controlProps}
-                placeholder="Bỏ trống để tự động tạo theo tên sự kiện"
               />
             )}
           </ControlledField>
@@ -162,15 +164,11 @@ export function AdminEventFormModal({
             label="Ngày kết thúc"
             rules={{
               validate: (value) => {
-                if (!value) {
-                  return true;
-                }
-
+                if (!value) return true;
                 const startDate = form.getValues("startDate");
                 if (startDate && value < startDate) {
                   return "Ngày kết thúc không được sớm hơn ngày bắt đầu.";
                 }
-
                 return true;
               },
             }}
@@ -208,49 +206,145 @@ export function AdminEventFormModal({
         </FieldGroup>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <ControlledField control={form.control} name="categoryId" label="Danh mục">
-            {({ field, triggerProps }) => (
-              <Select
-                value={getEventCategoryLabel(field.value) ?? EMPTY_EVENT_CATEGORY_LABEL}
-                onValueChange={(value) => {
-                  if (!value || value === EMPTY_EVENT_CATEGORY_LABEL) {
-                    field.onChange("");
-                    return;
-                  }
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-card-foreground">
+              Danh mục
+            </label>
+            <AdminSelect
+              value={form.watch("categoryId")}
+              onChange={(value) => form.setValue("categoryId", value, { shouldDirty: true })}
+              options={categoryOptions}
+              placeholder={EMPTY_EVENT_CATEGORY_LABEL}
+              searchable={categoryOptions.length > 5}
+              onAdd={isAdmin ? () => setShowNewCategory(true) : undefined}
+              addLabel="Thêm danh mục mới"
+            />
 
-                  field.onChange(getEventCategoryIdByLabel(value) ?? "");
-                }}
-              >
-                <SelectTrigger {...triggerProps}>
-                  <SelectValue placeholder={EMPTY_EVENT_CATEGORY_LABEL} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={EMPTY_EVENT_CATEGORY_LABEL}>
-                    {EMPTY_EVENT_CATEGORY_LABEL}
-                  </SelectItem>
-                  {eventCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.label}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </ControlledField>
+            {showNewCategory ? (
+              <div className="mt-3 overflow-hidden rounded-[12px] border border-border bg-card shadow-sm">
+                <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                  <span className="flex items-center gap-2 text-sm font-medium text-card-foreground">
+                    <Tag className="size-4 text-accent" />
+                    Danh mục mới
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewCategory(false);
+                      setNewCatLabel("");
+                      setNewCatSlug("");
+                      setCatError("");
+                    }}
+                    className="text-muted-foreground transition-colors hover:text-card-foreground"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+
+                {catError ? (
+                  <div className="mx-4 mt-3 rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    {catError}
+                  </div>
+                ) : null}
+
+                <div className="p-4">
+                  <div className="mb-3">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Tên danh mục
+                    </label>
+                    <input
+                      type="text"
+                      value={newCatLabel}
+                      onChange={(e) => setNewCatLabel(e.target.value)}
+                      placeholder="VD: Mục vụ"
+                      className="w-full rounded-[8px] border border-border bg-background px-3 py-2 text-sm text-card-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Slug
+                    </label>
+                    <input
+                      type="text"
+                      value={newCatSlug}
+                      onChange={(e) => setNewCatSlug(e.target.value)}
+                      placeholder={newCatAutoSlug || "tu-dong-theo-ten"}
+                      className="w-full rounded-[8px] border border-border bg-background px-3 py-2 text-sm text-card-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
+                    />
+                    {!newCatSlug && newCatAutoSlug ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Slug tự động:{" "}
+                        <span className="font-mono text-accent">{newCatAutoSlug}</span>
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={creatingCategory}
+                      onClick={async () => {
+                        const token = getToken();
+                        if (!token) return;
+
+                        const slug = newCatSlug.trim() || newCatAutoSlug;
+                        if (!newCatLabel.trim() || !slug) {
+                          setCatError("Vui lòng nhập tên danh mục");
+                          return;
+                        }
+
+                        setCreatingCategory(true);
+                        setCatError("");
+
+                        try {
+                          const cat = await createEventCategory(token, {
+                            slug,
+                            label: newCatLabel.trim(),
+                          });
+                          setCategories((prev) => [...prev, cat]);
+                          form.setValue("categoryId", cat._id, { shouldDirty: true });
+                          setShowNewCategory(false);
+                          setNewCatLabel("");
+                          setNewCatSlug("");
+                        } catch (err) {
+                          setCatError(
+                            err instanceof Error ? err.message : "Lỗi tạo danh mục",
+                          );
+                        } finally {
+                          setCreatingCategory(false);
+                        }
+                      }}
+                      className="rounded-[8px] bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
+                    >
+                      {creatingCategory ? "Đang tạo..." : "Tạo danh mục"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewCategory(false);
+                        setNewCatLabel("");
+                        setNewCatSlug("");
+                        setCatError("");
+                      }}
+                      className="text-sm text-muted-foreground transition-colors hover:text-card-foreground"
+                    >
+                      Hủy
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           <ControlledField control={form.control} name="status" label="Trạng thái">
             {({ field, triggerProps }) => (
               <Select
                 value={getEventStatusLabel(field.value)}
                 onValueChange={(value) => {
-                  if (!value) {
-                    return;
-                  }
-
+                  if (!value) return;
                   const status = getEventStatusByLabel(value);
-                  if (status) {
-                    field.onChange(status);
-                  }
+                  if (status) field.onChange(status);
                 }}
               >
                 <SelectTrigger {...triggerProps}>
@@ -269,55 +363,15 @@ export function AdminEventFormModal({
         </div>
 
         <div>
-          <span className="mb-1 block text-sm font-medium text-card-foreground">
+          <label className="mb-1.5 block text-sm font-medium text-card-foreground">
             Ảnh đại diện
-          </span>
+          </label>
           <input type="hidden" {...form.register("image")} />
-          <input
-            ref={imageInputRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            aria-label="Chọn ảnh đại diện từ máy"
-            onChange={handleImageSelect}
+          <ImageUploader
+            value={imageValue || null}
+            onChange={(url) => form.setValue("image", url || "", { shouldDirty: true })}
+            onUpload={onUploadImage}
           />
-          <div className="flex flex-wrap items-start gap-3">
-            <AdminOutlineButton
-              className="h-11 px-4"
-              onClick={() => imageInputRef.current?.click()}
-            >
-              <ImagePlus className="size-4" aria-hidden />
-              Chọn ảnh từ máy
-            </AdminOutlineButton>
-            {imagePreview ? (
-              <AdminOutlineButton
-                className="text-destructive hover:bg-destructive/10"
-                onClick={handleRemoveImage}
-              >
-                <Trash2 className="size-4" aria-hidden />
-                Xóa ảnh
-              </AdminOutlineButton>
-            ) : null}
-          </div>
-          {imagePreview ? (
-            <div className="relative mt-3 h-40 w-full overflow-hidden rounded-[10px] border border-border">
-              <Image
-                src={imagePreview}
-                alt="Xem trước ảnh đại diện"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 672px"
-                unoptimized={imagePreview.startsWith("data:")}
-              />
-            </div>
-          ) : (
-            <p className="mt-2 text-xs text-muted-foreground">Chưa chọn ảnh.</p>
-          )}
-          {form.formState.errors.image ? (
-            <p className="mt-2 text-sm text-destructive">
-              {form.formState.errors.image.message}
-            </p>
-          ) : null}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 md:items-end">
@@ -334,9 +388,7 @@ export function AdminEventFormModal({
                   onChange={(changeEvent) => {
                     const checked = changeEvent.target.checked;
                     field.onChange(checked);
-                    if (!checked) {
-                      form.setValue("featuredOrder", "");
-                    }
+                    if (!checked) form.setValue("featuredOrder", "");
                   }}
                   onBlur={field.onBlur}
                   ref={field.ref}

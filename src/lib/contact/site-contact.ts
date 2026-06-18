@@ -27,15 +27,15 @@ export const siteContactItems: ContactInfoItem[] = [
   {
     id: "email",
     title: "Email",
-    value: "lienhe@sanam.org",
-    href: "mailto:lienhe@sanam.org",
+    value: "",
+    href: "",
     iconSrc: "/images/icon-mail-white.svg",
   },
   {
     id: "phone",
     title: "Điện thoại",
-    value: "(028) 1234 5678",
-    href: "tel:+842812345678",
+    value: "",
+    href: "",
     iconSrc: "/images/icon-phone-white.svg",
   },
   {

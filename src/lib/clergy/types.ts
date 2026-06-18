@@ -6,7 +6,7 @@ export type ClergyMemberType =
   | typeof CLERGY_TYPE_COUNCIL;
 
 export type ClergyMember = {
-  id: number;
+  id: number | string;
   type: ClergyMemberType;
   fullName: string;
   position: string;
@@ -16,6 +16,7 @@ export type ClergyMember = {
   birthday?: string;
   sortOrder?: number;
   isVisible?: boolean;
+  image?: string;
   ordinationDate?: string; // Ngày thụ phong Linh mục
   patronSaint?: string;    // Thánh bổn mạng
   patronDate?: string;     // Ngày lễ bổn mạng

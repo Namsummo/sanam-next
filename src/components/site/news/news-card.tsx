@@ -27,10 +27,11 @@ export function NewsCard({ article, className }: NewsCardProps) {
         <Link href={href} className="block">
           <figure className="overflow-hidden rounded-[20px]">
             <Image
-              src={DEFAULT_COVER}
+              src={article.coverImage || DEFAULT_COVER}
               alt={article.title || DEFAULT_COVER_ALT}
               width={640}
               height={556}
+              unoptimized={!!article.coverImage}
               className="aspect-[1/0.87] w-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.06]"
             />
           </figure>

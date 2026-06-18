@@ -1,14 +1,37 @@
 import { NewsCard } from "@/components/site/news/news-card";
 import { Button } from "@/components/site/shared/ui/button/button";
-import { getFeaturedNews } from "@/lib/news/mock-news";
+import { getPublicNews } from "@/shared/services/news-api";
 import { cn } from "@/lib/utils";
+import type { NewsArticle } from "@/lib/news/types";
 
 type FeaturedNewsSectionProps = {
   className?: string;
 };
 
-export function FeaturedNewsSection({ className }: FeaturedNewsSectionProps) {
-  const articles = getFeaturedNews(3);
+async function fetchFeaturedArticles(): Promise<NewsArticle[]> {
+  try {
+    const data = await getPublicNews({ page: 1, limit: 3, featured: true });
+    return data.articles.map((a) => ({
+      id: a._id,
+      slug: a.slug,
+      title: a.title,
+      excerpt: a.excerpt,
+      content: a.content,
+      contentFormat: a.contentFormat,
+      categoryId: a.categoryId?.slug,
+      coverImage: a.coverImage ?? undefined,
+      publishedAt: a.publishedAt,
+      isFeatured: a.isFeatured,
+      isVisible: a.isVisible,
+    }));
+  } catch {
+    const { getFeaturedNews } = await import("@/lib/news/mock-news");
+    return getFeaturedNews(3);
+  }
+}
+
+export async function FeaturedNewsSection({ className }: FeaturedNewsSectionProps) {
+  const articles = await fetchFeaturedArticles();
 
   if (articles.length === 0) {
     return null;

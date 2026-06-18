@@ -1,31 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Users } from "lucide-react";
 import { notFound } from "next/navigation";
-import { OrganizationMembersPanel } from "@/components/site/organization/organization-members-panel";
+import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
-import { formatMemberCount } from "@/lib/format";
-import { getOrganizationMembersBySlug } from "@/lib/organization/mock-organization-members";
-import {
-  getOrganizationBySlug,
-  getVisibleOrganizations,
-} from "@/lib/organization/mock-organizations";
+import { OrganizationMembersPanel } from "@/components/site/organization/organization-members-panel";
+import { getOrganizationBySlug, getOrganizations } from "@/lib/organization/api";
 import type { Organization } from "@/lib/organization/types";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-function getVisibleOrganizationBySlug(slug: string): Organization | undefined {
-  const organization = getOrganizationBySlug(slug);
-  if (!organization || !organization.isVisible) {
-    return undefined;
-  }
-  return organization;
-}
-
-export function generateStaticParams() {
-  return getVisibleOrganizations().map((organization) => ({
+export async function generateStaticParams() {
+  const organizations = await getOrganizations();
+  return organizations.map((organization) => ({
     slug: organization.slug,
   }));
 }
@@ -34,29 +22,30 @@ export async function generateMetadata({
   params,
 }: OrganizationDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const organization = getVisibleOrganizationBySlug(decodeURIComponent(slug));
-
-  if (!organization) {
+  try {
+    const organization = await getOrganizationBySlug(decodeURIComponent(slug));
+    return {
+      title: organization.name,
+      description: `Chi tiết đoàn thể ${organization.name}`,
+    };
+  } catch {
     return { title: "Không tìm thấy" };
   }
-
-  return {
-    title: organization.name,
-    description: organization.description,
-  };
 }
 
-export default async function OrganizationDetailPage({
-  params,
-}: OrganizationDetailPageProps) {
-  const { slug } = await params;
-  const organization = getVisibleOrganizationBySlug(decodeURIComponent(slug));
+export default async function OrganizationDetailPage(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
+  const slug = decodeURIComponent(params.slug);
+  const [organization, bgSettings] = await Promise.all([
+    getOrganizationBySlug(slug).catch(() => null),
+    getBackgroundSettings().catch(() => null),
+  ]);
 
   if (!organization) {
     notFound();
   }
-
-  const members = getOrganizationMembersBySlug(organization.slug);
 
   return (
     <>
@@ -67,26 +56,28 @@ export default async function OrganizationDetailPage({
           { label: "Đoàn thể", href: "/organization" },
           { label: organization.name },
         ]}
-        meta={
-          <p className="flex items-center justify-center gap-2 font-sans text-lg text-white">
-            <Users className="size-[18px] shrink-0" aria-hidden />
-            <span>{formatMemberCount(organization.memberCount)}</span>
-          </p>
-        }
+        backgroundImage={organization.image || bgSettings?.organizationBg}
       />
 
       <article className="px-6 py-16 md:py-[120px]">
         <div className="mx-auto max-w-[1300px]">
-          {organization.description ? (
-            <p className="mx-auto mb-12 max-w-[800px] text-center font-sans text-lg leading-relaxed text-foreground md:mb-16">
-              {organization.description}
-            </p>
+          {organization.terms && organization.terms.length > 0 ? (
+            <div className="mb-16">
+              <OrganizationMembersPanel terms={organization.terms} />
+            </div>
           ) : null}
 
-          <OrganizationMembersPanel
-            members={members}
-            organizationSlug={organization.slug}
-          />
+          {organization.history ? (
+            <div className="mt-16 border-t border-border pt-16">
+              <h2 className="mb-10 text-center font-display text-2xl font-semibold uppercase tracking-tight text-primary md:text-3xl">
+                Lịch sử hình thành
+              </h2>
+              <div 
+                className="prose prose-lg mx-auto max-w-[900px] text-foreground prose-headings:font-display prose-headings:text-primary prose-a:text-accent prose-img:rounded-[12px]"
+                dangerouslySetInnerHTML={{ __html: organization.history }} 
+              />
+            </div>
+          ) : null}
 
           <div className="mt-14 border-t border-border pt-10 md:mt-16">
             <Link

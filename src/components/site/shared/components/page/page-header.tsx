@@ -11,6 +11,7 @@ type PageHeaderProps = {
   title: string;
   breadcrumbs: PageHeaderBreadcrumb[];
   meta?: React.ReactNode;
+  backgroundImage?: string;
   className?: string;
 };
 
@@ -18,22 +19,30 @@ export function PageHeader({
   title,
   breadcrumbs,
   meta,
+  backgroundImage,
   className,
 }: PageHeaderProps) {
   return (
     <section
       className={cn(
-        "dark-section relative z-0 mx-[15px] mt-[15px] overflow-hidden rounded-[20px] bg-primary",
+        "dark-section relative z-0 mx-[15px] mt-[15px] overflow-hidden rounded-[20px]",
         "px-6 pb-20 pt-32 md:pb-[175px] md:pt-[220px] lg:pt-[280px]",
+        backgroundImage ? "bg-cover bg-center bg-fixed" : "bg-primary",
         className,
       )}
+      style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgba(1,1,1,0.35)_100%)]"
+        className={cn(
+          "pointer-events-none absolute inset-0",
+          backgroundImage
+            ? "bg-gradient-to-t from-black/70 via-black/40 to-black/30"
+            : "bg-[linear-gradient(180deg,transparent_40%,rgba(1,1,1,0.35)_100%)]",
+        )}
         aria-hidden
       />
 
-      <div className="relative z-1 mx-auto max-w-[1300px] text-center">
+      <div className="relative z-1 mx-auto max-w-[1300px] text-center wow fadeInUp" data-wow-delay="0.1s">
         <h1 className="mb-2.5 inline-block font-display text-4xl font-semibold uppercase leading-none text-white md:text-5xl lg:text-[65px]">
           {title}
         </h1>

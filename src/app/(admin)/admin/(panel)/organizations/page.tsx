@@ -1,10 +1,5 @@
-import { AdminModulePlaceholder } from "@/components/admin/admin-module-placeholder";
+import { AdminOrganizationsManager } from "@/components/admin/organizations/admin-organizations-manager";
 
 export default function AdminOrganizationsPage() {
-  return (
-    <AdminModulePlaceholder
-      title="Quản lý Đoàn thể"
-      description="Quản lý hội đoàn, khóa nhiệm kỳ và danh sách thành viên."
-    />
-  );
+  return <AdminOrganizationsManager />;
 }

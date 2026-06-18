@@ -99,7 +99,7 @@ export function CouncilMembersPanel({
             htmlFor="council-term-filter"
             className="mb-2 block font-sans text-sm font-semibold text-primary"
           >
-            Khóa (3 năm)
+            Khóa
           </label>
           <select
             id="council-term-filter"

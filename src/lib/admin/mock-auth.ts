@@ -1,46 +1,66 @@
-export const MOCK_ADMIN_ACCOUNT = {
-  email: "admin@sanam.org",
-  password: "changeme",
-} as const;
+const STORE = typeof localStorage !== "undefined" ? localStorage : null;
 
-export function validateMockAdminLogin(
-  email: string,
-  password: string,
-): boolean {
-  return (
-    email.trim() === MOCK_ADMIN_ACCOUNT.email &&
-    password === MOCK_ADMIN_ACCOUNT.password
-  );
+export const SESSION_KEY = "sanam_admin_token";
+export const USER_KEY = "sanam_admin_user";
+const SESSION_EVENT = "sanam_admin_session_change";
+
+export interface SessionUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
 }
 
-export const MOCK_ADMIN_SESSION_KEY = "sanam_admin_mock_session";
-const MOCK_ADMIN_SESSION_EVENT = "sanam_admin_session_change";
-
-export function subscribeMockAdminSession(
+export function subscribeSession(
   onStoreChange: () => void,
 ): () => void {
   if (typeof window === "undefined") {
     return () => {};
   }
 
-  window.addEventListener(MOCK_ADMIN_SESSION_EVENT, onStoreChange);
+  window.addEventListener(SESSION_EVENT, onStoreChange);
   return () =>
-    window.removeEventListener(MOCK_ADMIN_SESSION_EVENT, onStoreChange);
+    window.removeEventListener(SESSION_EVENT, onStoreChange);
 }
 
-export function setMockAdminSession(email: string): void {
-  if (typeof window === "undefined") return;
-  sessionStorage.setItem(MOCK_ADMIN_SESSION_KEY, email);
-  window.dispatchEvent(new Event(MOCK_ADMIN_SESSION_EVENT));
+export function setMockAdminSession(token: string, user?: SessionUser): void {
+  if (!STORE) return;
+  STORE.setItem(SESSION_KEY, token);
+  if (user) {
+    STORE.setItem(USER_KEY, JSON.stringify(user));
+  }
+  window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
-export function clearMockAdminSession(): void {
-  if (typeof window === "undefined") return;
-  sessionStorage.removeItem(MOCK_ADMIN_SESSION_KEY);
-  window.dispatchEvent(new Event(MOCK_ADMIN_SESSION_EVENT));
+export function clearSession(): void {
+  if (!STORE) return;
+  STORE.removeItem(SESSION_KEY);
+  STORE.removeItem(USER_KEY);
+  window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
-export function getMockAdminSession(): string | null {
-  if (typeof window === "undefined") return null;
-  return sessionStorage.getItem(MOCK_ADMIN_SESSION_KEY);
+export function getToken(): string | null {
+  if (!STORE) return null;
+  return STORE.getItem(SESSION_KEY);
+}
+
+let cachedUser: SessionUser | null = null;
+let lastRaw = "";
+
+export function getSessionUser(): SessionUser | null {
+  if (!STORE) return null;
+  const raw = STORE.getItem(USER_KEY) || "";
+  if (raw === lastRaw) return cachedUser;
+  lastRaw = raw;
+  if (!raw) {
+    cachedUser = null;
+    return null;
+  }
+  try {
+    cachedUser = JSON.parse(raw) as SessionUser;
+    return cachedUser;
+  } catch {
+    cachedUser = null;
+    return null;
+  }
 }

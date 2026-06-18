@@ -1,107 +1,93 @@
 import Image from "next/image";
-import Link from "next/link";
 import { DEFAULT_COVER } from "@/lib/image-constants";
-import { getOrganizationMemberDetailHref } from "@/lib/organization/member-routes";
-import type { OrganizationMemberDisplay } from "@/lib/organization/types";
+import type { ExecutiveMember } from "@/lib/organization/types";
 import { cn } from "@/lib/utils";
 
 type OrganizationMemberCardSize = "executive" | "member";
 
 type OrganizationMemberCardProps = {
-  member: OrganizationMemberDisplay;
-  organizationSlug: string;
+  member: ExecutiveMember;
   size?: OrganizationMemberCardSize;
   className?: string;
 };
 
 const sizeStyles: Record<
   OrganizationMemberCardSize,
-  {
-    card: string;
-    image: string;
-    imagePx: number;
-    realName: string;
-    saintName: string;
-  }
+  { image: string; imagePx: number; name: string; position: string }
 > = {
   executive: {
-    card: "p-6 md:p-7",
     image: "size-[140px] md:size-[160px]",
     imagePx: 160,
-    realName: "text-xl md:text-2xl",
-    saintName: "text-sm md:text-base",
+    name: "text-lg md:text-xl",
+    position: "text-sm",
   },
   member: {
-    card: "p-5",
-    image: "size-[110px] md:size-[120px]",
+    image: "size-[90px] md:size-[110px] lg:size-[120px]",
     imagePx: 120,
-    realName: "text-lg md:text-xl",
-    saintName: "text-xs md:text-sm",
+    name: "text-sm md:text-base lg:text-lg",
+    position: "text-[10px] md:text-xs lg:text-sm",
   },
 };
 
 export function OrganizationMemberCard({
   member,
-  organizationSlug,
   size = "member",
   className,
 }: OrganizationMemberCardProps) {
-  const displaySaintName = member.saintName.trim();
-  const displayRealName = member.realName.trim();
   const styles = sizeStyles[size];
-  const href = getOrganizationMemberDetailHref(organizationSlug, member.personId);
+  const imgSrc = member.image || DEFAULT_COVER;
+  const isExternal = !!member.image;
 
   return (
-    <Link
-      href={href}
+    <article
       className={cn(
-        "block w-full max-w-[320px] transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        "p-2 text-center flex flex-col items-center",
         className,
       )}
     >
-      <article
+      <figure
         className={cn(
-          "flex h-full flex-col items-center rounded-[20px] border border-border/40 bg-card text-center shadow-[0_8px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)]",
-          styles.card,
+          "mx-auto mb-3 overflow-hidden rounded-[20px] shadow-sm transition-transform duration-300 hover:scale-[1.03]",
+          styles.image,
         )}
       >
-        <figure
-          className={cn(
-            "mb-4 overflow-hidden rounded-[16px] shadow-sm",
-            styles.image,
-          )}
-        >
+        {isExternal ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imgSrc}
+            alt={`Chân dung ${member.fullName}`}
+            className="size-full object-cover"
+          />
+        ) : (
           <Image
-            src={DEFAULT_COVER}
-            alt={`${displaySaintName} ${displayRealName}`}
+            src={imgSrc}
+            alt={`Chân dung ${member.fullName}`}
             width={styles.imagePx}
             height={styles.imagePx}
             className="size-full object-cover"
           />
-        </figure>
-
-        <p className="font-sans text-xs font-semibold uppercase tracking-wider text-accent">
-          {member.position}
-        </p>
-
-        <h3
-          className={cn(
-            "mt-2 font-display font-bold leading-snug text-primary",
-            styles.realName,
-          )}
-        >
-          {displayRealName}
-        </h3>
-
-        <p
-          className={cn(
-            "mt-1 font-sans font-medium text-foreground/70",
-            styles.saintName,
-          )}
-        >
-          {displaySaintName}
-        </p>
-      </article>
-    </Link>
+        )}
+      </figure>
+      <p
+        className={cn(
+          "mt-0.5 font-sans font-semibold tracking-wider text-accent uppercase",
+          styles.position,
+        )}
+      >
+        {member.position}
+      </p>
+      <h3
+        className={cn(
+          "font-display font-bold tracking-tight text-primary leading-snug",
+          styles.name,
+        )}
+      >
+        {member.patronSaint ? `${member.patronSaint} ` : ""}
+        {member.fullName}
+      </h3>
+      {member.parish && (
+        <p className="mt-1 text-xs text-muted-foreground">{member.parish}</p>
+      )}
+    </article>
   );
 }

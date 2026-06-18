@@ -2,16 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/site/shared/ui/button/button";
 import { ControlledField, FieldGroup } from "@/components/site/shared/ui/field/field";
 import { Input } from "@/components/site/shared/ui/input/input";
-import {
-  MOCK_ADMIN_ACCOUNT,
-  setMockAdminSession,
-  validateMockAdminLogin,
-} from "@/lib/admin/mock-auth";
+import { loginApi } from "@/shared/services/auth-api";
+import { getToken, setMockAdminSession } from "@/lib/admin/mock-auth";
 
 type AdminLoginValues = {
   email: string;
@@ -20,6 +17,18 @@ type AdminLoginValues = {
 
 export function AdminLoginForm() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (getToken()) {
+      router.replace("/admin");
+    } else {
+      // Defer state update to avoid cascading render warning
+      const id = requestAnimationFrame(() => setReady(true));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [router]);
+
   const form = useForm<AdminLoginValues>({
     defaultValues: {
       email: "",
@@ -30,16 +39,24 @@ export function AdminLoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(values: AdminLoginValues) {
+  if (!ready) {
+    return (
+      <p className="text-center text-sm text-muted-foreground">Đang kiểm tra...</p>
+    );
+  }
+
+  async function onSubmit(values: AdminLoginValues) {
     setError(null);
 
-    if (!validateMockAdminLogin(values.email, values.password)) {
-      setError("Email hoặc mật khẩu không đúng");
-      return;
+    try {
+      const result = await loginApi(values.email, values.password);
+      setMockAdminSession(result.token, result.user);
+      router.push("/admin");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Đăng nhập thất bại",
+      );
     }
-
-    setMockAdminSession(values.email.trim());
-    router.push("/admin");
   }
 
   return (
@@ -128,7 +145,7 @@ export function AdminLoginForm() {
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        Tài khoản thử: {MOCK_ADMIN_ACCOUNT.email} / {MOCK_ADMIN_ACCOUNT.password}
+        Đăng nhập bằng tài khoản quản trị
       </p>
     </form>
   );

@@ -5,10 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminNavItems, isAdminNavActive } from "@/lib/admin/modules";
-import { clearMockAdminSession } from "@/lib/admin/mock-auth";
+import { clearSession } from "@/lib/admin/mock-auth";
 
 type AdminSidebarProps = {
   email: string;
+  name?: string;
   onNavigate?: () => void;
   onClose?: () => void;
   showCloseButton?: boolean;
@@ -24,7 +25,7 @@ export function AdminSidebar({
   const router = useRouter();
 
   function handleLogout() {
-    clearMockAdminSession();
+    clearSession();
     onNavigate?.();
     router.replace("/admin/login");
   }

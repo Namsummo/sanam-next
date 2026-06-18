@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Users } from "lucide-react";
 import { Button } from "@/components/site/shared/ui/button/button";
-import { formatMemberCount } from "@/lib/format";
 import type { Organization } from "@/lib/organization/types";
 import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import { cn } from "@/lib/utils";
@@ -25,11 +24,12 @@ export function OrganizationCard({ organization, className }: OrganizationCardPr
       <Link href={href} className="block overflow-hidden">
         <figure className="overflow-hidden">
           <Image
-            src={DEFAULT_COVER}
+            src={organization.image || DEFAULT_COVER}
             alt={organization.name || DEFAULT_COVER_ALT}
             width={640}
             height={400}
-            className="aspect-16/10 w-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.05]"
+            unoptimized={!!organization.image}
+            className="aspect-[16/10] w-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.05]"
           />
         </figure>
       </Link>
@@ -44,10 +44,16 @@ export function OrganizationCard({ organization, className }: OrganizationCardPr
           </Link>
         </h2>
 
-        <p className="mt-3 flex items-center gap-2 font-sans text-base text-foreground">
-          <Users className="size-4 shrink-0 text-accent" aria-hidden />
-          <span>{formatMemberCount(organization.memberCount)}</span>
-        </p>
+        {organization.memberCount > 0 && (
+          <div className="mt-3 flex items-center gap-2">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent/10">
+              <Users className="size-3.5 text-accent" />
+            </div>
+            <p className="font-sans text-sm font-medium text-muted-foreground">
+              {organization.memberCount} thành viên
+            </p>
+          </div>
+        )}
 
         <div className="mt-auto pt-6">
           <Button href={href} className="w-full justify-center py-3.5 pr-[46px] text-sm">

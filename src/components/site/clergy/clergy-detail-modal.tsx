@@ -70,18 +70,26 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
         {/* Left Side: Avatar and Quick Info */}
         <div className="relative w-full md:w-[320px] shrink-0 bg-[#eae7de]/70 flex flex-col items-center justify-center p-8 text-center border-b md:border-b-0 md:border-r border-border/40">
           <figure className="relative w-[180px] aspect-4/5 overflow-hidden rounded-[24px] shadow-md border-4 border-white mb-4 transition-transform duration-500 hover:scale-[1.02]">
-            <Image
-              src={DEFAULT_COVER}
-              alt={`Chân dung ${member.fullName}`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 180px, 180px"
-              priority
-            />
+            {member.image ? (
+              <img
+                src={member.image}
+                alt={`Chân dung ${member.fullName}`}
+                className="size-full object-cover"
+              />
+            ) : (
+              <Image
+                src={DEFAULT_COVER}
+                alt={`Chân dung ${member.fullName}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 180px, 180px"
+                priority
+              />
+            )}
           </figure>
 
           <span className="inline-block px-3.5 py-1 rounded-full text-[11px] font-bold tracking-wider text-accent bg-accent/10 uppercase mb-2">
-            {isPriest ? "Linh mục Triều" : "Ban Hành Giáo"}
+            {isPriest ? "Linh mục" : "Ban Hành Giáo"}
           </span>
 
           <h3 className="font-display text-lg font-bold text-primary leading-tight">

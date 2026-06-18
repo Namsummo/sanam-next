@@ -1,19 +1,78 @@
 import { EventCard } from "@/components/site/events/event-card";
 import { EventWeekList } from "@/components/site/events/event-week-list";
 import { Button } from "@/components/site/shared/ui/button/button";
-import {
-  getEventsThisWeek,
-  getFeaturedEvents,
-} from "@/lib/events/mock-events";
+import { getPublicEvents, toParishEvent } from "@/shared/services/events-api";
 import { cn } from "@/lib/utils";
 
 type EventsHomeSectionProps = {
   className?: string;
 };
 
-export function EventsHomeSection({ className }: EventsHomeSectionProps) {
-  const featuredEvents = getFeaturedEvents(2);
-  const weekEvents = getEventsThisWeek();
+function parseDateOnly(isoDate: string): Date {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function getEventStartDateTime(event: { startDate: string; startTime?: string }): Date {
+  const date = parseDateOnly(event.startDate);
+  if (event.startTime) {
+    const [hours, minutes] = event.startTime.split(":").map(Number);
+    date.setHours(hours, minutes, 0, 0);
+  } else {
+    date.setHours(0, 0, 0, 0);
+  }
+  return date;
+}
+
+function getWeekRange(anchor: Date): { start: Date; end: Date } {
+  const start = new Date(anchor);
+  start.setHours(0, 0, 0, 0);
+  const day = start.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  start.setDate(start.getDate() + diffToMonday);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+export async function EventsHomeSection({ className }: EventsHomeSectionProps) {
+  let allEvents: ReturnType<typeof toParishEvent>[] = [];
+
+  try {
+    const res = await getPublicEvents({ limit: 100 });
+    allEvents = res.events.map(toParishEvent);
+  } catch {
+    return null;
+  }
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  const upcoming = allEvents
+    .filter((event) => {
+      const endDate = event.endDate ?? event.startDate;
+      return parseDateOnly(endDate).getTime() >= now.getTime();
+    })
+    .sort((a, b) => getEventStartDateTime(a).getTime() - getEventStartDateTime(b).getTime());
+
+  const featuredEvents = upcoming
+    .filter((event) => event.isFeatured)
+    .sort((a, b) => {
+      const orderA = a.featuredOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.featuredOrder ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      return getEventStartDateTime(a).getTime() - getEventStartDateTime(b).getTime();
+    })
+    .slice(0, 2);
+
+  const { start, end } = getWeekRange(new Date());
+  const weekEvents = upcoming.filter((event) => {
+    const eventStart = parseDateOnly(event.startDate);
+    const eventEnd = parseDateOnly(event.endDate ?? event.startDate);
+    return eventStart.getTime() <= end.getTime() && eventEnd.getTime() >= start.getTime();
+  });
+
   const weekEventsWithoutFeatured = weekEvents.filter(
     (event) => !featuredEvents.some((featured) => featured.id === event.id),
   );

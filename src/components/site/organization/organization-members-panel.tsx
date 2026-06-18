@@ -2,18 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { OrganizationMemberCard } from "@/components/site/organization/organization-member-card";
-import {
-  formatOrganizationTermLabel,
-  getDefaultTermId,
-  getTermsFromMembers,
-} from "@/lib/organization/terms";
-import type { OrganizationMemberDisplay } from "@/lib/organization/types";
+import { OrganizationMemberCard } from "./organization-member-card";
+import type { ExecutiveTerm, ExecutiveMember } from "@/lib/organization/types";
 import { cn } from "@/lib/utils";
 
 type OrganizationMembersPanelProps = {
-  members: OrganizationMemberDisplay[];
-  organizationSlug: string;
+  terms: ExecutiveTerm[];
   className?: string;
 };
 
@@ -25,51 +19,39 @@ function normalizeSearchText(value: string): string {
     .trim();
 }
 
-function memberMatchesSearch(member: OrganizationMemberDisplay, query: string): boolean {
+function memberMatchesSearch(member: ExecutiveMember, query: string): boolean {
   if (!query) {
     return true;
   }
 
   const haystack = normalizeSearchText(
-    [member.saintName, member.realName, member.position].join(" "),
+    [member.fullName, member.position, member.patronSaint, member.parish]
+      .filter(Boolean)
+      .join(" "),
   );
   return haystack.includes(query);
 }
 
 export function OrganizationMembersPanel({
-  members,
-  organizationSlug,
+  terms,
   className,
 }: OrganizationMembersPanelProps) {
-  const terms = useMemo(() => getTermsFromMembers(members), [members]);
-  const defaultTermId = getDefaultTermId(terms);
+  const currentTerm = terms.find(t => t.isCurrent);
+  const defaultTermId = currentTerm ? currentTerm._id || currentTerm.name : (terms[0]?._id || terms[0]?.name);
 
-  const [selectedTermId, setSelectedTermId] = useState(defaultTermId ?? "");
+  const [selectedTermId, setSelectedTermId] = useState<string>(defaultTermId || "");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const activeTermId = selectedTermId || defaultTermId || "";
+  const activeTerm = terms.find(t => (t._id || t.name) === selectedTermId);
   const normalizedQuery = normalizeSearchText(searchQuery);
 
-  const termMembers = useMemo(
-    () => members.filter((m) => m.termId === activeTermId),
-    [members, activeTermId],
-  );
-
-  const filteredMembers = useMemo(
-    () => termMembers.filter((m) => memberMatchesSearch(m, normalizedQuery)),
-    [termMembers, normalizedQuery],
-  );
-
-  const executives = filteredMembers.filter((m) => m.isExecutive);
-  const regularMembers = filteredMembers.filter((m) => !m.isExecutive);
-  const activeTerm = terms.find((t) => t.id === activeTermId);
+  const filteredMembers = useMemo(() => {
+    if (!activeTerm) return [];
+    return activeTerm.members.filter((m) => memberMatchesSearch(m, normalizedQuery));
+  }, [activeTerm, normalizedQuery]);
 
   if (terms.length === 0) {
-    return (
-      <p className="text-center font-sans text-lg text-foreground">
-        Chưa có dữ liệu thành viên cho hội đoàn này.
-      </p>
-    );
+    return null;
   }
 
   return (
@@ -92,7 +74,7 @@ export function OrganizationMembersPanel({
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tên thánh, tên thật hoặc vị trí..."
+              placeholder="Tên, chức vụ hoặc giáo họ..."
               className="w-full rounded-[12px] border border-border bg-white py-3.5 pl-11 pr-4 font-sans text-base text-primary outline-none transition-colors placeholder:text-foreground/50 focus:border-accent"
             />
           </div>
@@ -103,17 +85,17 @@ export function OrganizationMembersPanel({
             htmlFor="org-term-filter"
             className="mb-2 block font-sans text-sm font-semibold text-primary"
           >
-            Khóa (3 năm)
+            Khóa
           </label>
           <select
             id="org-term-filter"
-            value={activeTermId}
+            value={selectedTermId}
             onChange={(e) => setSelectedTermId(e.target.value)}
             className="w-full cursor-pointer appearance-none rounded-[12px] border border-border bg-white px-4 py-3.5 font-sans text-base text-primary outline-none transition-colors focus:border-accent"
           >
             {terms.map((term) => (
-              <option key={term.id} value={term.id}>
-                {formatOrganizationTermLabel(term)}
+              <option key={term._id || term.name} value={term._id || term.name}>
+                {term.name} {term.isCurrent ? "(Hiện tại)" : ""}
               </option>
             ))}
           </select>
@@ -122,62 +104,35 @@ export function OrganizationMembersPanel({
 
       <section>
         <div className="mb-8 text-center md:mb-10">
-          <h2 className="font-display text-2xl font-semibold uppercase tracking-tight text-primary md:text-3xl">
-            Ban điều hành nhiệm kỳ
-          </h2>
+          <h3 className="font-display text-2xl font-semibold uppercase tracking-tight text-primary md:text-3xl">
+            Ban Điều Hành
+          </h3>
           {activeTerm ? (
             <p className="mt-2 font-sans text-sm text-foreground/80">
-              {formatOrganizationTermLabel(activeTerm)}
+              {activeTerm.name}
+              {normalizedQuery ? "" : ` · ${filteredMembers.length} thành viên`}
             </p>
           ) : null}
         </div>
 
-        {executives.length === 0 ? (
+        {filteredMembers.length === 0 ? (
           <p className="text-center font-sans text-base text-foreground/80">
-            Không có ban điều hành phù hợp với bộ lọc hiện tại.
+            Không có kết quả phù hợp với bộ lọc hiện tại.
           </p>
         ) : (
-          <div className="flex flex-wrap justify-center gap-6 md:gap-8">
-            {executives.map((member) => (
-              <OrganizationMemberCard
-                key={member.id}
-                member={member}
-                organizationSlug={organizationSlug}
-                size="executive"
-                className="sm:max-w-[300px]"
-              />
+          <ul className="flex list-none gap-4 overflow-x-auto pb-1 md:grid md:grid-cols-4 lg:grid-cols-5 md:overflow-visible md:pb-0 md:gap-6 lg:gap-8">
+            {filteredMembers.map((member, idx) => (
+              <li
+                key={member._id || idx}
+                className="min-w-[50vw] shrink-0 sm:min-w-[35vw] md:min-w-0"
+              >
+                <OrganizationMemberCard
+                  member={member}
+                  className="w-full"
+                />
+              </li>
             ))}
-          </div>
-        )}
-      </section>
-
-      <section>
-        <div className="mb-8 text-center md:mb-10">
-          <h2 className="font-display text-2xl font-semibold uppercase tracking-tight text-primary md:text-3xl">
-            Danh sách thành viên
-          </h2>
-          <p className="mt-2 font-sans text-sm text-foreground/80">
-            {regularMembers.length} thành viên
-            {normalizedQuery ? " (đã lọc)" : ""}
-          </p>
-        </div>
-
-        {regularMembers.length === 0 ? (
-          <p className="text-center font-sans text-base text-foreground/80">
-            Không có thành viên phù hợp với bộ lọc hiện tại.
-          </p>
-        ) : (
-          <div className="flex flex-wrap justify-center gap-5 md:gap-6">
-            {regularMembers.map((member) => (
-              <OrganizationMemberCard
-                key={member.id}
-                member={member}
-                organizationSlug={organizationSlug}
-                size="member"
-                className="max-w-[240px]"
-              />
-            ))}
-          </div>
+          </ul>
         )}
       </section>
     </div>
