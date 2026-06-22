@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Plus } from "lucide-react";
 import {
   createEmptyEventFormValues,
@@ -11,16 +11,18 @@ import {
   type EventFormValues,
 } from "@/components/admin/events/admin-event-form";
 import { AdminEventFormModal } from "@/components/admin/events/admin-event-form-modal";
+import { AdminEventsFilters } from "@/components/admin/events/admin-events-filters";
 import { AdminEventsTable } from "@/components/admin/events/admin-events-table";
-import { getEventCategoryLabel } from "@/lib/events/categories";
 import { getToken } from "@/lib/admin/mock-auth";
 import {
   createEvent,
   deleteEvent,
   getAllEvents,
+  getEventCategories,
   toParishEvent,
   updateEvent,
   uploadEventImage,
+  type ApiEventCategory,
 } from "@/shared/services/events-api";
 import { slugify } from "@/shared/lib/slugify";
 import type { EventStatus, ParishEvent } from "@/lib/events/types";
@@ -28,77 +30,79 @@ import type { EventStatus, ParishEvent } from "@/lib/events/types";
 const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
+const SEARCH_DEBOUNCE_MS = 1000;
+
 export function AdminEventsManager() {
   const router = useRouter();
   const [events, setEvents] = useState<ParishEvent[]>([]);
+  const [categories, setCategories] = useState<ApiEventCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formDefaults, setFormDefaults] = useState<EventFormValues>(() => createEmptyEventFormValues());
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | EventStatus>("all");
-  const [categoryFilter, setCategoryFilter] = useState("Tất cả");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | string>("all");
   const [formOpen, setFormOpen] = useState(false);
 
-  const loadEvents = useCallback(async () => {
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  const fetchEvents = useCallback(async () => {
     const token = getToken();
     if (!token) {
       router.push("/admin/login");
       return;
     }
 
+    setFetching(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
-      const res = await getAllEvents(token, {});
-      setEvents(res.events.map(toParishEvent));
+      const trimmedSearch = debouncedSearch.trim();
+      const eventsRes = await getAllEvents(token, {
+        ...(trimmedSearch ? { search: trimmedSearch } : {}),
+        ...(statusFilter !== "all" ? { status: statusFilter } : {}),
+        ...(categoryFilter !== "all" ? { categoryId: categoryFilter } : {}),
+      });
+      setEvents(eventsRes.events.map(toParishEvent));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load events");
     } finally {
       setLoading(false);
+      setFetching(false);
     }
+  }, [categoryFilter, debouncedSearch, router, statusFilter]);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    getEventCategories()
+      .then(setCategories)
+      .catch(() => { });
   }, [router]);
 
   useEffect(() => {
-    loadEvents();
-  }, [loadEvents]);
+    fetchEvents();
+  }, [fetchEvents]);
 
-  const filteredEvents = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-
-    return [...events]
-      .filter((event) => {
-        if (statusFilter !== "all" && event.status !== statusFilter) {
-          return false;
-        }
-
-        if (categoryFilter !== "Tất cả") {
-          const categoryLabel = getEventCategoryLabel(event.categoryId) ?? "";
-          if (categoryLabel !== categoryFilter) {
-            return false;
-          }
-        }
-
-        if (!normalizedQuery) {
-          return true;
-        }
-
-        const categoryLabel = getEventCategoryLabel(event.categoryId) ?? "";
-        const searchable = [
-          event.name,
-          event.slug ?? "",
-          event.location,
-          categoryLabel,
-        ].join(" ");
-
-        return searchable.toLowerCase().includes(normalizedQuery);
-      })
-      .sort(
-        (first, second) =>
-          first.startDate.localeCompare(second.startDate) ||
-          (first.startTime ?? "").localeCompare(second.startTime ?? ""),
-      );
-  }, [categoryFilter, events, searchQuery, statusFilter]);
+  function handleClearFilters() {
+    setSearchQuery("");
+    setDebouncedSearch("");
+    setStatusFilter("all");
+    setCategoryFilter("all");
+  }
 
   function closeForm() {
     setFormOpen(false);
@@ -137,10 +141,10 @@ export function AdminEventsManager() {
 
     try {
       await deleteEvent(token, eventId);
-      setEvents((current) => current.filter((event) => event.id !== eventId));
       if (editingId === eventId) {
         closeForm();
       }
+      await fetchEvents();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete event");
     }
@@ -161,7 +165,7 @@ export function AdminEventsManager() {
 
     try {
       if (editingId) {
-        const updated = await updateEvent(token, editingId, {
+        await updateEvent(token, editingId, {
           name: values.name.trim(),
           startDate: values.startDate,
           startTime: values.startTime.trim() || undefined,
@@ -176,12 +180,9 @@ export function AdminEventsManager() {
           status: values.status,
           isVisible: true,
         });
-        setEvents((current) =>
-          current.map((item) => (item.id === editingId ? toParishEvent(updated) : item)),
-        );
       } else {
         const generatedSlug = `${slugify(values.name)}-${Date.now()}`;
-        const created = await createEvent(token, {
+        await createEvent(token, {
           name: values.name.trim(),
           slug: generatedSlug,
           startDate: values.startDate,
@@ -197,10 +198,10 @@ export function AdminEventsManager() {
           status: values.status,
           isVisible: true,
         });
-        setEvents((current) => [toParishEvent(created), ...current]);
       }
 
       closeForm();
+      await fetchEvents();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save event");
     }
@@ -240,15 +241,22 @@ export function AdminEventsManager() {
         </div>
       </div>
 
-      <AdminEventsTable
-        events={filteredEvents}
-        editingId={editingId}
+      <AdminEventsFilters
         searchQuery={searchQuery}
         statusFilter={statusFilter}
         categoryFilter={categoryFilter}
+        categories={categories}
         onSearchQueryChange={setSearchQuery}
         onStatusFilterChange={setStatusFilter}
         onCategoryFilterChange={setCategoryFilter}
+        onClear={handleClearFilters}
+      />
+
+      <AdminEventsTable
+        events={events}
+        categories={categories}
+        editingId={editingId}
+        fetching={fetching}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />

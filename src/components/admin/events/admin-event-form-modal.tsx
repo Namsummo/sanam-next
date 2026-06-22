@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Tag, X } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import {
   EMPTY_EVENT_CATEGORY_LABEL,
@@ -12,7 +11,11 @@ import {
 } from "@/components/admin/events/admin-event-form";
 import { AdminFormDialog } from "@/components/admin/shared/admin-form-dialog";
 import { AdminOutlineButton } from "@/components/admin/shared/admin-outline-button";
-import { ControlledField, FieldGroup } from "@/components/site/shared/ui/field/field";
+import {
+  AdminDateInput,
+  AdminTimeInput,
+} from "@/components/admin/shared/admin-datetime-input";
+import { ControlledField, FieldGroup, FieldLegend, FieldSet } from "@/components/site/shared/ui/field/field";
 import { Input } from "@/components/site/shared/ui/input/input";
 import {
   Select,
@@ -24,12 +27,9 @@ import {
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
 import { AdminSelect } from "@/components/admin/shared/admin-select";
 import { ImageUploader } from "@/components/admin/news/image-uploader";
-import { getToken } from "@/lib/admin/mock-auth";
-import {
-  createEventCategory,
-  getEventCategories,
-  type ApiEventCategory,
-} from "@/shared/services/events-api";
+import { AdminEventNewCategoryForm } from "@/components/admin/events/admin-event-new-category-form";
+import { getEventCategories, type ApiEventCategory } from "@/shared/services/events-api";
+import { Button } from "@/components/site/shared/ui/button/button";
 
 type AdminEventFormModalProps = {
   open: boolean;
@@ -57,17 +57,13 @@ export function AdminEventFormModal({
 
   const [categories, setCategories] = useState<ApiEventCategory[]>([]);
   const [showNewCategory, setShowNewCategory] = useState(false);
-  const [newCatLabel, setNewCatLabel] = useState("");
-  const [newCatSlug, setNewCatSlug] = useState("");
-  const [creatingCategory, setCreatingCategory] = useState(false);
-  const [catError, setCatError] = useState("");
 
   useEffect(() => {
     if (open) {
       form.reset(defaultValues);
       getEventCategories()
         .then(setCategories)
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [defaultValues, form, open]);
 
@@ -78,19 +74,6 @@ export function AdminEventFormModal({
         label: cat.label,
       })),
     [categories],
-  );
-
-  const newCatAutoSlug = useMemo(
-    () =>
-      newCatLabel
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-"),
-    [newCatLabel],
   );
 
   const sessionUser =
@@ -108,14 +91,16 @@ export function AdminEventFormModal({
       title={editingId ? "Chỉnh sửa sự kiện" : "Tạo sự kiện mới"}
       footer={
         <div className="flex items-center justify-end gap-3">
-          <AdminOutlineButton onClick={onClose}>Hủy</AdminOutlineButton>
-          <button
+          <AdminOutlineButton onClick={onClose} className="uppercase font-bold h-11">Hủy</AdminOutlineButton>
+          <Button
+            variant="primary"
             type="submit"
             form="admin-event-form"
-            className="inline-flex h-10 items-center justify-center rounded-[10px] bg-accent px-4 text-sm font-semibold text-white transition-colors hover:bg-accent/90"
+            showIcon={false}
+            className="h-11"
           >
             {editingId ? "Lưu thay đổi" : "Tạo sự kiện"}
-          </button>
+          </Button>
         </div>
       }
     >
@@ -145,40 +130,50 @@ export function AdminEventFormModal({
         </FieldGroup>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <ControlledField
-            control={form.control}
-            name="startDate"
-            label="Ngày bắt đầu"
-            rules={{ required: "Vui lòng chọn ngày bắt đầu." }}
-          >
-            {({ controlProps }) => <Input {...controlProps} type="date" />}
-          </ControlledField>
+          <FieldSet>
+            <FieldLegend variant="label">Thời gian bắt đầu</FieldLegend>
+            <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3">
+              <ControlledField
+                control={form.control}
+                name="startDate"
+                label="Ngày"
+                rules={{ required: "Vui lòng chọn ngày bắt đầu." }}
+              >
+                {({ controlProps }) => <AdminDateInput {...controlProps} />}
+              </ControlledField>
 
-          <ControlledField control={form.control} name="startTime" label="Giờ bắt đầu">
-            {({ controlProps }) => <Input {...controlProps} type="time" />}
-          </ControlledField>
+              <ControlledField control={form.control} name="startTime" label="Giờ">
+                {({ controlProps }) => <AdminTimeInput {...controlProps} />}
+              </ControlledField>
+            </div>
+          </FieldSet>
 
-          <ControlledField
-            control={form.control}
-            name="endDate"
-            label="Ngày kết thúc"
-            rules={{
-              validate: (value) => {
-                if (!value) return true;
-                const startDate = form.getValues("startDate");
-                if (startDate && value < startDate) {
-                  return "Ngày kết thúc không được sớm hơn ngày bắt đầu.";
-                }
-                return true;
-              },
-            }}
-          >
-            {({ controlProps }) => <Input {...controlProps} type="date" />}
-          </ControlledField>
+          <FieldSet>
+            <FieldLegend variant="label">Thời gian kết thúc</FieldLegend>
+            <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3">
+              <ControlledField
+                control={form.control}
+                name="endDate"
+                label="Ngày"
+                rules={{
+                  validate: (value) => {
+                    if (!value) return true;
+                    const startDate = form.getValues("startDate");
+                    if (startDate && value < startDate) {
+                      return "Ngày kết thúc không được sớm hơn ngày bắt đầu.";
+                    }
+                    return true;
+                  },
+                }}
+              >
+                {({ controlProps }) => <AdminDateInput {...controlProps} />}
+              </ControlledField>
 
-          <ControlledField control={form.control} name="endTime" label="Giờ kết thúc">
-            {({ controlProps }) => <Input {...controlProps} type="time" />}
-          </ControlledField>
+              <ControlledField control={form.control} name="endTime" label="Giờ">
+                {({ controlProps }) => <AdminTimeInput {...controlProps} />}
+              </ControlledField>
+            </div>
+          </FieldSet>
         </div>
 
         <FieldGroup>
@@ -200,7 +195,11 @@ export function AdminEventFormModal({
             rules={{ required: "Vui lòng nhập nội dung sự kiện." }}
           >
             {({ controlProps }) => (
-              <Textarea {...controlProps} placeholder="Nhập nội dung sự kiện..." />
+              <Textarea
+                {...controlProps}
+                placeholder="Nhập nội dung sự kiện..."
+                className="min-h-[300px]"
+              />
             )}
           </ControlledField>
         </FieldGroup>
@@ -221,119 +220,14 @@ export function AdminEventFormModal({
             />
 
             {showNewCategory ? (
-              <div className="mt-3 overflow-hidden rounded-[12px] border border-border bg-card shadow-sm">
-                <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                  <span className="flex items-center gap-2 text-sm font-medium text-card-foreground">
-                    <Tag className="size-4 text-accent" />
-                    Danh mục mới
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowNewCategory(false);
-                      setNewCatLabel("");
-                      setNewCatSlug("");
-                      setCatError("");
-                    }}
-                    className="text-muted-foreground transition-colors hover:text-card-foreground"
-                  >
-                    <X className="size-4" />
-                  </button>
-                </div>
-
-                {catError ? (
-                  <div className="mx-4 mt-3 rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                    {catError}
-                  </div>
-                ) : null}
-
-                <div className="p-4">
-                  <div className="mb-3">
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Tên danh mục
-                    </label>
-                    <input
-                      type="text"
-                      value={newCatLabel}
-                      onChange={(e) => setNewCatLabel(e.target.value)}
-                      placeholder="VD: Mục vụ"
-                      className="w-full rounded-[8px] border border-border bg-background px-3 py-2 text-sm text-card-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Slug
-                    </label>
-                    <input
-                      type="text"
-                      value={newCatSlug}
-                      onChange={(e) => setNewCatSlug(e.target.value)}
-                      placeholder={newCatAutoSlug || "tu-dong-theo-ten"}
-                      className="w-full rounded-[8px] border border-border bg-background px-3 py-2 text-sm text-card-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
-                    />
-                    {!newCatSlug && newCatAutoSlug ? (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Slug tự động:{" "}
-                        <span className="font-mono text-accent">{newCatAutoSlug}</span>
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={creatingCategory}
-                      onClick={async () => {
-                        const token = getToken();
-                        if (!token) return;
-
-                        const slug = newCatSlug.trim() || newCatAutoSlug;
-                        if (!newCatLabel.trim() || !slug) {
-                          setCatError("Vui lòng nhập tên danh mục");
-                          return;
-                        }
-
-                        setCreatingCategory(true);
-                        setCatError("");
-
-                        try {
-                          const cat = await createEventCategory(token, {
-                            slug,
-                            label: newCatLabel.trim(),
-                          });
-                          setCategories((prev) => [...prev, cat]);
-                          form.setValue("categoryId", cat._id, { shouldDirty: true });
-                          setShowNewCategory(false);
-                          setNewCatLabel("");
-                          setNewCatSlug("");
-                        } catch (err) {
-                          setCatError(
-                            err instanceof Error ? err.message : "Lỗi tạo danh mục",
-                          );
-                        } finally {
-                          setCreatingCategory(false);
-                        }
-                      }}
-                      className="rounded-[8px] bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
-                    >
-                      {creatingCategory ? "Đang tạo..." : "Tạo danh mục"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowNewCategory(false);
-                        setNewCatLabel("");
-                        setNewCatSlug("");
-                        setCatError("");
-                      }}
-                      className="text-sm text-muted-foreground transition-colors hover:text-card-foreground"
-                    >
-                      Hủy
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <AdminEventNewCategoryForm
+                onClose={() => setShowNewCategory(false)}
+                onCreated={(category) => {
+                  setCategories((prev) => [...prev, category]);
+                  form.setValue("categoryId", category._id, { shouldDirty: true });
+                  setShowNewCategory(false);
+                }}
+              />
             ) : null}
           </div>
 
@@ -350,7 +244,7 @@ export function AdminEventFormModal({
                 <SelectTrigger {...triggerProps}>
                   <SelectValue placeholder="Chọn trạng thái" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
                   {EVENT_STATUS_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.label}>
                       {option.label}

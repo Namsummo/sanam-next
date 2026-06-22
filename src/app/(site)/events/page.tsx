@@ -10,15 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage() {
-  let events: ReturnType<typeof toParishEvent>[] = [];
+  const res = await getPublicEvents({ limit: 100 });
+  const events = res.events.map(toParishEvent);
   const bgSettings = await getBackgroundSettings().catch(() => null);
-
-  try {
-    const res = await getPublicEvents({ limit: 100 });
-    events = res.events.map(toParishEvent);
-  } catch {
-    // API unavailable — render empty state
-  }
 
   return (
     <>
@@ -37,7 +31,7 @@ export default async function EventsPage() {
               Hiện chưa có sự kiện nào được đăng.
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 md:gap-x-8 md:gap-y-10 xl:grid-cols-3">
               {events.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}

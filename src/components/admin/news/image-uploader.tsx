@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { Input } from "@/components/site/shared/ui/input/input";
 
 type ImageUploaderProps = {
   value?: string | null;
@@ -47,14 +49,17 @@ export function ImageUploader({
     <div className={cn("", className)}>
       {preview ? (
         <div className="relative overflow-hidden rounded-[16px] border border-border">
-          <img
+          <Image
             src={preview}
             alt="Cover preview"
-            className="aspect-[2/1] w-full object-cover"
+            className="size-full object-cover"
+            width={500}
+            height={500}
           />
           <button
             type="button"
             onClick={handleRemove}
+            aria-label="Remove image"
             className="absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
           >
             <X className="size-4" />
@@ -65,7 +70,7 @@ export function ImageUploader({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex aspect-[2/1] w-full cursor-pointer items-center justify-center rounded-[16px] border-2 border-dashed border-border bg-card transition-colors hover:border-accent hover:bg-accent/5 disabled:opacity-50"
+          className="flex aspect-2/1 w-full cursor-pointer items-center justify-center rounded-[16px] border-2 border-dashed border-border bg-card transition-colors hover:border-accent hover:bg-accent/5 disabled:opacity-50"
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
@@ -85,7 +90,7 @@ export function ImageUploader({
           )}
         </button>
       )}
-      <input
+      <Input
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/gif,image/webp"
