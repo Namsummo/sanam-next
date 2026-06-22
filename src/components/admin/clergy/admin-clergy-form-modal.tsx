@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/site/shared/ui/select/select";
+import { AdminDateInput } from "../shared/admin-datetime-input";
 
 type AdminClergyFormModalProps = {
   open: boolean;
@@ -94,7 +95,7 @@ export function AdminClergyFormModal({
               <SelectTrigger {...triggerProps}>
                 <SelectValue placeholder="Chọn phân loại" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
                 {CLERGY_TYPE_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.label}>
                     {opt.label}
@@ -167,7 +168,7 @@ export function AdminClergyFormModal({
             name="birthday"
             label="Ngày sinh"
           >
-            {({ controlProps }) => <Input {...controlProps} type="date" />}
+            {({ controlProps }) => <AdminDateInput {...controlProps} />}
           </ControlledField>
 
           <ControlledField
@@ -175,7 +176,7 @@ export function AdminClergyFormModal({
             name="ordinationDate"
             label="Ngày thụ phong"
           >
-            {({ controlProps }) => <Input {...controlProps} type="date" />}
+            {({ controlProps }) => <AdminDateInput {...controlProps} />}
           </ControlledField>
 
           <ControlledField

@@ -11,7 +11,6 @@ type PriestCardProps = {
 
 export function PriestCard({ member, className, onClick }: PriestCardProps) {
   const imgSrc = member.image || DEFAULT_COVER;
-  const isExternal = !!member.image;
 
   return (
     <article
@@ -22,21 +21,14 @@ export function PriestCard({ member, className, onClick }: PriestCardProps) {
       )}
     >
       <figure className="relative w-[160px] sm:w-[150px] md:w-[170px] lg:w-[190px] aspect-4/5 shrink-0 overflow-hidden rounded-[16px] shadow-sm">
-        {isExternal ? (
-          <img
-            src={imgSrc}
-            alt={`Chân dung ${member.fullName}`}
-            className="size-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.03]"
-          />
-        ) : (
-          <Image
-            src={imgSrc}
-            alt={`Chân dung ${member.fullName}`}
-            width={300}
-            height={375}
-            className="size-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.03]"
-          />
-        )}
+        <Image
+          src={imgSrc}
+          alt={`Chân dung ${member.fullName}`}
+          width={300}
+          height={375}
+          unoptimized={!!member.image}
+          className="size-full object-cover object-top transition-transform duration-600 ease-in-out hover:scale-[1.03]"
+        />
       </figure>
 
       <div className="flex-1 flex flex-col justify-start text-center sm:text-left">

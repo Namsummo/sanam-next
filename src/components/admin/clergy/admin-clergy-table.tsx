@@ -32,6 +32,7 @@ const actionButtonClassName =
 type AdminClergyTableProps = {
   members: ClergyMember[];
   editingId: string | null;
+  fetching?: boolean;
   searchQuery: string;
   typeFilter: "all" | "priest" | "council";
   onSearchQueryChange: (value: string) => void;
@@ -44,6 +45,7 @@ type AdminClergyTableProps = {
 export function AdminClergyTable({
   members,
   editingId,
+  fetching = false,
   searchQuery,
   typeFilter,
   onSearchQueryChange,
@@ -92,7 +94,7 @@ export function AdminClergyTable({
               <SelectTrigger>
                 <SelectValue placeholder={ALL_FILTER_VALUE} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
                 <SelectItem value={ALL_FILTER_VALUE}>{ALL_FILTER_VALUE}</SelectItem>
                 <SelectItem value="Linh mục">Linh mục</SelectItem>
                 <SelectItem value="Ban Hành Giáo">Ban Hành Giáo</SelectItem>
@@ -102,10 +104,20 @@ export function AdminClergyTable({
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[20px] border border-border bg-card">
+      <section
+        className={cn(
+          "overflow-hidden rounded-[20px] border border-border bg-card",
+          fetching && "opacity-60",
+        )}
+      >
         <div className="border-b border-border px-4 py-3">
           <p className="text-sm font-medium text-card-foreground">
             Danh sách thành viên ({members.length})
+            {fetching ? (
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                Đang tải...
+              </span>
+            ) : null}
           </p>
         </div>
 

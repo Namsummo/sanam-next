@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { X, Calendar, Award, Heart, BookOpen, MapPin, Quote } from "lucide-react";
 import { formatIsoDateToVi } from "@/lib/format";
@@ -14,7 +15,6 @@ type ClergyDetailModalProps = {
 };
 
 export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
-  // Prevent background scroll when modal is open
   useEffect(() => {
     if (member) {
       document.body.style.overflow = "hidden";
@@ -26,7 +26,6 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
     };
   }, [member]);
 
-  // Handle escape key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -39,60 +38,49 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
     };
   }, [onClose]);
 
-  if (!member) return null;
+  if (!member || typeof document === "undefined") return null;
 
   const isPriest = member.type === CLERGY_TYPE_PRIEST;
+  const imageSrc = member.image || DEFAULT_COVER;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+      className="fixed inset-0 z-200 flex items-center justify-center overflow-y-auto p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
     >
-      {/* Backdrop with Blur */}
       <div
         className="fixed inset-0 bg-[#010101]/60 backdrop-blur-md transition-opacity duration-300"
         onClick={onClose}
       />
 
-      {/* Modal Content Container */}
-      <div className="relative w-full max-w-[800px] overflow-hidden rounded-[32px] bg-[#f5f3ec] border border-border shadow-[0_35px_70px_rgba(0,0,0,0.25)] transition-all duration-300 md:flex z-10">
-
-        {/* Close Button */}
+      <div className="relative z-10 w-full max-w-[800px] overflow-hidden rounded-[32px] border border-border bg-[#f5f3ec] shadow-[0_35px_70px_rgba(0,0,0,0.25)] transition-all duration-300 md:flex">
         <button
           onClick={onClose}
-          className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-[#010101]/10 text-primary hover:bg-accent hover:text-white transition-all duration-300 cursor-pointer"
+          className="absolute top-5 right-5 z-20 flex size-10 cursor-pointer items-center justify-center rounded-full bg-[#010101]/10 text-primary transition-all duration-300 hover:bg-accent hover:text-white"
           aria-label="Đóng"
         >
           <X className="size-5" />
         </button>
 
-        {/* Left Side: Avatar and Quick Info */}
-        <div className="relative w-full md:w-[320px] shrink-0 bg-[#eae7de]/70 flex flex-col items-center justify-center p-8 text-center border-b md:border-b-0 md:border-r border-border/40">
-          <figure className="relative w-[180px] aspect-4/5 overflow-hidden rounded-[24px] shadow-md border-4 border-white mb-4 transition-transform duration-500 hover:scale-[1.02]">
-            {member.image ? (
-              <img
-                src={member.image}
-                alt={`Chân dung ${member.fullName}`}
-                className="size-full object-cover"
-              />
-            ) : (
-              <Image
-                src={DEFAULT_COVER}
-                alt={`Chân dung ${member.fullName}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 180px, 180px"
-                priority
-              />
-            )}
+        <div className="relative flex w-full shrink-0 flex-col items-center justify-center border-b border-border/40 bg-[#eae7de]/70 p-8 text-center md:w-[320px] md:border-r md:border-b-0">
+          <figure className="relative mb-4 aspect-4/5 w-[180px] overflow-hidden rounded-[24px] border-4 border-white shadow-md transition-transform duration-500 hover:scale-[1.02]">
+            <Image
+              src={imageSrc}
+              alt={`Chân dung ${member.fullName}`}
+              width={180}
+              height={225}
+              unoptimized={!!member.image}
+              className="size-full object-cover object-top"
+              priority
+            />
           </figure>
 
-          <span className="inline-block px-3.5 py-1 rounded-full text-[11px] font-bold tracking-wider text-accent bg-accent/10 uppercase mb-2">
+          <span className="mb-2 inline-block rounded-full bg-accent/10 px-3.5 py-1 text-[11px] font-bold tracking-wider text-accent uppercase">
             {isPriest ? "Linh mục" : "Ban Hành Giáo"}
           </span>
 
-          <h3 className="font-display text-lg font-bold text-primary leading-tight">
+          <h3 className="font-display text-lg font-bold leading-tight text-primary">
             {member.fullName}
           </h3>
           <p className="mt-1 font-sans text-sm font-semibold text-foreground/80">
@@ -100,8 +88,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
           </p>
         </div>
 
-        {/* Right Side: Detailed Profile Info */}
-        <div className="flex-1 p-6 sm:p-10 flex flex-col justify-center">
+        <div className="flex flex-1 flex-col justify-center p-6 sm:p-10">
           <div className="space-y-6">
             <div>
               <span className="font-display text-xs font-bold tracking-[0.2em] text-accent/80 uppercase">
@@ -112,69 +99,62 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
               </h2>
             </div>
 
-            {/* Info Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Birthday */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {member.birthday ? (
-                <div className="flex items-center gap-3 p-3 rounded-[16px] bg-white/50 border border-border/30">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
+                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
                     <Calendar className="size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-foreground/50 uppercase tracking-wider">Ngày sinh</p>
+                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">Ngày sinh</p>
                     <p className="text-sm font-semibold text-primary">{formatIsoDateToVi(member.birthday)}</p>
                   </div>
                 </div>
               ) : null}
 
-              {/* Ordination Date (Priests only) */}
               {isPriest && member.ordinationDate ? (
-                <div className="flex items-center gap-3 p-3 rounded-[16px] bg-white/50 border border-border/30">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
+                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
                     <Award className="size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-foreground/50 uppercase tracking-wider">Thụ phong Linh mục</p>
+                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">Thụ phong Linh mục</p>
                     <p className="text-sm font-semibold text-primary">{formatIsoDateToVi(member.ordinationDate)}</p>
                   </div>
                 </div>
               ) : null}
 
-              {/* Patron Saint */}
               {member.patronSaint ? (
-                <div className="flex items-center gap-3 p-3 rounded-[16px] bg-white/50 border border-border/30">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
+                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
                     <Heart className="size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-foreground/50 uppercase tracking-wider">Thánh bổn mạng</p>
+                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">Thánh bổn mạng</p>
                     <p className="text-sm font-semibold text-primary">{member.patronSaint}</p>
                   </div>
                 </div>
               ) : null}
 
-              {/* Feast Day (Ngày mừng lễ bổn mạng) */}
               {member.patronDate ? (
-                <div className="flex items-center gap-3 p-3 rounded-[16px] bg-white/50 border border-border/30">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
+                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
                     <BookOpen className="size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-foreground/50 uppercase tracking-wider">Lễ bổn mạng</p>
+                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">Lễ bổn mạng</p>
                     <p className="text-sm font-semibold text-primary">{member.patronDate}</p>
                   </div>
                 </div>
               ) : null}
 
-              {/* Hometown or Giáo họ */}
               {member.hometown ? (
-                <div className="flex items-center gap-3 p-3 rounded-[16px] bg-white/50 border border-border/30 sm:col-span-2">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
+                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3 sm:col-span-2">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
                     <MapPin className="size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-foreground/50 uppercase tracking-wider">
+                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">
                       {isPriest ? "Quê quán" : "Giáo họ thuộc giáo xứ"}
                     </p>
                     <p className="text-sm font-semibold text-primary">{member.hometown}</p>
@@ -183,22 +163,20 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
               ) : null}
             </div>
 
-            {/* Motto (Priests only) */}
             {isPriest && member.motto ? (
-              <div className="relative p-5 rounded-[20px] bg-white/70 border border-border/40 overflow-hidden">
-                <Quote className="absolute right-4 bottom-4 h-16 w-16 text-accent/5 pointer-events-none transform translate-y-2 translate-x-2" />
-                <p className="text-[10px] font-bold text-accent uppercase tracking-wider mb-2">Khẩu hiệu mục vụ</p>
-                <blockquote className="italic text-foreground text-sm md:text-[14px] leading-relaxed pl-3 border-l-2 border-accent">
+              <div className="relative overflow-hidden rounded-[20px] border border-border/40 bg-white/70 p-5">
+                <Quote className="pointer-events-none absolute right-4 bottom-4 size-16 translate-x-2 translate-y-2 text-accent/5" />
+                <p className="mb-2 text-[10px] font-bold tracking-wider text-accent uppercase">Khẩu hiệu mục vụ</p>
+                <blockquote className="border-l-2 border-accent pl-3 text-sm leading-relaxed text-foreground italic md:text-[14px]">
                   &ldquo;{member.motto}&rdquo;
                 </blockquote>
               </div>
             ) : null}
 
-            {/* Description (Biography / Ministry) */}
             {member.description ? (
               <div className="space-y-1.5">
-                <h4 className="text-xs font-bold text-primary uppercase tracking-wider">Sơ lược mục vụ</h4>
-                <p className="text-sm text-foreground/80 leading-relaxed font-sans">
+                <h4 className="text-xs font-bold tracking-wider text-primary uppercase">Sơ lược mục vụ</h4>
+                <p className="font-sans text-sm leading-relaxed text-foreground/80">
                   {member.description}
                 </p>
               </div>
@@ -206,6 +184,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

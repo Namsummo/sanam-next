@@ -10,6 +10,14 @@ import {
 } from "@/lib/clergy/council-terms";
 import type { ClergyMember } from "@/lib/clergy/types";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/site/shared/ui/input/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/site/shared/ui/select/select";
 
 type CouncilMembersPanelProps = {
   members: ClergyMember[];
@@ -58,7 +66,6 @@ export function CouncilMembersPanel({
       .filter((m) => memberMatchesSearch(m, normalizedQuery));
   }, [members, activeTermId, normalizedQuery]);
 
-  const activeTerm = terms.find((t) => t.id === activeTermId);
 
   if (terms.length === 0) {
     return (
@@ -78,41 +85,47 @@ export function CouncilMembersPanel({
           >
             Tìm kiếm
           </label>
-          <div className="relative">
+          <div className="relative w-full">
             <Search
-              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-foreground/50"
+              className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
               aria-hidden
             />
-            <input
+
+            <Input
               id="council-member-search"
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tên, chức vụ hoặc giáo họ..."
-              className="w-full rounded-[12px] border border-border bg-white py-3.5 pl-11 pr-4 font-sans text-base text-primary outline-none transition-colors placeholder:text-foreground/50 focus:border-accent"
+              placeholder="Tìm kiếm theo tên, chức vụ hoặc giáo họ..."
+              className="h-12 w-full rounded-xl border-border pl-12 pr-4 text-base shadow-sm transition-allduration-200
+      "
             />
           </div>
         </div>
 
         <div className="md:w-[280px]">
-          <label
-            htmlFor="council-term-filter"
-            className="mb-2 block font-sans text-sm font-semibold text-primary"
-          >
+          <span className="mb-2 block font-sans text-sm font-semibold text-primary">
             Khóa
-          </label>
-          <select
-            id="council-term-filter"
+          </span>
+          <Select
             value={activeTermId}
-            onChange={(e) => setSelectedTermId(e.target.value)}
-            className="w-full cursor-pointer appearance-none rounded-[12px] border border-border bg-white px-4 py-3.5 font-sans text-base text-primary outline-none transition-colors focus:border-accent"
+            onValueChange={(value) => {
+              if (value) {
+                setSelectedTermId(value);
+              }
+            }}
           >
-            {terms.map((term) => (
-              <option key={term.id} value={term.id}>
-                {formatCouncilTermLabel(term)}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="council-term-filter" className="h-auto py-3.5 text-base">
+              <SelectValue placeholder="Chọn khóa" />
+            </SelectTrigger>
+            <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false} >
+              {terms.map((term) => (
+                <SelectItem key={term.id} value={term.id}>
+                  {formatCouncilTermLabel(term)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -121,12 +134,6 @@ export function CouncilMembersPanel({
           <h3 className="font-display text-2xl font-semibold uppercase tracking-tight text-primary md:text-3xl">
             Ban Hành Giáo
           </h3>
-          {activeTerm ? (
-            <p className="mt-2 font-sans text-sm text-foreground/80">
-              {formatCouncilTermLabel(activeTerm)}
-              {normalizedQuery ? "" : ` · ${filteredMembers.length} người`}
-            </p>
-          ) : null}
         </div>
 
         {filteredMembers.length === 0 ? (
