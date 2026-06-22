@@ -1,9 +1,11 @@
 import type { EventStatus, ParishEvent } from "@/lib/events/types";
 
-export const EVENT_STATUS_OPTIONS: Array<{ value: EventStatus; label: string }> = [
+export const EVENT_STATUS_OPTIONS: Array<{
+  value: EventStatus;
+  label: string;
+}> = [
   { value: "draft", label: "Nháp" },
   { value: "published", label: "Đã công bố" },
-  { value: "postponed", label: "Hoãn" },
 ];
 
 export const EMPTY_EVENT_CATEGORY_LABEL = "Chọn danh mục";
@@ -59,7 +61,7 @@ export function mapEventToFormValues(event: ParishEvent): EventFormValues {
     categoryId: event.categoryId ?? "",
     isFeatured: event.isFeatured,
     featuredOrder: event.featuredOrder ? String(event.featuredOrder) : "",
-    status: event.status === "cancelled" ? "draft" : event.status,
+    status: event.status,
   };
 }
 
@@ -97,7 +99,7 @@ export function getEventStatusLabel(status: EventStatus): string {
     return known.label;
   }
 
-  if (status === "cancelled") {
+  if (status === "draft") {
     return "Nháp";
   }
 
@@ -109,12 +111,8 @@ export function getEventStatusBadgeClassName(status: EventStatus): string {
     return "bg-emerald-100 text-emerald-700";
   }
 
-  if (status === "draft") {
+  if (status === "draft" || status === "postponed" || status === "cancelled") {
     return "bg-slate-100 text-slate-700";
-  }
-
-  if (status === "postponed") {
-    return "bg-amber-100 text-amber-700";
   }
 
   return "bg-slate-100 text-slate-700";

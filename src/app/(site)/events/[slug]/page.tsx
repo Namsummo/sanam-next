@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Clock, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
-import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
-import { getEventCategoryLabel } from "@/lib/events/categories";
 import {
   getPublicEventBySlug,
   getPublicEvents,
   toParishEvent,
 } from "@/shared/services/events-api";
 import { formatEventDateTime } from "@/lib/format";
-import { DEFAULT_COVER } from "@/lib/image-constants";
+import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import type { ParishEvent } from "@/lib/events/types";
+import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 
 type EventDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -68,7 +68,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     notFound();
   }
 
-  const categoryLabel = getEventCategoryLabel(event.categoryId);
+  const body = getEventBody(event);
 
   return (
     <>
@@ -96,28 +96,35 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
       <article className="px-6 py-16 md:py-[120px]">
         <div className="mx-auto max-w-[1100px]">
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            {event.isFeatured ? (
-              <span className="rounded-[10px] bg-primary px-3 py-1.5 font-sans text-sm font-medium text-white">
-                Nổi bật
-              </span>
-            ) : null}
-            {categoryLabel ? (
-              <span className="rounded-[10px] bg-accent px-3 py-1.5 font-sans text-sm font-medium text-white">
-                {categoryLabel}
-              </span>
+          {event.image ? (
+            <figure className="mb-8 overflow-hidden rounded-[20px]">
+              <Image
+                src={event.image}
+                alt={event.name || DEFAULT_COVER_ALT}
+                width={1100}
+                height={688}
+                unoptimized
+                priority
+                className="aspect-16/10 w-full object-cover"
+              />
+            </figure>
+          ) : null}
+
+          <div className="border-b border-border pb-8">
+            <h2 className="mb-6 font-display text-3xl font-bold leading-tight text-primary md:mb-8 md:text-4xl">
+              {event.name}
+            </h2>
+
+            {body ? (
+              event.contentFormat === "html" ? (
+                <NewsHtmlContent html={body} className="border-b-0 pb-0" />
+              ) : (
+                <p className="whitespace-pre-line font-sans text-lg leading-relaxed text-foreground">
+                  {body}
+                </p>
+              )
             ) : null}
           </div>
-
-          {event.contentFormat === "html" ? (
-            <NewsHtmlContent html={event.content} />
-          ) : (
-            <div className="border-b border-border pb-8">
-              <p className="whitespace-pre-line font-sans text-lg leading-relaxed text-foreground">
-                {event.content}
-              </p>
-            </div>
-          )}
 
           <div className="mt-10 border-border pt-8">
             <Link
@@ -131,4 +138,47 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       </article>
     </>
   );
+}
+
+function stripHtmlTags(value: string): string {
+  return value
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Bỏ tiêu đề trùng ở đầu content nếu admin copy-paste tên vào nội dung. */
+function getEventBody(event: ParishEvent): string {
+  const content = event.content.trim();
+  const name = event.name.trim();
+  if (!content || !name) {
+    return content;
+  }
+
+  if (event.contentFormat === "html") {
+    const headingMatch = content.match(/^<h([12])[^>]*>([\s\S]*?)<\/h\1>\s*/i);
+    if (headingMatch && stripHtmlTags(headingMatch[2]) === name) {
+      return content.slice(headingMatch[0].length).trim();
+    }
+
+    const paragraphMatch = content.match(/^<p[^>]*>([\s\S]*?)<\/p>\s*/i);
+    if (paragraphMatch && stripHtmlTags(paragraphMatch[1]) === name) {
+      return content.slice(paragraphMatch[0].length).trim();
+    }
+
+    return content;
+  }
+
+  if (content === name) {
+    return "";
+  }
+
+  if (content.startsWith(`${name}\n`)) {
+    return content.slice(name.length + 1).trim();
+  }
+
+  return content;
 }

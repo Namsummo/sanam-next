@@ -1,12 +1,6 @@
 export type EventContentFormat = "plain" | "html";
 
-export type EventStatus = "draft" | "published" | "cancelled" | "postponed";
-
-export type EventCategory = {
-  id: string;
-  label: string;
-  sortOrder?: number;
-};
+export type EventStatus = "draft" | "published";
 
 export type ParishEvent = {
   id: string;
@@ -22,6 +16,7 @@ export type ParishEvent = {
   contentFormat: EventContentFormat;
   image?: string;
   categoryId?: string;
+  categoryLabel?: string;
   isFeatured: boolean;
   featuredOrder?: number;
   status: EventStatus;

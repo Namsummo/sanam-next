@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { CalendarClock, MapPin } from "lucide-react";
 import { formatEventDateTime } from "@/lib/format";
 import type { ParishEvent } from "@/lib/events/types";

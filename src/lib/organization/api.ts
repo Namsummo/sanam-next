@@ -1,4 +1,8 @@
 import { getToken } from "@/lib/admin/mock-auth";
+import {
+  getOrganizationBySlug as getMockOrganizationBySlug,
+  getVisibleOrganizations as getMockOrganizations,
+} from "./mock-organizations";
 import type { Organization } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -117,13 +121,23 @@ export async function toggleOrganizationVisibility(id: string): Promise<{ isVisi
 
 // Public APIs
 export async function getOrganizations(): Promise<Organization[]> {
-  const res = await fetch(`${API_BASE}/api/organizations`);
-  if (!res.ok) throw new Error("Failed to fetch organizations");
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/api/organizations`);
+    if (!res.ok) throw new Error("Failed to fetch organizations");
+    return res.json();
+  } catch {
+    return getMockOrganizations();
+  }
 }
 
 export async function getOrganizationBySlug(slug: string): Promise<Organization> {
-  const res = await fetch(`${API_BASE}/api/organizations/${slug}`);
-  if (!res.ok) throw new Error("Organization not found");
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/api/organizations/${slug}`);
+    if (!res.ok) throw new Error("Organization not found");
+    return res.json();
+  } catch {
+    const mock = getMockOrganizationBySlug(slug);
+    if (mock) return mock;
+    throw new Error("Organization not found");
+  }
 }

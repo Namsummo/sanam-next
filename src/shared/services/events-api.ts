@@ -1,4 +1,4 @@
-import type { ParishEvent } from "@/lib/events/types";
+import type { EventStatus, ParishEvent } from "@/lib/events/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -55,10 +55,15 @@ export interface PaginatedEventsResponse {
 }
 
 export function toParishEvent(data: ApiEventResponse): ParishEvent {
-  const categoryId =
-    typeof data.categoryId === "object" && data.categoryId
-      ? data.categoryId._id
-      : data.categoryId || undefined;
+  let categoryId: string | undefined;
+  let categoryLabel: string | undefined;
+
+  if (typeof data.categoryId === "object" && data.categoryId) {
+    categoryId = data.categoryId._id;
+    categoryLabel = data.categoryId.label;
+  } else if (typeof data.categoryId === "string") {
+    categoryId = data.categoryId;
+  }
 
   return {
     id: data._id,
@@ -74,9 +79,13 @@ export function toParishEvent(data: ApiEventResponse): ParishEvent {
     contentFormat: data.contentFormat,
     image: data.image || undefined,
     categoryId,
+    categoryLabel,
     isFeatured: data.isFeatured,
-    featuredOrder: data.featuredOrder ?? undefined,
-    status: data.status,
+    featuredOrder:
+      data.featuredOrder != null && Number.isFinite(data.featuredOrder)
+        ? data.featuredOrder
+        : undefined,
+    status: data.status as EventStatus,
     isVisible: data.isVisible,
   };
 }
@@ -118,7 +127,9 @@ export async function getPublicEvents(params?: {
   return res.json();
 }
 
-export async function getPublicEventBySlug(slug: string): Promise<ApiEventResponse> {
+export async function getPublicEventBySlug(
+  slug: string,
+): Promise<ApiEventResponse> {
   const res = await fetch(`${API_BASE}/api/events/${encodeURIComponent(slug)}`);
   if (!res.ok) throw new Error("Event not found");
   return res.json();
@@ -182,7 +193,9 @@ export async function createEvent(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to create event" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to create event" }));
     throw new Error(err.message);
   }
   return res.json();
@@ -202,16 +215,15 @@ export async function updateEvent(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to update event" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to update event" }));
     throw new Error(err.message);
   }
   return res.json();
 }
 
-export async function deleteEvent(
-  token: string,
-  id: string,
-): Promise<void> {
+export async function deleteEvent(token: string, id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/admin/events/${id}`, {
     method: "DELETE",
     headers: authHeaders(token),
@@ -244,7 +256,9 @@ export async function createEventCategory(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to create category" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to create category" }));
     throw new Error(err.message);
   }
   return res.json();
