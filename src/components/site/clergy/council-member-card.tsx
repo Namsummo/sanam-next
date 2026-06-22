@@ -38,7 +38,6 @@ export function CouncilMemberCard({
 }: CouncilMemberCardProps) {
   const styles = sizeStyles[size];
   const imgSrc = member.image || DEFAULT_COVER;
-  const isExternal = !!member.image;
 
   return (
     <article
@@ -56,21 +55,14 @@ export function CouncilMemberCard({
           styles.image,
         )}
       >
-        {isExternal ? (
-          <img
-            src={imgSrc}
-            alt={`Chân dung ${member.fullName}`}
-            className="size-full object-cover"
-          />
-        ) : (
-          <Image
-            src={imgSrc}
-            alt={`Chân dung ${member.fullName}`}
-            width={styles.imagePx}
-            height={styles.imagePx}
-            className="size-full object-cover"
-          />
-        )}
+        <Image
+          src={imgSrc}
+          alt={`Chân dung ${member.fullName}`}
+          width={styles.imagePx}
+          height={styles.imagePx}
+          unoptimized={!!member.image}
+          className="size-full object-cover object-top"
+        />
       </figure>
       <p
         className={cn(

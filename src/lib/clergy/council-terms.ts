@@ -6,9 +6,7 @@ import {
 import type { OrganizationTerm } from "@/lib/organization/types";
 import type { ClergyMember } from "@/lib/clergy/types";
 
-export {
-  formatOrganizationTermLabel as formatCouncilTermLabel,
-} from "@/lib/organization/terms";
+export { formatOrganizationTermLabel as formatCouncilTermLabel } from "@/lib/organization/terms";
 
 export function getTermsFromCouncilMembers(
   members: ClergyMember[],

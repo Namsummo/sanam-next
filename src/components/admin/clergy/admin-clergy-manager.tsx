@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Plus } from "lucide-react";
 import {
   createEmptyClergyFormValues,
@@ -28,64 +28,63 @@ import type { ClergyMember } from "@/lib/clergy/types";
 const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
+const SEARCH_DEBOUNCE_MS = 1000;
+
 export function AdminClergyManager() {
   const router = useRouter();
   const [members, setMembers] = useState<ClergyMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formDefaults, setFormDefaults] = useState<ClergyFormValues>(() => createEmptyClergyFormValues());
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "priest" | "council">("all");
   const [formOpen, setFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ClergyMember | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const loadMembers = useCallback(async () => {
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  const fetchMembers = useCallback(async () => {
     const token = getToken();
     if (!token) {
       router.push("/admin/login");
       return;
     }
 
+    setFetching(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
-      const res = await getAllClergy(token, {});
-      setMembers(res.members.map(toClergyMember));
+      const trimmedSearch = debouncedSearch.trim();
+      const res = await getAllClergy(token, {
+        ...(trimmedSearch ? { search: trimmedSearch } : {}),
+        ...(typeFilter !== "all" ? { type: typeFilter } : {}),
+      });
+      setMembers(
+        res.members
+          .map(toClergyMember)
+          .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999)),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load clergy members");
     } finally {
       setLoading(false);
+      setFetching(false);
     }
-  }, [router]);
+  }, [debouncedSearch, router, typeFilter]);
 
   useEffect(() => {
-    loadMembers();
-  }, [loadMembers]);
-
-  const filteredMembers = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-
-    return [...members]
-      .filter((member) => {
-        if (typeFilter === "priest" && member.type !== 1) return false;
-        if (typeFilter === "council" && member.type !== 2) return false;
-
-        if (!normalizedQuery) return true;
-
-        const searchable = [
-          member.fullName,
-          member.position,
-          member.hometown ?? "",
-          member.patronSaint ?? "",
-          member.termId ?? "",
-        ].join(" ");
-
-        return searchable.toLowerCase().includes(normalizedQuery);
-      })
-      .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
-  }, [members, searchQuery, typeFilter]);
+    fetchMembers();
+  }, [fetchMembers]);
 
   function closeForm() {
     setFormOpen(false);
@@ -130,9 +129,9 @@ export function AdminClergyManager() {
     try {
       setDeleting(true);
       await deleteClergy(token, memberId);
-      setMembers((current) => current.filter((m) => String(m.id) !== memberId));
       if (editingId === memberId) closeForm();
       setDeleteTarget(null);
+      await fetchMembers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete member");
     } finally {
@@ -191,16 +190,13 @@ export function AdminClergyManager() {
       };
 
       if (editingId) {
-        const updated = await updateClergy(token, editingId, data);
-        setMembers((current) =>
-          current.map((m) => (String(m.id) === editingId ? toClergyMember(updated) : m)),
-        );
+        await updateClergy(token, editingId, data);
       } else {
-        const created = await createClergy(token, data);
-        setMembers((current) => [toClergyMember(created), ...current]);
+        await createClergy(token, data);
       }
 
       closeForm();
+      await fetchMembers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save member");
     }
@@ -241,8 +237,9 @@ export function AdminClergyManager() {
       </div>
 
       <AdminClergyTable
-        members={filteredMembers}
+        members={members}
         editingId={editingId}
+        fetching={fetching}
         searchQuery={searchQuery}
         typeFilter={typeFilter}
         onSearchQueryChange={setSearchQuery}
