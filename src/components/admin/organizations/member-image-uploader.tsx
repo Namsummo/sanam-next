@@ -50,6 +50,7 @@ export function MemberImageUploader({
           <button
             type="button"
             onClick={handleRemove}
+            title="Xóa ảnh"
             className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
           >
             <X className="size-4 text-white" />
@@ -75,6 +76,7 @@ export function MemberImageUploader({
         type="file"
         accept="image/jpeg,image/png,image/gif,image/webp"
         className="hidden"
+        aria-label="Tải ảnh thành viên"
         onChange={handleFile}
       />
     </div>

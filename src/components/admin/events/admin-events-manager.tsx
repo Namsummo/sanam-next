@@ -13,6 +13,7 @@ import {
 import { AdminEventFormModal } from "@/components/admin/events/admin-event-form-modal";
 import { AdminEventsFilters } from "@/components/admin/events/admin-events-filters";
 import { AdminEventsTable } from "@/components/admin/events/admin-events-table";
+import { EVENTS_PAGE_SIZE } from "@/components/admin/events/admin-events-table";
 import { getToken } from "@/lib/admin/mock-auth";
 import {
   createEvent,
@@ -36,6 +37,9 @@ export function AdminEventsManager() {
   const router = useRouter();
   const [events, setEvents] = useState<ParishEvent[]>([]);
   const [categories, setCategories] = useState<ApiEventCategory[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,18 +72,22 @@ export function AdminEventsManager() {
     try {
       const trimmedSearch = debouncedSearch.trim();
       const eventsRes = await getAllEvents(token, {
+        page,
+        limit: EVENTS_PAGE_SIZE,
         ...(trimmedSearch ? { search: trimmedSearch } : {}),
         ...(statusFilter !== "all" ? { status: statusFilter } : {}),
         ...(categoryFilter !== "all" ? { categoryId: categoryFilter } : {}),
       });
       setEvents(eventsRes.events.map(toParishEvent));
+      setTotalItems(eventsRes.pagination.total);
+      setTotalPages(eventsRes.pagination.totalPages);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load events");
     } finally {
       setLoading(false);
       setFetching(false);
     }
-  }, [categoryFilter, debouncedSearch, router, statusFilter]);
+  }, [categoryFilter, debouncedSearch, page, router, statusFilter]);
 
   useEffect(() => {
     const token = getToken();
@@ -102,6 +110,7 @@ export function AdminEventsManager() {
     setDebouncedSearch("");
     setStatusFilter("all");
     setCategoryFilter("all");
+    setPage(1);
   }
 
   function closeForm() {
@@ -246,9 +255,18 @@ export function AdminEventsManager() {
         statusFilter={statusFilter}
         categoryFilter={categoryFilter}
         categories={categories}
-        onSearchQueryChange={setSearchQuery}
-        onStatusFilterChange={setStatusFilter}
-        onCategoryFilterChange={setCategoryFilter}
+        onSearchQueryChange={(value) => {
+          setSearchQuery(value);
+          setPage(1);
+        }}
+        onStatusFilterChange={(value) => {
+          setStatusFilter(value);
+          setPage(1);
+        }}
+        onCategoryFilterChange={(value) => {
+          setCategoryFilter(value);
+          setPage(1);
+        }}
         onClear={handleClearFilters}
       />
 
@@ -257,6 +275,10 @@ export function AdminEventsManager() {
         categories={categories}
         editingId={editingId}
         fetching={fetching}
+        totalItems={totalItems}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />

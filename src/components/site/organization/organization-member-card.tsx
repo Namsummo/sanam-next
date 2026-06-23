@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { ExecutiveMember } from "@/lib/organization/types";
+import { getExecutiveMemberRoleLabel } from "@/lib/organization/executive-member-roles";
 import { cn } from "@/lib/utils";
 
 type OrganizationMemberCardSize = "executive" | "member";
@@ -41,7 +42,7 @@ export function OrganizationMemberCard({
   return (
     <article
       className={cn(
-        "p-2 text-center flex flex-col items-center",
+        "flex flex-col items-center p-2 text-center",
         className,
       )}
     >
@@ -74,7 +75,7 @@ export function OrganizationMemberCard({
           styles.position,
         )}
       >
-        {member.position}
+        {getExecutiveMemberRoleLabel(member.position)}
       </p>
       <h3
         className={cn(

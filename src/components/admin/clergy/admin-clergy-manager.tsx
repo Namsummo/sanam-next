@@ -1,9 +1,8 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Loader2, Plus } from "lucide-react";
 import {
   createEmptyClergyFormValues,
@@ -11,8 +10,17 @@ import {
   type ClergyFormValues,
 } from "@/components/admin/clergy/admin-clergy-form";
 import { AdminClergyFormModal } from "@/components/admin/clergy/admin-clergy-form-modal";
+import { AdminClergyFilters } from "@/components/admin/clergy/admin-clergy-filters";
 import { AdminClergyTable } from "@/components/admin/clergy/admin-clergy-table";
 import { getToken } from "@/lib/admin/mock-auth";
+import {
+  loadExtraCouncilTerms,
+  mergeCouncilTerms,
+  saveExtraCouncilTerms,
+} from "@/lib/clergy/admin-council-terms";
+import { getTermsFromCouncilMembers } from "@/lib/clergy/council-terms";
+import type { OrganizationTerm } from "@/lib/organization/types";
+import { sortTermsNewestFirst } from "@/lib/organization/terms";
 import {
   createClergy,
   deleteClergy,
@@ -29,10 +37,14 @@ const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
 const SEARCH_DEBOUNCE_MS = 1000;
+const PAGE_SIZE = 11;
 
 export function AdminClergyManager() {
   const router = useRouter();
   const [members, setMembers] = useState<ClergyMember[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,9 +53,34 @@ export function AdminClergyManager() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "priest" | "council">("all");
+  const [termFilter, setTermFilter] = useState<"all" | string>("all");
   const [formOpen, setFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ClergyMember | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [extraCouncilTerms, setExtraCouncilTerms] = useState<OrganizationTerm[]>(
+    () => loadExtraCouncilTerms(),
+  );
+
+  const councilTerms = useMemo(
+    () =>
+      mergeCouncilTerms(
+        getTermsFromCouncilMembers(members),
+        extraCouncilTerms,
+      ),
+    [extraCouncilTerms, members],
+  );
+
+  function handleTermCreated(term: OrganizationTerm) {
+    setExtraCouncilTerms((current) => {
+      if (current.some((existing) => existing.id === term.id)) {
+        return current;
+      }
+
+      const next = sortTermsNewestFirst([...current, term]);
+      saveExtraCouncilTerms(next);
+      return next;
+    });
+  }
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -66,23 +103,29 @@ export function AdminClergyManager() {
     try {
       const trimmedSearch = debouncedSearch.trim();
       const res = await getAllClergy(token, {
+        page,
+        limit: PAGE_SIZE,
         ...(trimmedSearch ? { search: trimmedSearch } : {}),
         ...(typeFilter !== "all" ? { type: typeFilter } : {}),
+        ...(termFilter !== "all" ? { termId: termFilter } : {}),
       });
       setMembers(
         res.members
           .map(toClergyMember)
           .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999)),
       );
+      setTotalItems(res.pagination.total);
+      setTotalPages(res.pagination.totalPages);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load clergy members");
     } finally {
       setLoading(false);
       setFetching(false);
     }
-  }, [debouncedSearch, router, typeFilter]);
+  }, [debouncedSearch, page, router, termFilter, typeFilter]);
 
   useEffect(() => {
+    // eslint-disable-next-line
     fetchMembers();
   }, [fetchMembers]);
 
@@ -186,6 +229,7 @@ export function AdminClergyManager() {
         patronSaint: values.patronSaint.trim() || undefined,
         patronDate: values.patronDate.trim() || undefined,
         hometown: values.hometown.trim() || undefined,
+        // Linh mục: nhập tay (linh động). Ban Hành Giáo: chọn theo khóa (YYYY-YYYY).
         termId: values.termId.trim() || undefined,
       };
 
@@ -236,14 +280,40 @@ export function AdminClergyManager() {
         </div>
       </div>
 
+      <AdminClergyFilters
+        searchQuery={searchQuery}
+        typeFilter={typeFilter}
+        termFilter={termFilter}
+        councilTerms={councilTerms}
+        onSearchQueryChange={(value) => {
+          setSearchQuery(value);
+          setPage(1);
+        }}
+        onTypeFilterChange={(value) => {
+          setTypeFilter(value);
+          setPage(1);
+        }}
+        onTermFilterChange={(value) => {
+          setTermFilter(value);
+          setPage(1);
+        }}
+        onClear={() => {
+          setSearchQuery("");
+          setDebouncedSearch("");
+          setTypeFilter("all");
+          setTermFilter("all");
+          setPage(1);
+        }}
+      />
+
       <AdminClergyTable
         members={members}
         editingId={editingId}
         fetching={fetching}
-        searchQuery={searchQuery}
-        typeFilter={typeFilter}
-        onSearchQueryChange={setSearchQuery}
-        onTypeFilterChange={setTypeFilter}
+        totalItems={totalItems}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={(nextPage) => setPage(nextPage)}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onToggleVisibility={handleToggleVisibility}
@@ -253,9 +323,11 @@ export function AdminClergyManager() {
         open={formOpen}
         defaultValues={formDefaults}
         editingId={editingId}
+        councilTerms={councilTerms}
         onClose={closeForm}
         onSubmit={handleFormSubmit}
         onUploadImage={handleUploadImage}
+        onTermCreated={handleTermCreated}
       />
 
       <AdminConfirmDialog

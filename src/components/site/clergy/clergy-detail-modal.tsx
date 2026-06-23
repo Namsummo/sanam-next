@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { X, Calendar, Award, Heart, BookOpen, MapPin, Quote } from "lucide-react";
+import { X, Calendar, Award, Heart, BookOpen, MapPin } from "lucide-react";
 import { formatIsoDateToVi } from "@/lib/format";
 import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { ClergyMember } from "@/lib/clergy/types";
@@ -80,22 +80,22 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
             {isPriest ? "Linh mục" : "Ban Hành Giáo"}
           </span>
 
-          <h3 className="font-display text-lg font-bold leading-tight text-primary">
-            {member.fullName}
-          </h3>
           <p className="mt-1 font-sans text-sm font-semibold text-foreground/80">
             {member.position}
           </p>
+          <h3 className="font-display text-lg font-bold leading-tight text-primary">
+            {member.fullName}
+          </h3>
         </div>
 
         <div className="flex flex-1 flex-col justify-center p-6 sm:p-10">
           <div className="space-y-6">
             <div>
-              <span className="font-display text-xs font-bold tracking-[0.2em] text-accent/80 uppercase">
-                Thông tin cá nhân
+              <span className="font-bold text-xs tracking-widest text-accent/80 uppercase">
+                Thông tin ban hành giáo
               </span>
               <h2 className="mt-1 font-display text-2xl font-bold text-primary">
-                Chi tiết nhân sự
+                Chi tiết ban hành giáo
               </h2>
             </div>
 
@@ -162,25 +162,6 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
                 </div>
               ) : null}
             </div>
-
-            {isPriest && member.motto ? (
-              <div className="relative overflow-hidden rounded-[20px] border border-border/40 bg-white/70 p-5">
-                <Quote className="pointer-events-none absolute right-4 bottom-4 size-16 translate-x-2 translate-y-2 text-accent/5" />
-                <p className="mb-2 text-[10px] font-bold tracking-wider text-accent uppercase">Khẩu hiệu mục vụ</p>
-                <blockquote className="border-l-2 border-accent pl-3 text-sm leading-relaxed text-foreground italic md:text-[14px]">
-                  &ldquo;{member.motto}&rdquo;
-                </blockquote>
-              </div>
-            ) : null}
-
-            {member.description ? (
-              <div className="space-y-1.5">
-                <h4 className="text-xs font-bold tracking-wider text-primary uppercase">Sơ lược mục vụ</h4>
-                <p className="font-sans text-sm leading-relaxed text-foreground/80">
-                  {member.description}
-                </p>
-              </div>
-            ) : null}
           </div>
         </div>
       </div>

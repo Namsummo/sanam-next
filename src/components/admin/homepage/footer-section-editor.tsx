@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Globe, Link2, Loader2, MessageCircle, Pencil, Plus, Share2, Trash2, Send, Phone, Mail } from "lucide-react";
 import { getPublicFooterSettings, updateFooterSettings, type FooterSettingsPayload } from "@/shared/services/footer-settings-api";
+import Image from "next/image";
 
 type FooterZone =
   | "newsletterTitle"
@@ -327,7 +328,7 @@ function FooterPreview({
         <div className="grid grid-cols-1 gap-[30px] xl:grid-cols-12">
           <div className="xl:col-span-3">
             <div className="inline-block opacity-50">
-              <img src="/images/logo.svg" alt="sanam" className="h-[40px] w-auto max-w-[151px]" />
+              <Image src="/images/logo.svg" alt="sanam" className="h-[40px] w-auto max-w-[151px]" width={151} height={40} />
             </div>
             <ul className="mt-[50px] space-y-5 max-lg:mt-5 max-lg:space-y-3 opacity-50">
               <li>
@@ -364,7 +365,7 @@ function FooterPreview({
                 </ul>
               </button>
             </div>
-            
+
             <div className="relative w-full max-md:w-auto xl:border-r xl:border-white/10 xl:pr-[2.083vw] xl:w-[calc(35%-2.778vw)]">
               <button type="button" onClick={() => onSelectZone("ourServicesTitle")}
                 className={`w-full text-left transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "ourServicesTitle" ? "ring-2 ring-accent" : ""}`}>
@@ -401,7 +402,7 @@ function FooterPreview({
                   ))}
                 </ul>
               </button>
-              
+
               <div className="mt-[30px] border-t border-white/10 pt-[30px] max-lg:mt-5 max-lg:pt-5">
                 <button type="button" onClick={() => onSelectZone("socialLinks")}
                   className={`block w-full text-left transition-all hover:ring-2 hover:ring-accent/50 p-2 -m-2 rounded ${selectedZone === "socialLinks" ? "ring-2 ring-accent" : ""}`}>

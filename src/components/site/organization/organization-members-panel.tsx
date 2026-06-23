@@ -4,6 +4,12 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { OrganizationMemberCard } from "./organization-member-card";
 import type { ExecutiveTerm, ExecutiveMember } from "@/lib/organization/types";
+import { sortMembersByOrder } from "@/lib/organization/executive-members";
+import {
+  formatExecutiveTermDisplay,
+  getExecutiveTermKey,
+  sortExecutiveTermsNewestFirst,
+} from "@/lib/organization/executive-terms";
 import { cn } from "@/lib/utils";
 
 type OrganizationMembersPanelProps = {
@@ -36,18 +42,25 @@ export function OrganizationMembersPanel({
   terms,
   className,
 }: OrganizationMembersPanelProps) {
-  const currentTerm = terms.find(t => t.isCurrent);
-  const defaultTermId = currentTerm ? currentTerm._id || currentTerm.name : (terms[0]?._id || terms[0]?.name);
+  const sortedTerms = useMemo(() => sortExecutiveTermsNewestFirst(terms), [terms]);
+  const currentTerm = sortedTerms.find((t) => t.isCurrent);
+  const defaultTermId = currentTerm
+    ? getExecutiveTermKey(currentTerm)
+    : sortedTerms[0]
+      ? getExecutiveTermKey(sortedTerms[0])
+      : "";
 
   const [selectedTermId, setSelectedTermId] = useState<string>(defaultTermId || "");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const activeTerm = terms.find(t => (t._id || t.name) === selectedTermId);
+  const activeTerm = sortedTerms.find((t) => getExecutiveTermKey(t) === selectedTermId);
   const normalizedQuery = normalizeSearchText(searchQuery);
 
   const filteredMembers = useMemo(() => {
     if (!activeTerm) return [];
-    return activeTerm.members.filter((m) => memberMatchesSearch(m, normalizedQuery));
+    return sortMembersByOrder(activeTerm.members).filter((m) =>
+      memberMatchesSearch(m, normalizedQuery),
+    );
   }, [activeTerm, normalizedQuery]);
 
   if (terms.length === 0) {
@@ -93,11 +106,15 @@ export function OrganizationMembersPanel({
             onChange={(e) => setSelectedTermId(e.target.value)}
             className="w-full cursor-pointer appearance-none rounded-[12px] border border-border bg-white px-4 py-3.5 font-sans text-base text-primary outline-none transition-colors focus:border-accent"
           >
-            {terms.map((term) => (
-              <option key={term._id || term.name} value={term._id || term.name}>
-                {term.name} {term.isCurrent ? "(Hiện tại)" : ""}
-              </option>
-            ))}
+            {sortedTerms.map((term) => {
+              const termKey = getExecutiveTermKey(term);
+              return (
+                <option key={termKey} value={termKey}>
+                  {formatExecutiveTermDisplay(term)}
+                  {term.isCurrent ? " (Hiện tại)" : ""}
+                </option>
+              );
+            })}
           </select>
         </div>
       </div>
@@ -109,7 +126,7 @@ export function OrganizationMembersPanel({
           </h3>
           {activeTerm ? (
             <p className="mt-2 font-sans text-sm text-foreground/80">
-              {activeTerm.name}
+              {formatExecutiveTermDisplay(activeTerm)}
               {normalizedQuery ? "" : ` · ${filteredMembers.length} thành viên`}
             </p>
           ) : null}

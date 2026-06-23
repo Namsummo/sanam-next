@@ -1,10 +1,15 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Plus } from "lucide-react";
-import { AdminOrganizationsTable } from "./admin-organizations-table";
+import {
+  AdminOrganizationsTable,
+  ORGANIZATIONS_PAGE_SIZE,
+} from "./admin-organizations-table";
+import { AdminOrganizationsFilters } from "./admin-organizations-filters";
 import {
   getAdminOrganizations,
   deleteOrganization,
@@ -16,42 +21,56 @@ import type { Organization } from "@/lib/organization/types";
 const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
+const SEARCH_DEBOUNCE_MS = 1000;
+
 export function AdminOrganizationsManager() {
   const router = useRouter();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Organization | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
   const loadOrganizations = useCallback(async () => {
     try {
-      setLoading(true);
+      setFetching(true);
       setError(null);
-      const res = await getAdminOrganizations();
+
+      const trimmedSearch = debouncedSearch.trim();
+      const res = await getAdminOrganizations({
+        page,
+        limit: ORGANIZATIONS_PAGE_SIZE,
+        ...(trimmedSearch ? { search: trimmedSearch } : {}),
+      });
+
       setOrganizations(res.organizations);
+      setTotalItems(res.pagination.total);
+      setTotalPages(res.pagination.totalPages);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load organizations");
     } finally {
       setLoading(false);
+      setFetching(false);
     }
-  }, []);
+  }, [debouncedSearch, page]);
 
   useEffect(() => {
     loadOrganizations();
   }, [loadOrganizations]);
-
-  const filteredOrganizations = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-
-    return [...organizations].filter((org) => {
-      if (!normalizedQuery) return true;
-
-      const searchable = [org.name, org.slug].join(" ");
-      return searchable.toLowerCase().includes(normalizedQuery);
-    });
-  }, [organizations, searchQuery]);
 
   function openCreateForm() {
     router.push("/admin/organizations/create");
@@ -73,8 +92,8 @@ export function AdminOrganizationsManager() {
     try {
       setDeleting(true);
       await deleteOrganization(organizationId);
-      setOrganizations((current) => current.filter((o) => o._id !== organizationId));
       setDeleteTarget(null);
+      await loadOrganizations();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete organization");
     } finally {
@@ -129,11 +148,22 @@ export function AdminOrganizationsManager() {
         </div>
       </div>
 
-      <AdminOrganizationsTable
-        organizations={filteredOrganizations}
-        editingId={null}
+      <AdminOrganizationsFilters
         searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
+        onSearchQueryChange={(value) => {
+          setSearchQuery(value);
+          setPage(1);
+        }}
+      />
+
+      <AdminOrganizationsTable
+        organizations={organizations}
+        editingId={null}
+        fetching={fetching}
+        totalItems={totalItems}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onToggleVisibility={handleToggleVisibility}

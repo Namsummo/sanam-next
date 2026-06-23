@@ -6,6 +6,7 @@ export type ExecutiveMember = {
   position?: string;
   parish?: string;
   image?: string;
+  sortOrder?: number;
 };
 
 export type ExecutiveTerm = {

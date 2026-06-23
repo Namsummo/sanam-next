@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/site/shared/ui/table/table";
+import { AdminPagination } from "@/components/admin/shared/admin-pagination";
 import type { ParishEvent } from "@/lib/events/types";
 import { getEventDateTimeDisplay } from "@/lib/format";
 import type { ApiEventCategory } from "@/shared/services/events-api";
@@ -20,6 +21,8 @@ import { cn } from "@/lib/utils";
 
 const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
+
+export const EVENTS_PAGE_SIZE = 10;
 
 function EventDateTimeDisplay({ event }: { event: ParishEvent }) {
   const { date, time } = getEventDateTimeDisplay(event);
@@ -44,6 +47,10 @@ type AdminEventsTableProps = {
   categories: ApiEventCategory[];
   editingId: string | null;
   fetching?: boolean;
+  totalItems?: number;
+  page?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
   onEdit: (event: ParishEvent) => void;
   onDelete: (eventId: string) => void;
 };
@@ -53,6 +60,10 @@ export function AdminEventsTable({
   categories,
   editingId,
   fetching = false,
+  totalItems,
+  page = 1,
+  totalPages = 1,
+  onPageChange,
   onEdit,
   onDelete,
 }: AdminEventsTableProps) {
@@ -69,7 +80,7 @@ export function AdminEventsTable({
     >
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <p className="text-sm font-medium text-card-foreground">
-          Danh sách sự kiện ({events.length})
+          Danh sách sự kiện ({events.length}/{totalItems ?? events.length})
         </p>
         {fetching ? (
           <Loader2 className="size-4 animate-spin text-muted-foreground" aria-label="Đang tải" />
@@ -152,6 +163,17 @@ export function AdminEventsTable({
           )}
         </TableBody>
       </Table>
+
+      {onPageChange ? (
+        <div className="border-t border-border px-4 py-3">
+          <AdminPagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            showWhenSinglePage
+          />
+        </div>
+      ) : null}
     </section>
   );
 }
