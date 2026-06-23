@@ -73,9 +73,10 @@ interface TextAnimeProps {
   children: string;
   className?: string;
   once?: boolean;
+  delay?: number;
 }
 
-export function TextAnime({ children, className, once = true }: TextAnimeProps) {
+export function TextAnime({ children, className, once = true, delay = 0 }: TextAnimeProps) {
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLSpanElement>(null);
 
@@ -117,7 +118,7 @@ export function TextAnime({ children, className, once = true }: TextAnimeProps) 
       {words.map((word, wordIndex) => (
         <span key={wordIndex} className="inline-block whitespace-nowrap mr-[0.25em] last:mr-0">
           {word.split("").map((char, charIndex) => {
-            const delay = globalCharIndex * 0.02;
+            const charDelay = delay + globalCharIndex * 0.02;
             globalCharIndex++;
             return (
               <span
@@ -129,7 +130,7 @@ export function TextAnime({ children, className, once = true }: TextAnimeProps) 
                     : "opacity-0 translate-x-[50px]"
                 )}
                 style={{
-                  transitionDelay: `${delay}s`,
+                  transitionDelay: `${charDelay}s`,
                 }}
               >
                 {char}
