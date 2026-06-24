@@ -74,7 +74,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     <>
       <PageHeader
         title={event.name}
-        backgroundImage={event.image || bgSettings?.eventsBg || DEFAULT_COVER}
+        backgroundImage={bgSettings?.eventsBg}
         breadcrumbs={[
           { label: "Trang chủ", href: "/" },
           { label: "Sự kiện", href: "/events" },

@@ -14,17 +14,19 @@ type CouncilMemberCardProps = {
 
 const sizeStyles: Record<
   CouncilMemberCardSize,
-  { image: string; imagePx: number; name: string; position: string }
+  { image: string; imageWidth: number; imageHeight: number; name: string; position: string }
 > = {
   executive: {
-    image: "size-[140px] md:size-[160px]",
-    imagePx: 160,
+    image: "w-[100px] md:w-[160px] aspect-[3/4]",
+    imageWidth: 160,
+    imageHeight: 213,
     name: "text-lg md:text-xl",
     position: "text-sm",
   },
   member: {
-    image: "size-[90px] md:size-[110px] lg:size-[120px]",
-    imagePx: 120,
+    image: "w-[72px] md:w-[110px] lg:w-[120px] aspect-[3/4]",
+    imageWidth: 120,
+    imageHeight: 160,
     name: "text-sm md:text-base lg:text-lg",
     position: "text-[10px] md:text-xs lg:text-sm",
   },
@@ -50,7 +52,7 @@ export function CouncilMemberCard({
     >
       <figure
         className={cn(
-          "mx-auto mb-3 overflow-hidden rounded-[20px] shadow-sm transition-transform duration-300",
+          "mx-auto mb-3 overflow-hidden  shadow-sm transition-transform duration-300",
           onClick && "hover:scale-[1.03]",
           styles.image,
         )}
@@ -58,8 +60,8 @@ export function CouncilMemberCard({
         <Image
           src={imgSrc}
           alt={`Chân dung ${member.fullName}`}
-          width={styles.imagePx}
-          height={styles.imagePx}
+          width={styles.imageWidth}
+          height={styles.imageHeight}
           unoptimized={!!member.image}
           className="size-full object-cover object-top"
         />

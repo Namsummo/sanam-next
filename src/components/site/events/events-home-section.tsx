@@ -4,9 +4,6 @@ import { ScrollReveal, TextAnime } from "@/components/site/shared/components/ani
 import { getPublicEvents, toParishEvent } from "@/shared/services/events-api";
 import type { ParishEvent } from "@/lib/events/types";
 
-type EventsHomeSectionProps = {
-  className?: string;
-};
 
 function parseDateOnly(isoDate: string): Date {
   const [year, month, day] = isoDate.split("-").map(Number);
@@ -40,7 +37,7 @@ function sortEventsForDisplay(events: ParishEvent[]): ParishEvent[] {
   });
 }
 
-export async function EventsHomeSection({ className }: EventsHomeSectionProps) {
+export async function EventsHomeSection() {
   const res = await getPublicEvents({ limit: 50 });
   const events = res.events.map(toParishEvent);
 

@@ -5,7 +5,6 @@ import { notFound, redirect } from "next/navigation";
 import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { getNewsCategoryLabel } from "@/lib/news/categories";
-import { DEFAULT_COVER } from "@/lib/image-constants";
 import { formatNewsDate } from "@/lib/format";
 import { getPublicNewsBySlug, getPublicNews } from "@/shared/services/news-api";
 import type { NewsArticle } from "@/lib/news/types";
@@ -94,13 +93,12 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
   }
 
   const categoryLabel = getNewsCategoryLabel(article.categoryId);
-  const coverImage = article.coverImage;
 
   return (
     <>
       <PageHeader
         title={article.title}
-        backgroundImage={coverImage || bgSettings?.newsBg || DEFAULT_COVER}
+        backgroundImage={bgSettings?.newsBg}
         breadcrumbs={[
           { label: "Trang chủ", href: "/" },
           { label: "Tin tức", href: "/news" },

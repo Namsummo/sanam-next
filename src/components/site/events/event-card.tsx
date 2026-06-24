@@ -35,7 +35,7 @@ export function EventCard({ event, className }: EventCardProps) {
             width={640}
             height={556}
             unoptimized={!!event.image}
-            className="aspect-4/3 w-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.06]"
+            className="aspect-5/3 w-full object-cover"
           />
         </figure>
       </Link>

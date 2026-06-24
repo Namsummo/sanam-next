@@ -46,7 +46,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-200 flex items-center justify-center overflow-y-auto p-4 sm:p-6"
+      className="fixed inset-0 z-200 flex items-center justify-center overflow-y-auto p-2 sm:p-6"
       role="dialog"
       aria-modal="true"
     >
@@ -55,110 +55,110 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
         onClick={onClose}
       />
 
-      <div className="relative z-10 w-full max-w-[800px] overflow-hidden rounded-[32px] border border-border bg-[#f5f3ec] shadow-[0_35px_70px_rgba(0,0,0,0.25)] transition-all duration-300 md:flex">
+      <div className="relative z-10 max-h-[92vh] w-full max-w-[800px] overflow-y-auto rounded-[20px] border border-border bg-[#f5f3ec] shadow-[0_35px_70px_rgba(0,0,0,0.25)] transition-all duration-300 md:flex md:max-h-none md:overflow-hidden md:rounded-[32px]">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 z-20 flex size-10 cursor-pointer items-center justify-center rounded-full bg-[#010101]/10 text-primary transition-all duration-300 hover:bg-accent hover:text-white"
+          className="absolute top-3 right-3 z-20 flex size-8 cursor-pointer items-center justify-center rounded-full bg-[#010101]/10 text-primary transition-all duration-300 hover:bg-accent hover:text-white md:top-5 md:right-5 md:size-10"
           aria-label="Đóng"
         >
-          <X className="size-5" />
+          <X className="size-4 md:size-5" />
         </button>
 
-        <div className="relative flex w-full shrink-0 flex-col items-center justify-center border-b border-border/40 bg-[#eae7de]/70 p-8 text-center md:w-[320px] md:border-r md:border-b-0">
-          <figure className="relative mb-4 aspect-4/5 w-[180px] overflow-hidden rounded-[24px] border-4 border-white shadow-md transition-transform duration-500 hover:scale-[1.02]">
+        <div className="relative flex w-full shrink-0 flex-col items-center justify-center border-b border-border/40 bg-[#eae7de]/70 p-4 text-center sm:p-6 md:w-[260px] md:border-r md:border-b-0 md:p-6">
+          <figure className="relative mb-2 aspect-3/4 w-[112px] overflow-hidden transition-transform duration-500 hover:scale-[1.02] sm:mb-3 sm:w-[130px] md:mb-3 md:w-[140px]">
             <Image
               src={imageSrc}
               alt={`Chân dung ${member.fullName}`}
-              width={180}
-              height={225}
+              width={140}
+              height={187}
               unoptimized={!!member.image}
               className="size-full object-cover object-top"
               priority
             />
           </figure>
 
-          <span className="mb-2 inline-block rounded-full bg-accent/10 px-3.5 py-1 text-[11px] font-bold tracking-wider text-accent uppercase">
+          <span className="mb-1 inline-block rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-accent uppercase md:mb-2 md:px-3.5 md:py-1 md:text-[11px]">
             {isPriest ? "Linh mục" : "Ban Hành Giáo"}
           </span>
 
-          <p className="mt-1 font-sans text-sm font-semibold text-foreground/80">
+          <p className="mt-0.5 font-sans text-xs font-semibold text-foreground/80 md:mt-1 md:text-sm">
             {member.position}
           </p>
-          <h3 className="font-display text-lg font-bold leading-tight text-primary">
+          <h3 className="font-display text-base font-bold leading-tight text-primary md:text-lg">
             {member.fullName}
           </h3>
         </div>
 
-        <div className="flex flex-1 flex-col justify-center p-6 sm:p-10">
-          <div className="space-y-6">
+        <div className="flex flex-1 flex-col justify-center p-4 sm:p-6 md:p-10">
+          <div className="space-y-3 md:space-y-6">
             <div>
-              <span className="font-bold text-xs tracking-widest text-accent/80 uppercase">
-                Thông tin ban hành giáo
+              <span className="text-[10px] font-bold tracking-widest text-accent/80 uppercase md:text-xs">
+                {isPriest ? "Thông tin linh mục" : "Thông tin ban hành giáo"}
               </span>
-              <h2 className="mt-1 font-display text-2xl font-bold text-primary">
-                Chi tiết ban hành giáo
+              <h2 className="mt-0.5 font-display text-lg font-bold text-primary md:mt-1 md:text-2xl">
+                {isPriest ? "Chi tiết về Cha" : "Chi tiết ban hành giáo"}
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:gap-4">
               {member.birthday ? (
-                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
-                    <Calendar className="size-5" />
+                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-[16px] md:p-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
+                    <Calendar className="size-4 md:size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">Ngày sinh</p>
-                    <p className="text-sm font-semibold text-primary">{formatIsoDateToVi(member.birthday)}</p>
+                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Ngày sinh</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{formatIsoDateToVi(member.birthday)}</p>
                   </div>
                 </div>
               ) : null}
 
               {isPriest && member.ordinationDate ? (
-                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
-                    <Award className="size-5" />
+                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-[16px] md:p-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
+                    <Award className="size-4 md:size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">Thụ phong Linh mục</p>
-                    <p className="text-sm font-semibold text-primary">{formatIsoDateToVi(member.ordinationDate)}</p>
+                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Thụ phong Linh mục</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{formatIsoDateToVi(member.ordinationDate)}</p>
                   </div>
                 </div>
               ) : null}
 
               {member.patronSaint ? (
-                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
-                    <Heart className="size-5" />
+                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-[16px] md:p-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
+                    <Heart className="size-4 md:size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">Thánh bổn mạng</p>
-                    <p className="text-sm font-semibold text-primary">{member.patronSaint}</p>
+                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Thánh bổn mạng</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{member.patronSaint}</p>
                   </div>
                 </div>
               ) : null}
 
               {member.patronDate ? (
-                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
-                    <BookOpen className="size-5" />
+                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-[16px] md:p-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
+                    <BookOpen className="size-4 md:size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">Lễ bổn mạng</p>
-                    <p className="text-sm font-semibold text-primary">{member.patronDate}</p>
+                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Lễ bổn mạng</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{member.patronDate}</p>
                   </div>
                 </div>
               ) : null}
 
               {member.hometown ? (
-                <div className="flex items-center gap-3 rounded-[16px] border border-border/30 bg-white/50 p-3 sm:col-span-2">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent">
-                    <MapPin className="size-5" />
+                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 sm:col-span-2 md:gap-3 md:rounded-[16px] md:p-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
+                    <MapPin className="size-4 md:size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-wider text-foreground/50 uppercase">
+                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">
                       {isPriest ? "Quê quán" : "Giáo họ thuộc giáo xứ"}
                     </p>
-                    <p className="text-sm font-semibold text-primary">{member.hometown}</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{member.hometown}</p>
                   </div>
                 </div>
               ) : null}
