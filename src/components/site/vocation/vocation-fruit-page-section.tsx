@@ -1,11 +1,16 @@
-"use client";
-
 import Link from "next/link";
 import { VocationFruitPanel } from "@/components/site/vocation/vocation-fruit-panel";
-import { mockVocationFruits } from "@/lib/vocation/mock-vocation-fruits";
+import { getPublicVocationFruits, toVocationFruit } from "@/shared/services/vocation-api";
+import type { VocationFruit } from "@/lib/vocation/types";
 
-export function VocationFruitPageSection() {
-  const fruits = mockVocationFruits;
+export async function VocationFruitPageSection() {
+  let fruits: VocationFruit[] = [];
+  try {
+    const res = await getPublicVocationFruits();
+    fruits = res.fruits.map(toVocationFruit);
+  } catch (error) {
+    console.error("Failed to load vocation fruits:", error);
+  }
 
   return (
     <>

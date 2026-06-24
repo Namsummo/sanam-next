@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import { AdminWorshipCategoriesPanel } from "@/components/admin/worship/admin-worship-categories-panel";
 import {
@@ -22,14 +22,27 @@ import { getToken } from "@/lib/admin/mock-auth";
 import {
   createEmptyCategory,
   createEmptyVideo,
-  getWorshipAdminState,
-  saveWorshipAdminState,
   slugifyCategoryName,
   type WorshipVideoCategory,
   type WorshipVideoItem,
 } from "@/lib/videos/admin-worship-store";
 import type { LiveSettings } from "@/lib/videos/types";
 import { cn } from "@/lib/utils";
+import {
+  getAdminWorshipCategories,
+  getAdminWorshipVideos,
+  getAdminLiveSettings,
+  createAdminWorshipCategory,
+  updateAdminWorshipCategory,
+  deleteAdminWorshipCategory,
+  createAdminWorshipVideo,
+  updateAdminWorshipVideo,
+  deleteAdminWorshipVideo,
+  updateAdminLiveSettings,
+  toWorshipVideoCategory,
+  toWorshipVideoItem,
+  toLiveSettings,
+} from "@/shared/services/worship-api";
 
 type WorshipAdminTab = "categories" | "live";
 
@@ -55,6 +68,7 @@ export function AdminWorshipManager() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [isSavingLive, setIsSavingLive] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
@@ -86,53 +100,64 @@ export function AdminWorshipManager() {
     useState<WorshipVideoItem | null>(null);
 
   useEffect(() => {
-    if (!getToken()) {
+    const token = getToken();
+    if (!token) {
       router.push("/admin/login");
+      return;
     }
+
+    let active = true;
+    async function loadData(authToken: string) {
+      try {
+        setIsLoading(true);
+        const [catsRes, vidsRes, liveRes] = await Promise.all([
+          getAdminWorshipCategories(authToken),
+          getAdminWorshipVideos(authToken),
+          getAdminLiveSettings(authToken),
+        ]);
+
+        if (!active) return;
+
+        const cats = catsRes.categories.map(toWorshipVideoCategory);
+        const vids = vidsRes.videos.map(toWorshipVideoItem);
+        const liveSettings = toLiveSettings(liveRes);
+
+        setCategories(cats);
+        setVideos(vids);
+        setLive(liveSettings);
+        setSelectedCategoryId(cats[0]?.id ?? null);
+      } catch (err) {
+        console.error("Failed to load worship data:", err);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    }
+
+    loadData(token);
+    return () => {
+      active = false;
+    };
   }, [router]);
-
-  useEffect(() => {
-    const state = getWorshipAdminState();
-    setCategories(state.categories);
-    setVideos(state.videos);
-    setLive(state.live);
-    setSelectedCategoryId(state.categories[0]?.id ?? null);
-  }, []);
-
-  function persistState(
-    nextCategories = categories,
-    nextVideos = videos,
-    nextLive = live,
-  ) {
-    saveWorshipAdminState({
-      categories: nextCategories,
-      videos: nextVideos,
-      live: nextLive,
-    });
-  }
 
   function showSavedMessage(message: string) {
     setSaveMessage(message);
     window.setTimeout(() => setSaveMessage(null), 2500);
   }
 
-  function handleSaveLive() {
+  async function handleSaveLive() {
+    const token = getToken();
+    if (!token) return;
     setIsSavingLive(true);
-    persistState(categories, videos, live);
-    window.setTimeout(() => {
-      setIsSavingLive(false);
+    try {
+      const updated = await updateAdminLiveSettings(token, live);
+      setLive(toLiveSettings(updated));
       showSavedMessage("Đã lưu cấu hình livestream.");
-    }, 300);
-  }
-
-  function handleSaveLibrary(
-    nextCategories: WorshipVideoCategory[],
-    nextVideos: WorshipVideoItem[],
-  ) {
-    setCategories(nextCategories);
-    setVideos(nextVideos);
-    persistState(nextCategories, nextVideos, live);
-    showSavedMessage("Đã lưu thư viện video.");
+    } catch (err: any) {
+      console.error(err);
+      showSavedMessage(`Lỗi: ${err.message || "Không lưu được livestream"}`);
+    } finally {
+      setIsSavingLive(false);
+    }
   }
 
   function openCreateCategory() {
@@ -148,46 +173,70 @@ export function AdminWorshipManager() {
     setCategoryModalOpen(true);
   }
 
-  function handleCategorySubmit(values: WorshipCategoryFormValues) {
-    const payload: WorshipVideoCategory = {
-      id: editingCategoryId ?? `cat-${crypto.randomUUID()}`,
-      name: values.name.trim(),
-      slug: values.slug.trim() || slugifyCategoryName(values.name),
-      description: values.description.trim(),
-      sortOrder: values.sortOrder,
-    };
+  async function handleCategorySubmit(values: WorshipCategoryFormValues) {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const payload = {
+        name: values.name.trim(),
+        slug: values.slug.trim() || slugifyCategoryName(values.name),
+        description: values.description.trim(),
+        sortOrder: values.sortOrder,
+      };
 
-    const nextCategories = editingCategoryId
-      ? categories.map((category) =>
-          category.id === editingCategoryId ? payload : category,
-        )
-      : [...categories, payload];
+      if (editingCategoryId) {
+        const updated = await updateAdminWorshipCategory(token, editingCategoryId, payload);
+        const mapped = toWorshipVideoCategory(updated);
+        const nextCategories = categories.map((c) => (c.id === editingCategoryId ? mapped : c));
+        const sorted = [...nextCategories].sort((a, b) => a.sortOrder - b.sortOrder);
+        setCategories(sorted);
+      } else {
+        const created = await createAdminWorshipCategory(token, payload);
+        const mapped = toWorshipVideoCategory(created);
+        const nextCategories = [...categories, mapped];
+        const sorted = [...nextCategories].sort((a, b) => a.sortOrder - b.sortOrder);
+        setCategories(sorted);
+        if (!selectedCategoryId) {
+          setSelectedCategoryId(mapped.id);
+        }
+      }
 
-    const sorted = [...nextCategories].sort((a, b) => a.sortOrder - b.sortOrder);
-    setCategoryModalOpen(false);
-    setEditingCategoryId(null);
-    if (!selectedCategoryId) {
-      setSelectedCategoryId(payload.id);
+      setCategoryModalOpen(false);
+      setEditingCategoryId(null);
+      showSavedMessage("Đã lưu danh mục.");
+    } catch (err: any) {
+      console.error(err);
+      showSavedMessage(`Lỗi: ${err.message || "Không lưu được danh mục"}`);
     }
-    handleSaveLibrary(sorted, videos);
   }
 
-  function confirmDeleteCategory() {
+  async function confirmDeleteCategory() {
     if (!deleteCategoryTarget) return;
+    const token = getToken();
+    if (!token) return;
+    try {
+      await deleteAdminWorshipCategory(token, deleteCategoryTarget.id);
 
-    const nextCategories = categories.filter(
-      (category) => category.id !== deleteCategoryTarget.id,
-    );
-    const nextVideos = videos.filter(
-      (video) => video.categoryId !== deleteCategoryTarget.id,
-    );
+      const nextCategories = categories.filter(
+        (category) => category.id !== deleteCategoryTarget.id,
+      );
+      const nextVideos = videos.filter(
+        (video) => video.categoryId !== deleteCategoryTarget.id,
+      );
 
-    if (selectedCategoryId === deleteCategoryTarget.id) {
-      setSelectedCategoryId(nextCategories[0]?.id ?? null);
+      setCategories(nextCategories);
+      setVideos(nextVideos);
+
+      if (selectedCategoryId === deleteCategoryTarget.id) {
+        setSelectedCategoryId(nextCategories[0]?.id ?? null);
+      }
+
+      setDeleteCategoryTarget(null);
+      showSavedMessage("Đã xóa danh mục.");
+    } catch (err: any) {
+      console.error(err);
+      showSavedMessage(`Lỗi: ${err.message || "Không xóa được danh mục"}`);
     }
-
-    setDeleteCategoryTarget(null);
-    handleSaveLibrary(nextCategories, nextVideos);
   }
 
   function openCreateVideo() {
@@ -204,23 +253,46 @@ export function AdminWorshipManager() {
     setVideoModalOpen(true);
   }
 
-  function handleVideoSubmit(values: WorshipVideoFormValues) {
-    const payload = mapFormValuesToVideo(values, editingVideoId);
-    const nextVideos = editingVideoId
-      ? videos.map((video) => (video.id === editingVideoId ? payload : video))
-      : [...videos, payload];
+  async function handleVideoSubmit(values: WorshipVideoFormValues) {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const payloadWithId = mapFormValuesToVideo(values, editingVideoId);
+      const { id: _, ...payload } = payloadWithId;
 
-    setVideoModalOpen(false);
-    setEditingVideoId(null);
-    handleSaveLibrary(categories, nextVideos);
+      if (editingVideoId) {
+        const updated = await updateAdminWorshipVideo(token, editingVideoId, payload);
+        const mapped = toWorshipVideoItem(updated);
+        setVideos(videos.map((video) => (video.id === editingVideoId ? mapped : video)));
+      } else {
+        const created = await createAdminWorshipVideo(token, payload);
+        const mapped = toWorshipVideoItem(created);
+        setVideos([...videos, mapped]);
+      }
+
+      setVideoModalOpen(false);
+      setEditingVideoId(null);
+      showSavedMessage("Đã lưu video.");
+    } catch (err: any) {
+      console.error(err);
+      showSavedMessage(`Lỗi: ${err.message || "Không lưu được video"}`);
+    }
   }
 
-  function confirmDeleteVideo() {
+  async function confirmDeleteVideo() {
     if (!deleteVideoTarget) return;
-
-    const nextVideos = videos.filter((video) => video.id !== deleteVideoTarget.id);
-    setDeleteVideoTarget(null);
-    handleSaveLibrary(categories, nextVideos);
+    const token = getToken();
+    if (!token) return;
+    try {
+      await deleteAdminWorshipVideo(token, deleteVideoTarget.id);
+      const nextVideos = videos.filter((video) => video.id !== deleteVideoTarget.id);
+      setVideos(nextVideos);
+      setDeleteVideoTarget(null);
+      showSavedMessage("Đã xóa video.");
+    } catch (err: any) {
+      console.error(err);
+      showSavedMessage(`Lỗi: ${err.message || "Không xóa được video"}`);
+    }
   }
 
   const tabs: { id: WorshipAdminTab; label: string }[] = [
@@ -244,8 +316,7 @@ export function AdminWorshipManager() {
             Video & Livestream
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Quản lý danh mục video và cấu hình phát trực tiếp Thánh lễ (mock UI,
-            lưu tạm trên trình duyệt).
+            Quản lý danh mục video và cấu hình phát trực tiếp Thánh lễ.
           </p>
         </div>
       </div>
@@ -274,7 +345,12 @@ export function AdminWorshipManager() {
         ))}
       </div>
 
-      {activeTab === "categories" ? (
+      {isLoading ? (
+        <div className="flex h-64 flex-col items-center justify-center gap-3 text-muted-foreground bg-card border border-border rounded-[16px]">
+          <Loader2 className="h-8 w-8 animate-spin text-accent" />
+          <span className="text-sm">Đang tải dữ liệu...</span>
+        </div>
+      ) : activeTab === "categories" ? (
         <AdminWorshipCategoriesPanel
           categories={categories}
           videos={videos}

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { VocationFruitPageSection } from "@/components/site/vocation/vocation-fruit-page-section";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Hoa trái ơn gọi",
   description:

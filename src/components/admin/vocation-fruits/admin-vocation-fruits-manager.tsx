@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Plus } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ArrowLeft, Loader2, Plus } from "lucide-react";
 import {
   createEmptyVocationFruitFormValues,
   mapVocationFruitToFormValues,
@@ -14,77 +14,28 @@ import { AdminVocationFruitFilters } from "@/components/admin/vocation-fruits/ad
 import { AdminVocationFruitsTable } from "@/components/admin/vocation-fruits/admin-vocation-fruits-table";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import { getToken } from "@/lib/admin/mock-auth";
-import { mockVocationFruits } from "@/lib/vocation/mock-vocation-fruits";
 import type { VocationFruit, VocationType } from "@/lib/vocation/types";
 import { AdminOutlineButton } from "../shared/admin-outline-button";
+import {
+  getAllVocationFruits,
+  createVocationFruit,
+  updateVocationFruit,
+  deleteVocationFruit,
+  toVocationFruit,
+} from "@/shared/services/vocation-api";
+import { uploadEventImage } from "@/shared/services/events-api";
 
-
-const SEARCH_DEBOUNCE_MS = 300;
+const SEARCH_DEBOUNCE_MS = 1000;
 const PAGE_SIZE = 11;
-
-function filterFruits(
-  fruits: VocationFruit[],
-  params?: { vocationType?: VocationType; search?: string },
-): VocationFruit[] {
-  let result = fruits;
-
-  if (params?.vocationType) {
-    result = result.filter((fruit) => fruit.vocationType === params.vocationType);
-  }
-
-  const search = params?.search?.trim();
-  if (search) {
-    const query = search
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-
-    result = result.filter((fruit) => {
-      const haystack = [
-        fruit.fullName,
-        fruit.religiousOrder,
-        fruit.currentAssignment,
-        fruit.hometown,
-        fruit.patronSaint,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
-
-      return haystack.includes(query);
-    });
-  }
-
-  return result;
-}
-
-function paginateFruits<T>(items: T[], page: number, limit: number) {
-  const total = items.length;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  const safePage = Math.min(Math.max(page, 1), totalPages);
-  const start = (safePage - 1) * limit;
-
-  return {
-    items: items.slice(start, start + limit),
-    total,
-    totalPages,
-  };
-}
-
-async function uploadImagePreview(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
 
 export function AdminVocationFruitsManager() {
   const router = useRouter();
+  const [fruits, setFruits] = useState<VocationFruit[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formDefaults, setFormDefaults] = useState<VocationFruitFormValues>(() =>
     createEmptyVocationFruitFormValues(),
@@ -94,12 +45,7 @@ export function AdminVocationFruitsManager() {
   const [typeFilter, setTypeFilter] = useState<"all" | VocationType>("all");
   const [formOpen, setFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<VocationFruit | null>(null);
-
-  useEffect(() => {
-    if (!getToken()) {
-      router.push("/admin/login");
-    }
-  }, [router]);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -109,20 +55,37 @@ export function AdminVocationFruitsManager() {
     return () => window.clearTimeout(timer);
   }, [searchQuery]);
 
-  const { fruits, totalItems, totalPages } = useMemo(() => {
-    const trimmedSearch = debouncedSearch.trim();
-    const filtered = filterFruits(mockVocationFruits, {
-      ...(trimmedSearch ? { search: trimmedSearch } : {}),
-      ...(typeFilter !== "all" ? { vocationType: typeFilter } : {}),
-    });
-    const paginated = paginateFruits(filtered, page, PAGE_SIZE);
+  const fetchFruits = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
 
-    return {
-      fruits: paginated.items,
-      totalItems: paginated.total,
-      totalPages: paginated.totalPages,
-    };
-  }, [debouncedSearch, page, typeFilter]);
+    setError(null);
+
+    try {
+      const trimmedSearch = debouncedSearch.trim();
+      const res = await getAllVocationFruits(token, {
+        page,
+        limit: PAGE_SIZE,
+        ...(trimmedSearch ? { search: trimmedSearch } : {}),
+        ...(typeFilter !== "all" ? { type: typeFilter } : {}),
+      });
+      setFruits(res.fruits.map(toVocationFruit));
+      setTotalItems(res.pagination.total);
+      setTotalPages(res.pagination.totalPages);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load vocation fruits");
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedSearch, page, router, typeFilter]);
+
+  useEffect(() => {
+    // eslint-disable-next-line
+    fetchFruits();
+  }, [fetchFruits]);
 
   function closeForm() {
     setFormOpen(false);
@@ -143,16 +106,76 @@ export function AdminVocationFruitsManager() {
   }
 
   function handleDelete(fruitId: string) {
-    const target = mockVocationFruits.find((fruit) => fruit.id === fruitId);
+    const target = fruits.find((fruit) => fruit.id === fruitId);
     if (target) setDeleteTarget(target);
   }
 
-  function handleFormSubmit(_values: VocationFruitFormValues) {
-    closeForm();
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+
+    const token = getToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      await deleteVocationFruit(token, deleteTarget.id);
+      if (editingId === deleteTarget.id) closeForm();
+      setDeleteTarget(null);
+      await fetchFruits();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete vocation fruit");
+    } finally {
+      setDeleting(false);
+    }
   }
 
-  function confirmDelete() {
-    setDeleteTarget(null);
+  async function handleFormSubmit(values: VocationFruitFormValues) {
+    const token = getToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    try {
+      const data = {
+        fullName: values.fullName.trim(),
+        vocationType: values.vocationType,
+        religiousOrder: values.religiousOrder.trim() || undefined,
+        currentAssignment: values.currentAssignment.trim() || undefined,
+        hometown: values.hometown.trim() || undefined,
+        patronSaint: values.patronSaint.trim() || undefined,
+        vocationYear: values.vocationYear ? Number(values.vocationYear) : undefined,
+        image: values.image.trim() || undefined,
+      };
+
+      if (editingId) {
+        await updateVocationFruit(token, editingId, data);
+      } else {
+        await createVocationFruit(token, data);
+      }
+
+      closeForm();
+      await fetchFruits();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save vocation fruit");
+    }
+  }
+
+  async function handleUploadImage(file: File): Promise<string> {
+    const token = getToken();
+    if (!token) throw new Error("Not authenticated");
+    return uploadEventImage(token, file);
+  }
+
+  if (loading) {
+    return (
+      <div className="mx-auto flex max-w-7xl items-center justify-center py-20">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   return (
@@ -170,9 +193,13 @@ export function AdminVocationFruitsManager() {
             <h1 className="font-display text-3xl font-semibold text-card-foreground">
               Hoa trái ơn gọi
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Quản lý Quý Cha, Quý Thầy và Quý Dì quê hương giáo xứ Sa Nam.
-            </p>
+            {error ? (
+              <p className="mt-1 text-sm text-destructive">{error}</p>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">
+                Quản lý Quý Cha, Quý Thầy và Quý Dì quê hương giáo xứ Sa Nam.
+              </p>
+            )}
           </div>
           <AdminOutlineButton type="button" onClick={openCreateForm}>
             <Plus className="size-4" aria-hidden />
@@ -217,7 +244,7 @@ export function AdminVocationFruitsManager() {
         editingId={editingId}
         onClose={closeForm}
         onSubmit={handleFormSubmit}
-        onUploadImage={uploadImagePreview}
+        onUploadImage={handleUploadImage}
       />
 
       <AdminConfirmDialog
@@ -230,6 +257,7 @@ export function AdminVocationFruitsManager() {
         confirmLabel="Xóa"
         cancelLabel="Hủy"
         onConfirm={confirmDelete}
+        loading={deleting}
         variant="danger"
       />
     </div>

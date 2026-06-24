@@ -198,10 +198,6 @@ export function AdminWorshipLivePanel({
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Giai đoạn mock: cấu hình được lưu vào trình duyệt (localStorage). Khi có API,
-        phần này sẽ đồng bộ với server.
-      </p>
     </div>
   );
 }

@@ -1,15 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Radio, Tv, Calendar, User, Eye, RefreshCw } from "lucide-react";
 import { Video, LiveSettings } from "@/lib/videos/types";
 import type { YoutubeMetadata } from "@/lib/videos/youtube-metadata";
 import {
-  getStoredVideos,
-  getStoredLiveSettings,
-} from "@/lib/videos/mock-videos";
-import {
-  getDisplayVideos,
   formatVideoDate,
   formatViewCount,
 } from "@/lib/videos/video-utils";
@@ -17,13 +12,23 @@ import { VideoCard } from "./video-card";
 import { LiveChat } from "./live-chat";
 import { VideoPlayerModal } from "./video-player-modal";
 import { cn } from "@/lib/utils";
+import {
+  getPublicWorshipCategories,
+  getPublicWorshipVideos,
+  getPublicLiveSettings,
+  toWorshipVideoCategory,
+  toWorshipVideoItem,
+  toLiveSettings,
+} from "@/shared/services/worship-api";
+import type { WorshipVideoCategory, WorshipVideoItem } from "@/lib/videos/admin-worship-store";
 
 export function WorshipPlatform() {
   const [mounted, setMounted] = useState(false);
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [categories, setCategories] = useState<WorshipVideoCategory[]>([]);
+  const [videos, setVideos] = useState<WorshipVideoItem[]>([]);
   const [liveSettings, setLiveSettings] = useState<LiveSettings>({
     isLive: false,
-    youtubeId: "lYnBFKbKxU",
+    youtubeId: "",
     youtubeUrl: "",
   });
   const [liveMetadata, setLiveMetadata] = useState<YoutubeMetadata | null>(null);
@@ -36,14 +41,35 @@ export function WorshipPlatform() {
       : null;
 
   useEffect(() => {
-    const initData = () => {
-      setVideos(getStoredVideos());
-      setLiveSettings(getStoredLiveSettings());
-      setMounted(true);
-    };
+    let active = true;
+    async function loadData() {
+      try {
+        const [catsRes, vidsRes, liveRes] = await Promise.all([
+          getPublicWorshipCategories(),
+          getPublicWorshipVideos(),
+          getPublicLiveSettings(),
+        ]);
 
-    const timer = setTimeout(initData, 0);
-    return () => clearTimeout(timer);
+        if (!active) return;
+
+        const cats = catsRes.categories.map(toWorshipVideoCategory);
+        const vids = vidsRes.videos.map(toWorshipVideoItem);
+        const live = toLiveSettings(liveRes);
+
+        setCategories(cats);
+        setVideos(vids);
+        setLiveSettings(live);
+      } catch (err) {
+        console.error("Failed to load worship data:", err);
+      } finally {
+        if (active) setMounted(true);
+      }
+    }
+
+    loadData();
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -78,11 +104,6 @@ export function WorshipPlatform() {
       cancelled = true;
     };
   }, [liveSettings.isLive, liveSettings.youtubeId]);
-
-  const displayVideos = useMemo(() => getDisplayVideos(videos), [videos]);
-
-  const massEventVideos = displayVideos.filter((v) => v.category === "mass-event");
-  const hymnVideos = displayVideos.filter((v) => v.category === "hymn");
 
   if (!mounted) {
     return (
@@ -207,59 +228,59 @@ export function WorshipPlatform() {
       )}
 
       <section className="space-y-12">
-        <div className="w-full">
-          <div className="flex items-center justify-between mb-5 border-b border-border/40 pb-2">
-            <h3 className="font-display text-lg md:text-xl font-bold uppercase text-primary flex items-center gap-2">
-              <Tv className="size-5 text-accent" />
-              Thánh lễ & Sự kiện vừa diễn ra
-            </h3>
-            <span className="text-xs font-mono text-foreground/60">{massEventVideos.length} Video</span>
-          </div>
+        {categories.map((category) => {
+          const categoryVideos = videos.filter((video) => video.categoryId === category.id);
+          const mappedVideos: Video[] = categoryVideos.map((video) => ({
+            id: video.id,
+            title: video.title,
+            youtubeId: video.youtubeId || "",
+            youtubeUrl: video.youtubeUrl || "",
+            publishedAt: video.publishedAt,
+            duration: video.duration || "00:00",
+            thumbnail:
+              video.thumbnail ||
+              (video.youtubeId ? `https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg` : ""),
+            category: category.slug === "hymn" ? "hymn" : "mass-event",
+            description: video.description || undefined,
+            views: video.views,
+            speaker: video.speaker || undefined,
+          }));
 
-          {massEventVideos.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {massEventVideos.map((video) => (
-                <VideoCard
-                  key={video.id}
-                  video={video}
-                  isActive={modalVideo?.id === video.id}
-                  onSelect={setModalVideo}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="py-8 text-center text-xs text-foreground/50 bg-card rounded-xl border border-border/30">
-              Chưa có video thánh lễ hoặc sự kiện nào.
-            </div>
-          )}
-        </div>
+          return (
+            <div key={category.id} className="w-full">
+              <div className="flex items-center justify-between mb-5 border-b border-border/40 pb-2">
+                <h3 className="font-display text-lg md:text-xl font-bold uppercase text-primary flex items-center gap-2">
+                  {category.slug === "hymn" ? (
+                    <Radio className="size-5 text-accent" />
+                  ) : (
+                    <Tv className="size-5 text-accent" />
+                  )}
+                  {category.name}
+                </h3>
+                <span className="text-xs font-mono text-foreground/60">
+                  {mappedVideos.length} Video
+                </span>
+              </div>
 
-        <div className="w-full">
-          <div className="flex items-center justify-between mb-5 border-b border-border/40 pb-2">
-            <h3 className="font-display text-lg md:text-xl font-bold uppercase text-primary flex items-center gap-2">
-              <Radio className="size-5 text-accent" />
-              Thánh ca tâm tình
-            </h3>
-            <span className="text-xs font-mono text-foreground/60">{hymnVideos.length} Video</span>
-          </div>
-
-          {hymnVideos.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {hymnVideos.map((video) => (
-                <VideoCard
-                  key={video.id}
-                  video={video}
-                  isActive={modalVideo?.id === video.id}
-                  onSelect={setModalVideo}
-                />
-              ))}
+              {mappedVideos.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {mappedVideos.map((video) => (
+                    <VideoCard
+                      key={video.id}
+                      video={video}
+                      isActive={modalVideo?.id === video.id}
+                      onSelect={setModalVideo}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-xs text-foreground/50 bg-card rounded-xl border border-border/30">
+                  Chưa có video nào trong danh mục này.
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="py-8 text-center text-xs text-foreground/50 bg-card rounded-xl border border-border/30">
-              Chưa có video thánh ca nào.
-            </div>
-          )}
-        </div>
+          );
+        })}
       </section>
 
       <VideoPlayerModal video={modalVideo} onClose={() => setModalVideo(null)} />

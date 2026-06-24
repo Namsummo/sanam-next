@@ -52,7 +52,7 @@ export const adminModules: AdminModule[] = [
   {
     id: "vocation-fruits",
     title: "Hoa trái ơn gọi",
-    description: "Quản lý Quý Cha, Quý Thầy và Quý Dì quê hương (mock, chưa có API).",
+    description: "Quản lý Quý Cha, Quý Thầy và Quý Dì quê hương.",
     href: "/admin/vocation-fruits",
     icon: Sprout,
     status: "available",
@@ -68,7 +68,7 @@ export const adminModules: AdminModule[] = [
   {
     id: "worship",
     title: "Video & Livestream",
-    description: "Quản lý danh mục video, YouTube và phát trực tiếp (mock UI).",
+    description: "Quản lý danh mục video, YouTube và phát trực tiếp.",
     href: "/admin/worship",
     icon: Video,
     status: "available",
