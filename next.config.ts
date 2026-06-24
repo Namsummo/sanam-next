@@ -22,6 +22,32 @@ const nextConfig: NextConfig = {
         port: "4000",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "103.130.213.159",
+        port: "4000",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "giaoxusanam.vn",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.giaoxusanam.vn",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "http",
+        hostname: "giaoxusanam.vn",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "http",
+        hostname: "*.giaoxusanam.vn",
+        pathname: "/uploads/**",
+      },
     ],
   },
 };

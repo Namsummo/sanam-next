@@ -8,6 +8,7 @@ import { formatIsoDateToVi } from "@/lib/format";
 import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { ClergyMember } from "@/lib/clergy/types";
 import { CLERGY_TYPE_PRIEST } from "@/lib/clergy/types";
+import { resolveApiUrl } from "@/lib/utils";
 
 type ClergyDetailModalProps = {
   member: ClergyMember | null;
@@ -41,7 +42,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
   if (!member || typeof document === "undefined") return null;
 
   const isPriest = member.type === CLERGY_TYPE_PRIEST;
-  const imageSrc = member.image || DEFAULT_COVER;
+  const imageSrc = resolveApiUrl(member.image) || DEFAULT_COVER;
 
   return createPortal(
     <div

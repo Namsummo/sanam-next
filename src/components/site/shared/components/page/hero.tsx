@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getHeroSettings, DEFAULT_HERO_SETTINGS, type HeroSettingsData } from "@/shared/services/hero-settings-api";
 import { ScrollReveal, TextAnime } from "../animation";
+import { resolveApiUrl } from "@/lib/utils";
 
 export function Hero() {
   const [settings, setSettings] = useState<HeroSettingsData>(DEFAULT_HERO_SETTINGS);
@@ -36,11 +37,13 @@ export function Hero() {
     return () => clearInterval(interval);
   }, [settings.counters]);
 
+  const videoSrc = resolveApiUrl(settings.backgroundVideoUrl);
+
   return (
     <div className="hero dark-section">
       <div className="hero-bg-video">
-        <video autoPlay muted playsInline loop preload="metadata">
-          <source src={settings.backgroundVideoUrl} type="video/mp4" />
+        <video key={videoSrc} autoPlay muted playsInline loop preload="metadata">
+          <source src={videoSrc} type="video/mp4" />
         </video>
       </div>
 

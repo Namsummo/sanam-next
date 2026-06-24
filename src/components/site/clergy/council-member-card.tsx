@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { ClergyMember } from "@/lib/clergy/types";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 
 type CouncilMemberCardSize = "executive" | "member";
 
@@ -37,7 +37,7 @@ export function CouncilMemberCard({
   onClick,
 }: CouncilMemberCardProps) {
   const styles = sizeStyles[size];
-  const imgSrc = member.image || DEFAULT_COVER;
+  const imgSrc = resolveApiUrl(member.image) || DEFAULT_COVER;
 
   return (
     <article

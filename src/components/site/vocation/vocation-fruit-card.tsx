@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { VocationFruit } from "@/lib/vocation/types";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 
 type VocationFruitCardProps = {
   fruit: VocationFruit;
@@ -18,7 +18,7 @@ export function VocationFruitCard({ fruit, className }: VocationFruitCardProps) 
     >
       <figure className="mx-auto mb-4 size-[120px] overflow-hidden rounded-[20px] shadow-sm md:size-[130px]">
         <Image
-          src={fruit.image || DEFAULT_COVER}
+          src={resolveApiUrl(fruit.image) || DEFAULT_COVER}
           alt={`Chân dung ${fruit.fullName}`}
           width={130}
           height={130}

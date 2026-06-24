@@ -9,6 +9,7 @@ import {
   DEFAULT_OUR_MISSION_SETTINGS,
   type OurMissionSettingsData,
 } from "@/shared/services/our-mission-settings-api";
+import { resolveApiUrl } from "@/lib/utils";
 
 export function OurMission() {
   const [settings, setSettings] = useState<OurMissionSettingsData>(DEFAULT_OUR_MISSION_SETTINGS);
@@ -120,7 +121,7 @@ export function OurMission() {
                   <div className="mission-image img-1">
                     <figure className="image-anime relative w-full aspect-[1/1.8] min-h-[400px]">
                       <Image
-                        src={settings.image1UploadUrl || settings.image1Url}
+                        src={resolveApiUrl(settings.image1UploadUrl || settings.image1Url)}
                         alt="Our Mission 1"
                         fill
                         sizes="(max-width: 1280px) 100vw, 340px"
@@ -136,7 +137,7 @@ export function OurMission() {
                   <div className="mission-image img-2">
                     <figure className="relative w-full aspect-[1/1.9609] min-h-[400px]">
                       <Image
-                        src={settings.image2UploadUrl || settings.image2Url}
+                        src={resolveApiUrl(settings.image2UploadUrl || settings.image2Url)}
                         alt="Our Mission 2"
                         fill
                         sizes="(max-width: 1280px) 100vw, 314px"

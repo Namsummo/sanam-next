@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Play, Clock, Eye, User } from "lucide-react";
 import { Video } from "@/lib/videos/types";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 
 interface VideoCardProps {
   video: Video;
@@ -21,7 +21,7 @@ export function VideoCard({ video, isActive, onSelect }: VideoCardProps) {
       {/* Thumbnail Container */}
       <div className="relative aspect-video w-full overflow-hidden bg-black/10">
         <Image
-          src={video.thumbnail}
+          src={resolveApiUrl(video.thumbnail)}
           alt={video.title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

@@ -2,7 +2,7 @@ import Image from "next/image";
 import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { ExecutiveMember } from "@/lib/organization/types";
 import { getExecutiveMemberRoleLabel } from "@/lib/organization/executive-member-roles";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 
 type OrganizationMemberCardSize = "executive" | "member";
 
@@ -36,7 +36,7 @@ export function OrganizationMemberCard({
   className,
 }: OrganizationMemberCardProps) {
   const styles = sizeStyles[size];
-  const imgSrc = member.image || DEFAULT_COVER;
+  const imgSrc = resolveApiUrl(member.image) || DEFAULT_COVER;
   const isExternal = !!member.image;
 
   return (

@@ -4,7 +4,7 @@ import { Users } from "lucide-react";
 import { Button } from "@/components/site/shared/ui/button/button";
 import type { Organization } from "@/lib/organization/types";
 import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 
 type OrganizationCardProps = {
   organization: Organization;
@@ -24,7 +24,7 @@ export function OrganizationCard({ organization, className }: OrganizationCardPr
       <Link href={href} className="block overflow-hidden">
         <figure className="overflow-hidden">
           <Image
-            src={organization.image || DEFAULT_COVER}
+            src={resolveApiUrl(organization.image) || DEFAULT_COVER}
             alt={organization.name || DEFAULT_COVER_ALT}
             width={640}
             height={400}

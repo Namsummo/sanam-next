@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 
 export type PageHeaderBreadcrumb = {
   label: string;
@@ -22,6 +22,8 @@ export function PageHeader({
   backgroundImage,
   className,
 }: PageHeaderProps) {
+  const resolvedBg = backgroundImage ? resolveApiUrl(backgroundImage) : undefined;
+
   return (
     <section
       className={cn(
@@ -29,10 +31,10 @@ export function PageHeader({
         "mx-[15px] mt-[15px] rounded-[20px]",
         "max-[991px]:mx-0 max-[991px]:mt-0 max-[991px]:rounded-none",
         "px-6 pb-20 pt-[170px] md:pb-[175px] md:pt-[220px] lg:pt-[280px]",
-        backgroundImage ? "bg-cover bg-center bg-fixed" : "bg-primary",
+        resolvedBg ? "bg-cover bg-center bg-fixed" : "bg-primary",
         className,
       )}
-      style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}
+      style={resolvedBg ? { backgroundImage: `url(${resolvedBg})` } : undefined}
     >
       <div
         className={cn(

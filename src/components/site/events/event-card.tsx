@@ -5,7 +5,7 @@ import { NewsReadMoreLink } from "@/components/site/news/news-read-more-link";
 import { formatEventDateTime } from "@/lib/format";
 import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import type { ParishEvent } from "@/lib/events/types";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 
 type EventCardProps = {
   event: ParishEvent;
@@ -15,7 +15,7 @@ type EventCardProps = {
 export function EventCard({ event, className }: EventCardProps) {
   const href = `/events/${event.slug ?? event.id}`;
   const categoryLabel = event.categoryLabel;
-  const imageSrc = event.image ?? DEFAULT_COVER;
+  const imageSrc = resolveApiUrl(event.image) || DEFAULT_COVER;
   const hasBadges = event.isFeatured || Boolean(categoryLabel);
 
   return (

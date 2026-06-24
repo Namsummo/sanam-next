@@ -23,6 +23,7 @@ import {
   type HeroButtonData,
   type HeroCounterData,
 } from "@/shared/services/hero-settings-api";
+import { resolveApiUrl } from "@/lib/utils";
 
 type HeroZone =
   | "background"
@@ -338,11 +339,13 @@ function HeroPreview({ settings, selectedZone, onSelectZone }: {
   selectedZone: HeroZone | null;
   onSelectZone: (zone: HeroZone) => void;
 }) {
+  const videoSrc = resolveApiUrl(settings.backgroundVideoUrl);
+
   return (
     <div className={`hero dark-section !min-h-0 !h-auto !p-[205px_0_80px] !m-0 !rounded-none transition-all ${selectedZone === "background" ? "ring-2 ring-accent" : ""}`}>
       <div className="hero-bg-video">
-        <video autoPlay muted playsInline loop preload="metadata">
-          <source src={settings.backgroundVideoUrl} type="video/mp4" />
+        <video key={videoSrc} autoPlay muted playsInline loop preload="metadata">
+          <source src={videoSrc} type="video/mp4" />
         </video>
       </div>
 

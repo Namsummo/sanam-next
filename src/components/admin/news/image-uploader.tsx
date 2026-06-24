@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 import Image from "next/image";
 import { Input } from "@/components/site/shared/ui/input/input";
 
@@ -50,7 +50,7 @@ export function ImageUploader({
       {preview ? (
         <div className="relative overflow-hidden rounded-[16px] border border-border">
           <Image
-            src={preview}
+            src={resolveApiUrl(preview)}
             alt="Cover preview"
             className="size-full object-cover"
             width={500}

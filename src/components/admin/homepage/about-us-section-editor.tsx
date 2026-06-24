@@ -12,6 +12,7 @@ import {
   type AboutUsMissionItemData,
 } from "@/shared/services/about-us-settings-api";
 import { uploadImage } from "@/shared/services/news-api";
+import { resolveApiUrl } from "@/lib/utils";
 import { Input } from "@/components/site/shared/ui/input/input";
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
 
@@ -54,7 +55,7 @@ function zoneLabel(zone: AboutZone): string {
 }
 
 function resolveAboutImageSrc(uploadUrl?: string, url?: string) {
-  return uploadUrl?.trim() || url || "";
+  return resolveApiUrl(uploadUrl?.trim() || url || "");
 }
 
 export function AboutUsSectionEditor() {
@@ -160,7 +161,7 @@ export function AboutUsSectionEditor() {
 
     return (
       <div className="overflow-hidden rounded-[12px] border border-border bg-muted/20">
-        <img src={src} alt="Xem trước" className="max-h-56 w-full object-cover" />
+        <img src={resolveApiUrl(src)} alt="Xem trước" className="max-h-56 w-full object-cover" />
       </div>
     );
   }

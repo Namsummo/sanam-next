@@ -5,7 +5,7 @@ import { getNewsCategoryLabel } from "@/lib/news/categories";
 import { formatNewsDate } from "@/lib/format";
 import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import type { NewsArticle } from "@/lib/news/types";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 
 type NewsCardProps = {
   article: NewsArticle;
@@ -27,7 +27,7 @@ export function NewsCard({ article, className }: NewsCardProps) {
         <Link href={href} className="block">
           <figure className="overflow-hidden rounded-[20px]">
             <Image
-              src={article.coverImage || DEFAULT_COVER}
+              src={resolveApiUrl(article.coverImage) || DEFAULT_COVER}
               alt={article.title || DEFAULT_COVER_ALT}
               width={640}
               height={556}
