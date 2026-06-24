@@ -33,7 +33,9 @@ export interface OurMissionSettingsData {
   contactLabel: string;
   contactPhone: string;
   image1Url: string;
+  image1UploadUrl?: string;
   image2Url: string;
+  image2UploadUrl?: string;
   visibility: OurMissionVisibilityData;
   createdAt?: string;
   updatedAt?: string;
@@ -59,7 +61,9 @@ export const DEFAULT_OUR_MISSION_SETTINGS: OurMissionSettingsData = {
   contactLabel: "Call Us!",
   contactPhone: "(+123) 456 789",
   image1Url: "/images/our-mission-image-1.jpg",
+  image1UploadUrl: "",
   image2Url: "/images/our-mission-image-2.png",
+  image2UploadUrl: "",
   visibility: {
     subtitle: true,
     title: true,

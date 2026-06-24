@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertCircle, Check, Eye, EyeOff, Image as ImageIcon, Loader2, Pencil } from "lucide-react";
+import { AlertCircle, Check, Eye, EyeOff, Image as ImageIcon, Loader2, Pencil, Upload } from "lucide-react";
 import { getToken } from "@/lib/admin/mock-auth";
 import {
   getOurMissionSettings,
@@ -11,6 +11,15 @@ import {
   type OurMissionSettingsData,
   type OurMissionItem,
 } from "@/shared/services/our-mission-settings-api";
+import { uploadImage } from "@/shared/services/news-api";
+import { Input } from "@/components/site/shared/ui/input/input";
+import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
+
+type ImageUploadTarget = "image1" | "image2";
+
+function resolveMissionImageSrc(uploadUrl?: string, url?: string) {
+  return uploadUrl?.trim() || url || "";
+}
 
 type MissionZone =
   | "subtitle"
@@ -46,6 +55,7 @@ export function OurMissionSectionEditor() {
   const [settings, setSettings] = useState<OurMissionSettingsData>(DEFAULT_OUR_MISSION_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<ImageUploadTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedZone, setSelectedZone] = useState<MissionZone | null>(null);
 
@@ -101,6 +111,47 @@ export function OurMissionSectionEditor() {
     }
   }
 
+  async function handleImageUpload(target: ImageUploadTarget) {
+    const token = getToken();
+    if (!token) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/gif,image/webp";
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      try {
+        setUploading(target);
+        setError(null);
+        const url = await uploadImage(token, file);
+        if (target === "image1") {
+          handleFieldChange("image1UploadUrl", url);
+        } else {
+          handleFieldChange("image2UploadUrl", url);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Upload failed");
+      } finally {
+        setUploading(null);
+      }
+    };
+
+    input.click();
+  }
+
+  function renderImageUploadPreview(src: string) {
+    if (!src.trim()) return null;
+
+    return (
+      <div className="overflow-hidden rounded-[12px] border border-border bg-muted/20">
+        <img src={src} alt="Xem trước" className="max-h-56 w-full object-cover" />
+      </div>
+    );
+  }
+
   function renderEditPanel() {
     if (!selectedZone) {
       return (
@@ -124,7 +175,7 @@ export function OurMissionSectionEditor() {
                 {settings.visibility.subtitle ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.subtitle} onChange={(e) => handleFieldChange("subtitle", e.target.value)}
+            <Input type="text" value={settings.subtitle} onChange={(e) => handleFieldChange("subtitle", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
         )}
@@ -137,7 +188,7 @@ export function OurMissionSectionEditor() {
                 {settings.visibility.title ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <textarea rows={3} value={settings.title} onChange={(e) => handleFieldChange("title", e.target.value)}
+            <Textarea rows={3} value={settings.title} onChange={(e) => handleFieldChange("title", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
         )}
@@ -150,8 +201,12 @@ export function OurMissionSectionEditor() {
                 {settings.visibility.description ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <textarea rows={4} value={settings.description} onChange={(e) => handleFieldChange("description", e.target.value)}
-              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
+            <Textarea
+              rows={8}
+              value={settings.description}
+              onChange={(e) => handleFieldChange("description", e.target.value)}
+              className="min-h-[200px] w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+            />
           </div>
         )}
 
@@ -165,15 +220,18 @@ export function OurMissionSectionEditor() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-card-foreground">Tiêu đề</label>
-              <input type="text" value={settings.missionItems[selectedZone.index]?.title ?? ""}
+              <Input type="text" value={settings.missionItems[selectedZone.index]?.title ?? ""}
                 onChange={(e) => handleMissionFieldChange(selectedZone.index, "title", e.target.value)}
                 className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-card-foreground">Mô tả</label>
-              <textarea rows={2} value={settings.missionItems[selectedZone.index]?.description ?? ""}
+              <Textarea
+                rows={6}
+                value={settings.missionItems[selectedZone.index]?.description ?? ""}
                 onChange={(e) => handleMissionFieldChange(selectedZone.index, "description", e.target.value)}
-                className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
+                className="min-h-[140px] w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+              />
             </div>
           </div>
         )}
@@ -188,7 +246,7 @@ export function OurMissionSectionEditor() {
                 {settings.visibility.button ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={zoneType === "buttonText" ? settings.buttonText : settings.buttonLink}
+            <Input type="text" value={zoneType === "buttonText" ? settings.buttonText : settings.buttonLink}
               onChange={(e) => handleFieldChange(zoneType === "buttonText" ? "buttonText" : "buttonLink", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
@@ -204,7 +262,7 @@ export function OurMissionSectionEditor() {
                 {settings.visibility.contactInfo ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={zoneType === "contactLabel" ? settings.contactLabel : settings.contactPhone}
+            <Input type="text" value={zoneType === "contactLabel" ? settings.contactLabel : settings.contactPhone}
               onChange={(e) => handleFieldChange(zoneType === "contactLabel" ? "contactLabel" : "contactPhone", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
@@ -218,8 +276,34 @@ export function OurMissionSectionEditor() {
                 {settings.visibility.image1 ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.image1Url} onChange={(e) => handleFieldChange("image1Url", e.target.value)}
-              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" placeholder="/images/our-mission-image-1.jpg" />
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={settings.image1Url}
+                onChange={(e) => handleFieldChange("image1Url", e.target.value)}
+                className="min-w-0 flex-1 rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+                placeholder="/images/our-mission-image-1.jpg"
+              />
+              <button
+                type="button"
+                onClick={() => handleImageUpload("image1")}
+                disabled={uploading === "image1"}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-2 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploading === "image1" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Upload className="size-4" />
+                )}
+                Tải lên
+              </button>
+            </div>
+            {settings.image1UploadUrl ? (
+              <div className="mt-3">
+                <p className="mb-1.5 text-xs text-muted-foreground">Ảnh đã tải lên</p>
+                {renderImageUploadPreview(settings.image1UploadUrl)}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -231,8 +315,34 @@ export function OurMissionSectionEditor() {
                 {settings.visibility.image2 ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.image2Url} onChange={(e) => handleFieldChange("image2Url", e.target.value)}
-              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" placeholder="/images/our-mission-image-2.png" />
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={settings.image2Url}
+                onChange={(e) => handleFieldChange("image2Url", e.target.value)}
+                className="min-w-0 flex-1 rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+                placeholder="/images/our-mission-image-2.png"
+              />
+              <button
+                type="button"
+                onClick={() => handleImageUpload("image2")}
+                disabled={uploading === "image2"}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-2 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploading === "image2" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Upload className="size-4" />
+                )}
+                Tải lên
+              </button>
+            </div>
+            {settings.image2UploadUrl ? (
+              <div className="mt-3">
+                <p className="mb-1.5 text-xs text-muted-foreground">Ảnh đã tải lên</p>
+                {renderImageUploadPreview(settings.image2UploadUrl)}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -354,7 +464,11 @@ function OurMissionPreview({ settings, selectedZone, onSelectZone }: {
               <div className={`mission-image img-1 ${!settings.visibility.image1 ? "opacity-40" : ""}`}>
                 <button type="button" onClick={() => onSelectZone("image1")}
                   className={`image-anime relative block w-full aspect-[1/1.8] min-h-[400px] rounded-[20px] overflow-hidden transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "image1" ? "ring-2 ring-accent" : ""}`}>
-                  <img src={settings.image1Url} alt="Our Mission 1" className="w-full h-full object-cover" />
+                  <img
+                    src={resolveMissionImageSrc(settings.image1UploadUrl, settings.image1Url)}
+                    alt="Our Mission 1"
+                    className="w-full h-full object-cover"
+                  />
                   <span className="absolute bottom-2 right-2 rounded bg-black/50 px-2 py-1 text-xs text-white backdrop-blur-sm"><ImageIcon className="mr-1 inline-block size-3" />Ảnh lớn</span>
                 </button>
               </div>
@@ -362,7 +476,11 @@ function OurMissionPreview({ settings, selectedZone, onSelectZone }: {
               <div className={`mission-image img-2 ${!settings.visibility.image2 ? "opacity-40" : ""}`}>
                 <button type="button" onClick={() => onSelectZone("image2")}
                   className={`relative block w-full aspect-[1/1.9609] min-h-[400px] rounded-[20px] overflow-hidden transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "image2" ? "ring-2 ring-accent" : ""}`}>
-                  <img src={settings.image2Url} alt="Our Mission 2" className="w-full h-full object-cover" />
+                  <img
+                    src={resolveMissionImageSrc(settings.image2UploadUrl, settings.image2Url)}
+                    alt="Our Mission 2"
+                    className="w-full h-full object-cover"
+                  />
                   <span className="absolute bottom-2 right-2 rounded bg-black/50 px-2 py-1 text-xs text-white backdrop-blur-sm"><ImageIcon className="mr-1 inline-block size-3" />Ảnh nhỏ</span>
                 </button>
               </div>

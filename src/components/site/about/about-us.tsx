@@ -50,7 +50,7 @@ export function AboutUs() {
                     <div className="about-us-image">
                       <figure className="image-anime relative w-full h-full aspect-[570/517] min-h-[400px]">
                       <Image
-                        src={settings.mainImageUrl}
+                        src={settings.mainImageUploadUrl || settings.mainImageUrl}
                         alt="About Us"
                         fill
                         sizes="(max-width: 1280px) 100vw, 570px"
@@ -66,7 +66,7 @@ export function AboutUs() {
                       <div className="about-video-image relative w-full aspect-[215/130]">
                       <figure className="w-full h-full relative">
                         <Image
-                          src={settings.videoThumbnailUrl}
+                          src={settings.videoThumbnailUploadUrl || settings.videoThumbnailUrl}
                           alt="Watch Our Video Cover"
                           fill
                           sizes="215px"
@@ -125,7 +125,7 @@ export function AboutUs() {
                       <div key={index} className="about-us-item">
                         <div className="icon-box shrink-0">
                           <Image
-                            src={item.iconUrl}
+                            src={item.iconUploadUrl || item.iconUrl}
                             alt={`${item.title} Icon`}
                             width={24}
                             height={24}
@@ -162,7 +162,7 @@ export function AboutUs() {
                           <div className="about-author-image overflow-hidden rounded-full w-[50px] h-[50px] relative">
                         <figure className="image-anime w-full h-full">
                           <Image
-                            src={settings.authorImageUrl}
+                            src={settings.authorImageUploadUrl || settings.authorImageUrl}
                             alt={`Author ${settings.authorName}`}
                             fill
                             sizes="50px"

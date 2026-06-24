@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertCircle, Check, Eye, EyeOff, Image as ImageIcon, Loader2, Pencil } from "lucide-react";
+import { AlertCircle, Check, Eye, EyeOff, Image as ImageIcon, Loader2, Pencil, Upload } from "lucide-react";
 import { getToken } from "@/lib/admin/mock-auth";
 import {
   getAboutUsSettings,
@@ -11,6 +11,11 @@ import {
   type AboutUsSettingsData,
   type AboutUsMissionItemData,
 } from "@/shared/services/about-us-settings-api";
+import { uploadImage } from "@/shared/services/news-api";
+import { Input } from "@/components/site/shared/ui/input/input";
+import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
+
+type ImageUploadTarget = "mainImage" | "authorImage" | "videoThumbnail" | `missionIcon:${number}`;
 
 type AboutZone =
   | "mainImage"
@@ -48,10 +53,15 @@ function zoneLabel(zone: AboutZone): string {
   return `Mục #${zone.index + 1}`;
 }
 
+function resolveAboutImageSrc(uploadUrl?: string, url?: string) {
+  return uploadUrl?.trim() || url || "";
+}
+
 export function AboutUsSectionEditor() {
   const [settings, setSettings] = useState<AboutUsSettingsData>(DEFAULT_ABOUT_US_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<ImageUploadTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedZone, setSelectedZone] = useState<AboutZone | null>(null);
 
@@ -107,6 +117,54 @@ export function AboutUsSectionEditor() {
     }
   }
 
+  async function handleImageUpload(target: ImageUploadTarget) {
+    const token = getToken();
+    if (!token) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/gif,image/webp";
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      try {
+        setUploading(target);
+        setError(null);
+        const url = await uploadImage(token, file);
+        if (target === "mainImage") {
+          handleFieldChange("mainImageUploadUrl", url);
+        } else if (target === "authorImage") {
+          handleFieldChange("authorImageUploadUrl", url);
+        } else if (target === "videoThumbnail") {
+          handleFieldChange("videoThumbnailUploadUrl", url);
+        } else if (target.startsWith("missionIcon:")) {
+          const index = Number.parseInt(target.split(":")[1] ?? "", 10);
+          if (!Number.isNaN(index)) {
+            handleMissionFieldChange(index, "iconUploadUrl", url);
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Upload failed");
+      } finally {
+        setUploading(null);
+      }
+    };
+
+    input.click();
+  }
+
+  function renderImageUploadPreview(src: string) {
+    if (!src.trim()) return null;
+
+    return (
+      <div className="overflow-hidden rounded-[12px] border border-border bg-muted/20">
+        <img src={src} alt="Xem trước" className="max-h-56 w-full object-cover" />
+      </div>
+    );
+  }
+
   function renderEditPanel() {
     if (!selectedZone) {
       return (
@@ -130,8 +188,34 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.mainImage ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.mainImageUrl} onChange={(e) => handleFieldChange("mainImageUrl", e.target.value)}
-              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" placeholder="/images/about-us-image-1.jpg" />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={settings.mainImageUrl}
+                onChange={(e) => handleFieldChange("mainImageUrl", e.target.value)}
+                className="min-w-0 flex-1 rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+                placeholder="/images/about-us-image-1.jpg"
+              />
+              <button
+                type="button"
+                onClick={() => handleImageUpload("mainImage")}
+                disabled={uploading === "mainImage"}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-2 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploading === "mainImage" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Upload className="size-4" />
+                )}
+                Tải lên
+              </button>
+            </div>
+            {settings.mainImageUploadUrl ? (
+              <div className="mt-3">
+                <p className="mb-1.5 text-xs text-muted-foreground">Ảnh đã tải lên</p>
+                {renderImageUploadPreview(settings.mainImageUploadUrl)}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -143,8 +227,34 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.video ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.videoThumbnailUrl} onChange={(e) => handleFieldChange("videoThumbnailUrl", e.target.value)}
-              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" placeholder="/images/about-us-video-image.jpg" />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={settings.videoThumbnailUrl}
+                onChange={(e) => handleFieldChange("videoThumbnailUrl", e.target.value)}
+                className="min-w-0 flex-1 rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+                placeholder="/images/about-us-video-image.jpg"
+              />
+              <button
+                type="button"
+                onClick={() => handleImageUpload("videoThumbnail")}
+                disabled={uploading === "videoThumbnail"}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-2 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploading === "videoThumbnail" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Upload className="size-4" />
+                )}
+                Tải lên
+              </button>
+            </div>
+            {settings.videoThumbnailUploadUrl ? (
+              <div className="mt-3">
+                <p className="mb-1.5 text-xs text-muted-foreground">Ảnh đã tải lên</p>
+                {renderImageUploadPreview(settings.videoThumbnailUploadUrl)}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -169,7 +279,7 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.video ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.videoTitle} onChange={(e) => handleFieldChange("videoTitle", e.target.value)}
+            <Input type="text" value={settings.videoTitle} onChange={(e) => handleFieldChange("videoTitle", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
         )}
@@ -182,7 +292,7 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.subtitle ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.subtitle} onChange={(e) => handleFieldChange("subtitle", e.target.value)}
+            <Input type="text" value={settings.subtitle} onChange={(e) => handleFieldChange("subtitle", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
         )}
@@ -195,7 +305,7 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.title ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <textarea rows={3} value={settings.title} onChange={(e) => handleFieldChange("title", e.target.value)}
+            <Textarea rows={3} value={settings.title} onChange={(e) => handleFieldChange("title", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
         )}
@@ -208,8 +318,12 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.description ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <textarea rows={4} value={settings.description} onChange={(e) => handleFieldChange("description", e.target.value)}
-              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
+            <Textarea
+              rows={8}
+              value={settings.description}
+              onChange={(e) => handleFieldChange("description", e.target.value)}
+              className="min-h-[200px] w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+            />
           </div>
         )}
 
@@ -223,21 +337,48 @@ export function AboutUsSectionEditor() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-card-foreground">URL Icon</label>
-              <input type="text" value={settings.missionItems[selectedZone.index]?.iconUrl ?? ""}
-                onChange={(e) => handleMissionFieldChange(selectedZone.index, "iconUrl", e.target.value)}
-                className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  value={settings.missionItems[selectedZone.index]?.iconUrl ?? ""}
+                  onChange={(e) => handleMissionFieldChange(selectedZone.index, "iconUrl", e.target.value)}
+                  className="min-w-0 flex-1 rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleImageUpload(`missionIcon:${selectedZone.index}`)}
+                  disabled={uploading === `missionIcon:${selectedZone.index}`}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-2 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {uploading === `missionIcon:${selectedZone.index}` ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Upload className="size-4" />
+                  )}
+                  Tải lên
+                </button>
+              </div>
+              {settings.missionItems[selectedZone.index]?.iconUploadUrl ? (
+                <div className="mt-3">
+                  <p className="mb-1.5 text-xs text-muted-foreground">Icon đã tải lên</p>
+                  {renderImageUploadPreview(settings.missionItems[selectedZone.index]?.iconUploadUrl ?? "")}
+                </div>
+              ) : null}
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-card-foreground">Tiêu đề</label>
-              <input type="text" value={settings.missionItems[selectedZone.index]?.title ?? ""}
+              <Input type="text" value={settings.missionItems[selectedZone.index]?.title ?? ""}
                 onChange={(e) => handleMissionFieldChange(selectedZone.index, "title", e.target.value)}
                 className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-card-foreground">Mô tả</label>
-              <textarea rows={2} value={settings.missionItems[selectedZone.index]?.description ?? ""}
+              <Textarea
+                rows={6}
+                value={settings.missionItems[selectedZone.index]?.description ?? ""}
                 onChange={(e) => handleMissionFieldChange(selectedZone.index, "description", e.target.value)}
-                className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
+                className="min-h-[140px] w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+              />
             </div>
           </div>
         )}
@@ -266,8 +407,34 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.author ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.authorImageUrl} onChange={(e) => handleFieldChange("authorImageUrl", e.target.value)}
-              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" placeholder="/images/author-1.jpg" />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={settings.authorImageUrl}
+                onChange={(e) => handleFieldChange("authorImageUrl", e.target.value)}
+                className="min-w-0 flex-1 rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+                placeholder="/images/author-1.jpg"
+              />
+              <button
+                type="button"
+                onClick={() => handleImageUpload("authorImage")}
+                disabled={uploading === "authorImage"}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-2 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploading === "authorImage" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Upload className="size-4" />
+                )}
+                Tải lên
+              </button>
+            </div>
+            {settings.authorImageUploadUrl ? (
+              <div className="mt-3">
+                <p className="mb-1.5 text-xs text-muted-foreground">Ảnh đã tải lên</p>
+                {renderImageUploadPreview(settings.authorImageUploadUrl)}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -279,7 +446,7 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.author ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.authorName} onChange={(e) => handleFieldChange("authorName", e.target.value)}
+            <Input type="text" value={settings.authorName} onChange={(e) => handleFieldChange("authorName", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
         )}
@@ -292,7 +459,7 @@ export function AboutUsSectionEditor() {
                 {settings.visibility.author ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
-            <input type="text" value={settings.authorTitle} onChange={(e) => handleFieldChange("authorTitle", e.target.value)}
+            <Input type="text" value={settings.authorTitle} onChange={(e) => handleFieldChange("authorTitle", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
         )}
@@ -357,7 +524,11 @@ function AboutUsPreview({ settings, selectedZone, onSelectZone }: {
               <div className={`about-us-image ${!settings.visibility.mainImage ? "opacity-40" : ""}`}>
                 <button type="button" onClick={() => onSelectZone("mainImage")}
                   className={`image-anime relative block w-full aspect-[570/517] min-h-[400px] rounded-[20px] overflow-hidden transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "mainImage" ? "ring-2 ring-accent" : ""}`}>
-                  <img src={settings.mainImageUrl} alt="About Us" className="w-full h-full object-cover" />
+                  <img
+                    src={resolveAboutImageSrc(settings.mainImageUploadUrl, settings.mainImageUrl)}
+                    alt="About Us"
+                    className="w-full h-full object-cover"
+                  />
                   <span className="absolute bottom-2 right-2 rounded bg-black/50 px-2 py-1 text-xs text-white backdrop-blur-sm"><ImageIcon className="mr-1 inline-block size-3" />Ảnh chính</span>
                 </button>
               </div>
@@ -366,10 +537,14 @@ function AboutUsPreview({ settings, selectedZone, onSelectZone }: {
                 <div className="about-video-image relative w-full aspect-[215/130]">
                   <button type="button" onClick={() => onSelectZone("videoThumbnail")}
                     className={`relative block w-full h-full rounded-[10px] overflow-hidden transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "videoThumbnail" ? "ring-2 ring-accent" : ""}`}>
-                    <img src={settings.videoThumbnailUrl} alt="Video Cover" className="w-full h-full object-cover" />
+                    <img
+                      src={resolveAboutImageSrc(settings.videoThumbnailUploadUrl, settings.videoThumbnailUrl)}
+                      alt="Video Cover"
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                   <button type="button" onClick={() => onSelectZone("videoUrl")}
-                    className="video-play-button !cursor-pointer">
+                    className="video-play-button !cursor-pointer" aria-label="Xem video">
                     <span className="popup-video bg-effect flex items-center justify-center w-[28px] h-[28px] rounded-full bg-[var(--accent-color)]">
                       <svg className="size-3 fill-current text-white ml-[2px]" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
                     </span>
@@ -407,7 +582,11 @@ function AboutUsPreview({ settings, selectedZone, onSelectZone }: {
                   <div key={index} className="about-us-item !w-[calc(50%-15px)]">
                     <button type="button" onClick={() => onSelectZone({ type: "missionItem", index })}
                       className={`icon-box shrink-0 !cursor-pointer transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone && typeof selectedZone !== "string" && selectedZone.type === "missionItem" && selectedZone.index === index ? "ring-2 ring-accent" : ""}`}>
-                      <img src={item.iconUrl} alt="" className="w-6 h-6" />
+                      <img
+                        src={resolveAboutImageSrc(item.iconUploadUrl, item.iconUrl)}
+                        alt={item.title}
+                        className="w-6 h-6"
+                      />
                     </button>
                     <div className="about-us-item-content">
                       <h3 className="font-display font-semibold text-lg text-[var(--primary-color)]">{item.title}</h3>
@@ -428,7 +607,11 @@ function AboutUsPreview({ settings, selectedZone, onSelectZone }: {
                 <div className={`about-author-box ${!settings.visibility.author ? "opacity-40" : ""}`}>
                   <button type="button" onClick={() => onSelectZone("authorImage")}
                     className={`about-author-image overflow-hidden rounded-full w-[50px] h-[50px] relative transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "authorImage" ? "ring-2 ring-accent" : ""}`}>
-                    <img src={settings.authorImageUrl} alt={settings.authorName} className="w-full h-full object-cover" />
+                    <img
+                      src={resolveAboutImageSrc(settings.authorImageUploadUrl, settings.authorImageUrl)}
+                      alt={settings.authorName}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                   <div className="about-author-content">
                     <button type="button" onClick={() => onSelectZone("authorName")}

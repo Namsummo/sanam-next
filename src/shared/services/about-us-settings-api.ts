@@ -8,6 +8,7 @@ function authHeaders(token: string): HeadersInit {
 
 export interface AboutUsMissionItemData {
   iconUrl: string;
+  iconUploadUrl?: string;
   title: string;
   description: string;
 }
@@ -26,7 +27,9 @@ export interface AboutUsVisibilityData {
 export interface AboutUsSettingsData {
   _id?: string;
   mainImageUrl: string;
+  mainImageUploadUrl?: string;
   videoThumbnailUrl: string;
+  videoThumbnailUploadUrl?: string;
   videoUrl: string;
   videoTitle: string;
   subtitle: string;
@@ -36,6 +39,7 @@ export interface AboutUsSettingsData {
   buttonText: string;
   buttonLink: string;
   authorImageUrl: string;
+  authorImageUploadUrl?: string;
   authorName: string;
   authorTitle: string;
   visibility: AboutUsVisibilityData;
@@ -45,7 +49,9 @@ export interface AboutUsSettingsData {
 
 export const DEFAULT_ABOUT_US_SETTINGS: AboutUsSettingsData = {
   mainImageUrl: "/images/about-us-image-1.jpg",
+  mainImageUploadUrl: "",
   videoThumbnailUrl: "/images/about-us-video-image.jpg",
+  videoThumbnailUploadUrl: "",
   videoUrl: "https://www.youtube.com/watch?v=Y-x0efG1seA",
   videoTitle: "Watch Our Video",
   subtitle: "About Us",
@@ -55,11 +61,13 @@ export const DEFAULT_ABOUT_US_SETTINGS: AboutUsSettingsData = {
   missionItems: [
     {
       iconUrl: "/images/icon-about-us-item-1.svg",
+      iconUploadUrl: "",
       title: "Our Mission",
       description: "Our mission is to share God&apos;s love, guide people in faith.",
     },
     {
       iconUrl: "/images/icon-about-us-item-2.svg",
+      iconUploadUrl: "",
       title: "Our Vision",
       description: "Our mission is to share God&apos;s love, guide people in faith.",
     },
@@ -67,6 +75,7 @@ export const DEFAULT_ABOUT_US_SETTINGS: AboutUsSettingsData = {
   buttonText: "Learn More About",
   buttonLink: "/introduce",
   authorImageUrl: "/images/author-1.jpg",
+  authorImageUploadUrl: "",
   authorName: "Cody Fisher",
   authorTitle: "CEO & Lead Pastor",
   visibility: {

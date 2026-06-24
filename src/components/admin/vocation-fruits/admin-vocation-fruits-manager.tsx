@@ -16,6 +16,7 @@ import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dial
 import { getToken } from "@/lib/admin/mock-auth";
 import { mockVocationFruits } from "@/lib/vocation/mock-vocation-fruits";
 import type { VocationFruit, VocationType } from "@/lib/vocation/types";
+import { AdminOutlineButton } from "../shared/admin-outline-button";
 
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -171,13 +172,12 @@ export function AdminVocationFruitsManager() {
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Quản lý Quý Cha, Quý Thầy và Quý Dì quê hương giáo xứ Sa Nam.
-              Dữ liệu mock — thao tác lưu sẽ kết nối API sau.
             </p>
           </div>
-          <button type="button" onClick={openCreateForm}>
+          <AdminOutlineButton type="button" onClick={openCreateForm}>
             <Plus className="size-4" aria-hidden />
             Thêm hoa trái
-          </button>
+          </AdminOutlineButton>
         </div>
       </div>
 

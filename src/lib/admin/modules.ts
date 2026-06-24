@@ -67,10 +67,10 @@ export const adminModules: AdminModule[] = [
   {
     id: "worship",
     title: "Video & Livestream",
-    description: "Thư viện video và trạng thái phát trực tiếp.",
+    description: "Quản lý danh mục video, YouTube và phát trực tiếp (mock UI).",
     href: "/admin/worship",
     icon: Video,
-    status: "coming-soon",
+    status: "available",
   },
   {
     id: "mass-schedule",

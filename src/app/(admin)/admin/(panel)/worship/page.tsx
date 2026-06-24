@@ -1,10 +1,5 @@
-import { AdminModulePlaceholder } from "@/components/admin/admin-module-placeholder";
+import { AdminWorshipManager } from "@/components/admin/worship/admin-worship-manager";
 
 export default function AdminWorshipPage() {
-  return (
-    <AdminModulePlaceholder
-      title="Video & Livestream"
-      description="Quản lý thư viện video YouTube và trạng thái phát trực tiếp."
-    />
-  );
+  return <AdminWorshipManager />;
 }
