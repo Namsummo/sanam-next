@@ -9,13 +9,7 @@ import { ImageUploader } from "@/components/admin/news/image-uploader";
 import { AdminOrganizationTermMembersTable } from "./admin-organization-term-members-table";
 import { getToken } from "@/lib/admin/mock-auth";
 import { uploadImage } from "@/shared/services/news-api";
-import {
-  createOrganization,
-  updateOrganization,
-  addOrganizationTerm,
-  updateOrganizationTerm,
-  deleteOrganizationTerm,
-} from "@/lib/organization/api";
+import { createOrganization, updateOrganization } from "@/lib/organization/api";
 import { slugify } from "@/shared/lib/slugify";
 import {
   createEmptyExecutiveMember,
@@ -98,169 +92,70 @@ export function AdminOrganizationForm({ organization }: AdminOrganizationFormPro
     return uploadImage(token, file);
   }
 
-  async function handleCreateTerm(term: OrganizationTerm) {
+  function handleCreateTerm(term: OrganizationTerm) {
     if (terms.some((existing) => existing._id === term.id)) {
       setError("Khóa này đã tồn tại trong danh sách.");
       return;
     }
 
     setError("");
-    setImportMessage("");
-    const newTerm = createExecutiveTerm(term, { isCurrent: terms.length === 0 });
-
-    if (isEdit && organization) {
-      try {
-        setSaving(true);
-        const updatedOrg = await addOrganizationTerm(organization._id, newTerm);
-        setTerms(normalizeExecutiveTerms(updatedOrg.terms));
-        setImportMessage(`Đã tạo và lưu thành công nhiệm kỳ ${newTerm.name} vào cơ sở dữ liệu.`);
-        setShowNewTermForm(false);
-        setActiveTab("members");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể tạo nhiệm kỳ");
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      setTerms((current) => [
-        ...current,
-        newTerm,
-      ]);
-      setShowNewTermForm(false);
-      setActiveTab("members");
-    }
+    setTerms((current) => [
+      ...current,
+      createExecutiveTerm(term, { isCurrent: current.length === 0 }),
+    ]);
+    setShowNewTermForm(false);
+    setActiveTab("members");
   }
 
   function findTermIndex(termKey: string): number {
     return terms.findIndex((term) => getExecutiveTermKey(term) === termKey);
   }
 
-  async function handleRemoveTerm(termKey: string) {
-    const term = terms.find((t) => getExecutiveTermKey(t) === termKey);
-    if (!term) return;
-
-    setError("");
-    setImportMessage("");
-
-    if (isEdit && organization && term._id) {
-      const confirmed = window.confirm(`Bạn có chắc chắn muốn xóa nhiệm kỳ ${term.name} trực tiếp khỏi cơ sở dữ liệu?`);
-      if (!confirmed) return;
-
-      try {
-        setSaving(true);
-        const updatedOrg = await deleteOrganizationTerm(organization._id, term._id);
-        setTerms(normalizeExecutiveTerms(updatedOrg.terms));
-        setImportMessage(`Đã xóa thành công nhiệm kỳ ${term.name} khỏi cơ sở dữ liệu.`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể xóa nhiệm kỳ");
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      setTerms(terms.filter((t) => getExecutiveTermKey(t) !== termKey));
-    }
+  function handleRemoveTerm(termKey: string) {
+    setTerms(terms.filter((term) => getExecutiveTermKey(term) !== termKey));
   }
 
-  async function handleUpdateTerm(index: number, updates: Partial<ExecutiveTerm>) {
-    const term = terms[index];
-    if (!term) return;
+  function handleUpdateTerm(index: number, updates: Partial<ExecutiveTerm>) {
+    setTerms((current) =>
+      current.map((term, termIndex) => {
+        if (termIndex !== index) {
+          return updates.isCurrent ? { ...term, isCurrent: false } : term;
+        }
 
-    setError("");
-    setImportMessage("");
-
-    if (isEdit && organization && term._id) {
-      try {
-        setSaving(true);
-        const updatedOrg = await updateOrganizationTerm(organization._id, term._id, updates);
-        setTerms(normalizeExecutiveTerms(updatedOrg.terms));
-        setImportMessage(`Đã cập nhật thành công nhiệm kỳ ${term.name}.`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể cập nhật nhiệm kỳ");
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      setTerms((current) =>
-        current.map((t, termIndex) => {
-          if (termIndex !== index) {
-            return updates.isCurrent ? { ...t, isCurrent: false } : t;
-          }
-
-          return { ...t, ...updates };
-        }),
-      );
-    }
-  }
-
-  async function handleAddMember(termIndex: number) {
-    const term = terms[termIndex];
-    if (!term) return;
-
-    setError("");
-    setImportMessage("");
-    const newMembers = [
-      ...term.members,
-      createEmptyExecutiveMember(term.members.length + 1),
-    ];
-
-    if (isEdit && organization && term._id) {
-      try {
-        setSaving(true);
-        const updatedOrg = await updateOrganizationTerm(organization._id, term._id, { members: newMembers });
-        setTerms(normalizeExecutiveTerms(updatedOrg.terms));
-        setImportMessage("Đã thêm thành viên mới thành công.");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể thêm thành viên");
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      setTerms((current) =>
-        current.map((t, index) =>
-          index !== termIndex
-            ? t
-            : {
-                ...t,
-                members: newMembers,
-              },
-        ),
-      );
-    }
-  }
-
-  async function handleRemoveMember(termIndex: number, memberIndex: number) {
-    const term = terms[termIndex];
-    if (!term) return;
-
-    setError("");
-    setImportMessage("");
-    const newMembers = normalizeExecutiveMembers(
-      term.members.filter((_, itemIndex) => itemIndex !== memberIndex),
+        return { ...term, ...updates };
+      }),
     );
+  }
 
-    if (isEdit && organization && term._id) {
-      try {
-        setSaving(true);
-        const updatedOrg = await updateOrganizationTerm(organization._id, term._id, { members: newMembers });
-        setTerms(normalizeExecutiveTerms(updatedOrg.terms));
-        setImportMessage("Đã xóa thành viên thành công.");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể xóa thành viên");
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      setTerms((current) =>
-        current.map((t, index) =>
-          index !== termIndex
-            ? t
-            : {
-                ...t,
-                members: newMembers,
-              },
-        ),
-      );
-    }
+  function handleAddMember(termIndex: number) {
+    setTerms((current) =>
+      current.map((term, index) =>
+        index !== termIndex
+          ? term
+          : {
+              ...term,
+              members: [
+                ...term.members,
+                createEmptyExecutiveMember(term.members.length + 1),
+              ],
+            },
+      ),
+    );
+  }
+
+  function handleRemoveMember(termIndex: number, memberIndex: number) {
+    setTerms((current) =>
+      current.map((term, index) =>
+        index !== termIndex
+          ? term
+          : {
+              ...term,
+              members: normalizeExecutiveMembers(
+                term.members.filter((_, itemIndex) => itemIndex !== memberIndex),
+              ),
+            },
+      ),
+    );
   }
 
   function handleUpdateMember(
@@ -282,37 +177,17 @@ export function AdminOrganizationForm({ organization }: AdminOrganizationFormPro
     );
   }
 
-  async function handleReplaceMembers(termIndex: number, members: ExecutiveMember[]) {
-    const term = terms[termIndex];
-    if (!term) return;
-
-    setError("");
-    setImportMessage("");
-    const newMembers = normalizeExecutiveMembers(members);
-
-    if (isEdit && organization && term._id) {
-      try {
-        setSaving(true);
-        const updatedOrg = await updateOrganizationTerm(organization._id, term._id, { members: newMembers });
-        setTerms(normalizeExecutiveTerms(updatedOrg.terms));
-        setImportMessage(`Đã nhập thành công ${members.length} thành viên từ file Excel.`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể nhập danh sách thành viên");
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      setTerms((current) =>
-        current.map((t, index) =>
-          index !== termIndex
-            ? t
-            : {
-                ...t,
-                members: newMembers,
-              },
-        ),
-      );
-    }
+  function handleReplaceMembers(termIndex: number, members: ExecutiveMember[]) {
+    setTerms((current) =>
+      current.map((term, index) =>
+        index !== termIndex
+          ? term
+          : {
+              ...term,
+              members: normalizeExecutiveMembers(members),
+            },
+      ),
+    );
   }
 
   function handleExportMembers(termIndex: number) {

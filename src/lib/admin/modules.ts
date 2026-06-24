@@ -10,6 +10,7 @@ import {
   Users,
   Video,
   Image as ImageIcon,
+  UserCog,
 } from "lucide-react";
 
 export type AdminModuleStatus = "available" | "coming-soon";
@@ -102,6 +103,14 @@ export const adminModules: AdminModule[] = [
     description: "Quản lý hình ảnh nền của các trang.",
     href: "/admin/library",
     icon: ImageIcon,
+    status: "available",
+  },
+  {
+    id: "users",
+    title: "Thành viên",
+    description: "Quản lý tài khoản đăng nhập trang quản trị.",
+    href: "/admin/users",
+    icon: UserCog,
     status: "available",
   },
 ];

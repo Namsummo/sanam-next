@@ -12,6 +12,7 @@ import {
 import { formatCouncilTermLabel } from "@/lib/clergy/council-terms";
 import { parseTermId } from "@/lib/organization/terms";
 import type { OrganizationTerm } from "@/lib/organization/types";
+import { createAdminTerm } from "@/lib/organization/api";
 
 type AdminClergyNewTermFormProps = {
   existingTermIds: string[];
@@ -27,6 +28,7 @@ export function AdminClergyNewTermForm({
   const [startYear, setStartYear] = useState("");
   const [endYear, setEndYear] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const previewTerm = useMemo(() => {
     const start = Number(startYear);
@@ -45,7 +47,7 @@ export function AdminClergyNewTermForm({
     onClose();
   }
 
-  function handleCreate() {
+  async function handleCreate() {
     const start = Number(startYear);
     const end = Number(endYear);
     const validationError = validateCouncilTermYears(start, end);
@@ -68,10 +70,27 @@ export function AdminClergyNewTermForm({
       return;
     }
 
-    setStartYear("");
-    setEndYear("");
+    setLoading(true);
     setError("");
-    onCreated(term);
+    try {
+      await createAdminTerm(start, end);
+      alert(`Đã tạo nhiệm kỳ mới ${start} – ${end} thành công và lưu vào cơ sở dữ liệu!`);
+      setStartYear("");
+      setEndYear("");
+      onCreated(term);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Đã xảy ra lỗi khi tạo nhiệm kỳ.";
+      if (errMsg.includes("đã tồn tại")) {
+        alert(`Nhiệm kỳ ${start} – ${end} đã tồn tại trong hệ thống. Đang thêm vào danh sách.`);
+        setStartYear("");
+        setEndYear("");
+        onCreated(term);
+      } else {
+        setError(errMsg);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -87,6 +106,7 @@ export function AdminClergyNewTermForm({
           showIcon={false}
           onClick={handleClose}
           className="text-muted-foreground transition-colors hover:text-card-foreground"
+          disabled={loading}
         >
           <X className="size-4" />
         </Button>
@@ -113,6 +133,7 @@ export function AdminClergyNewTermForm({
               onChange={(event) => setStartYear(event.target.value)}
               placeholder="VD: 2023"
               className="bg-background"
+              disabled={loading}
             />
           </div>
 
@@ -129,6 +150,7 @@ export function AdminClergyNewTermForm({
               onChange={(event) => setEndYear(event.target.value)}
               placeholder="VD: 2026"
               className="bg-background"
+              disabled={loading}
             />
           </div>
         </div>
@@ -144,14 +166,15 @@ export function AdminClergyNewTermForm({
         ) : null}
 
         <div className="mt-4 flex items-center gap-2">
-          <AdminOutlineButton
+          <button
             type="button"
+            disabled={loading}
             onClick={handleCreate}
-            className="rounded-[8px] bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90"
+            className="rounded-[8px] bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
           >
-            Thêm nhiệm kỳ
-          </AdminOutlineButton>
-          <AdminOutlineButton type="button" onClick={handleClose}>
+            {loading ? "Đang tạo..." : "Thêm nhiệm kỳ"}
+          </button>
+          <AdminOutlineButton type="button" onClick={handleClose} disabled={loading}>
             Hủy
           </AdminOutlineButton>
         </div>
