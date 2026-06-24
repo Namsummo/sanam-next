@@ -4,6 +4,19 @@ export const SESSION_KEY = "sanam_admin_token";
 export const USER_KEY = "sanam_admin_user";
 const SESSION_EVENT = "sanam_admin_session_change";
 
+function setCookie(name: string, value: string, days = 7) {
+  if (typeof document === "undefined") return;
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = "; expires=" + date.toUTCString();
+  document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Lax";
+}
+
+function deleteCookie(name: string) {
+  if (typeof document === "undefined") return;
+  document.cookie = name + "=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax";
+}
+
 export interface SessionUser {
   id: string;
   email: string;
@@ -29,6 +42,7 @@ export function setMockAdminSession(token: string, user?: SessionUser): void {
   if (user) {
     STORE.setItem(USER_KEY, JSON.stringify(user));
   }
+  setCookie(SESSION_KEY, token, 7);
   window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
@@ -36,6 +50,7 @@ export function clearSession(): void {
   if (!STORE) return;
   STORE.removeItem(SESSION_KEY);
   STORE.removeItem(USER_KEY);
+  deleteCookie(SESSION_KEY);
   window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
