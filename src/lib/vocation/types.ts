@@ -8,7 +8,7 @@ export type VocationType =
   | typeof VOCATION_TYPE_SISTER;
 
 export type VocationFruit = {
-  id: number;
+  id: string;
   fullName: string;
   vocationType: VocationType;
   /** Dòng tu / tổ chức */
@@ -20,6 +20,5 @@ export type VocationFruit = {
   patronSaint?: string;
   /** Năm thụ phong / tuyên khấn */
   vocationYear?: number;
-  sortOrder?: number;
-  isVisible?: boolean;
+  image?: string;
 };

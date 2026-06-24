@@ -25,8 +25,10 @@ export function PageHeader({
   return (
     <section
       className={cn(
-        "dark-section relative z-0 mx-[15px] mt-[15px] overflow-hidden rounded-[20px]",
-        "px-6 pb-20 pt-32 md:pb-[175px] md:pt-[220px] lg:pt-[280px]",
+        "page-header dark-section relative z-0 overflow-hidden",
+        "mx-[15px] mt-[15px] rounded-[20px]",
+        "max-[991px]:mx-0 max-[991px]:mt-0 max-[991px]:rounded-none",
+        "px-6 pb-20 pt-[170px] md:pb-[175px] md:pt-[220px] lg:pt-[280px]",
         backgroundImage ? "bg-cover bg-center bg-fixed" : "bg-primary",
         className,
       )}

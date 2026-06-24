@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Newspaper,
   Settings,
+  Sprout,
   Users,
   Video,
   Image as ImageIcon,
@@ -45,6 +46,14 @@ export const adminModules: AdminModule[] = [
     description: "Cập nhật hồ sơ linh mục và ban hành giáo.",
     href: "/admin/clergy",
     icon: Church,
+    status: "available",
+  },
+  {
+    id: "vocation-fruits",
+    title: "Hoa trái ơn gọi",
+    description: "Quản lý Quý Cha, Quý Thầy và Quý Dì quê hương (mock, chưa có API).",
+    href: "/admin/vocation-fruits",
+    icon: Sprout,
     status: "available",
   },
   {

@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { VocationFruitPanel } from "@/components/site/vocation/vocation-fruit-panel";
-import { getVisibleVocationFruits } from "@/lib/vocation/mock-vocation-fruits";
+import { mockVocationFruits } from "@/lib/vocation/mock-vocation-fruits";
 
 export function VocationFruitPageSection() {
-  const fruits = getVisibleVocationFruits();
+  const fruits = mockVocationFruits;
 
   return (
     <>

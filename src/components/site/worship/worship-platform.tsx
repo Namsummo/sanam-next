@@ -23,7 +23,7 @@ export function WorshipPlatform() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [liveSettings, setLiveSettings] = useState<LiveSettings>({
     isLive: false,
-    youtubeId: "",
+    youtubeId: "lYnBFKbKxU",
     youtubeUrl: "",
   });
   const [liveMetadata, setLiveMetadata] = useState<YoutubeMetadata | null>(null);
@@ -144,16 +144,6 @@ export function WorshipPlatform() {
                     <p className="font-display text-lg uppercase font-semibold">Chưa có luồng phát</p>
                   </div>
                 )}
-
-                <div className="absolute top-4 right-4 pointer-events-none">
-                  <span className="bg-accent px-3 py-1 rounded-md text-xs font-bold tracking-wider uppercase text-white flex items-center gap-1.5 shadow-md">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                    </span>
-                    Đang Trực Tiếp
-                  </span>
-                </div>
               </div>
 
               <div className="mt-5 p-5 bg-card border border-border/40 rounded-2xl shadow-sm">

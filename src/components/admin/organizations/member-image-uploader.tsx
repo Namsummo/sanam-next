@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { X, Loader2, Image as ImageIcon } from "lucide-react";
 
 type MemberImageUploaderProps = {
   value?: string | null;

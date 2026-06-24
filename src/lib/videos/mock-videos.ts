@@ -1,10 +1,10 @@
 import { Video, LiveSettings } from "./types";
 
-const MASS_EVENT_VIDEO_ID = "jBNF5sjPSAk";
+const MASS_EVENT_VIDEO_ID = "lYnBFKbKxU";
 const MASS_EVENT_VIDEO_URL = `https://www.youtube.com/watch?v=${MASS_EVENT_VIDEO_ID}`;
 const MASS_EVENT_THUMBNAIL = `https://i.ytimg.com/vi/${MASS_EVENT_VIDEO_ID}/hqdefault.jpg`;
 
-const HYMN_VIDEO_ID = "bk4m3VdBKDc";
+const HYMN_VIDEO_ID = "lYnBFKbKxU";
 const HYMN_VIDEO_URL = `https://www.youtube.com/watch?v=${HYMN_VIDEO_ID}`;
 const HYMN_THUMBNAIL = `https://i.ytimg.com/vi/${HYMN_VIDEO_ID}/hqdefault.jpg`;
 
@@ -93,9 +93,9 @@ export const defaultMockVideos: Video[] = [
 ];
 
 export const defaultLiveSettings: LiveSettings = {
-  isLive: false,
-  youtubeId: "",
-  youtubeUrl: "",
+  isLive: true,
+  youtubeId: "TfYsAVvxtpw",
+  youtubeUrl: "https://www.youtube.com/watch?v=TfYsAVvxtpw",
 };
 
 const STORAGE_KEYS = {

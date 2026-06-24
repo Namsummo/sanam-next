@@ -29,18 +29,20 @@ export default async function SiteLayout({
     }
 
     return (
-      <div data-theme="site" className="flex min-h-full flex-col px-0 md:px-4">
+      <div data-theme="site" className="flex min-h-full flex-col px-0 min-[992px]:px-4">
         <UnderConstructionPage contactItems={contactItems} socialLinks={socialLinks} />
       </div>
     );
   }
 
   return (
-    <div data-theme="site" className="flex min-h-full flex-col px-0 md:px-4">
+    <div data-theme="site" className="flex min-h-full flex-col">
       <Preloader />
       <SiteHeader />
-      {children}
-      <SiteFooter />
+      <div className="flex min-h-0 flex-1 flex-col px-0 min-[992px]:px-4">
+        {children}
+        <SiteFooter />
+      </div>
     </div>
   );
 }

@@ -1,32 +1,29 @@
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
+import { WorshipPlatform } from "@/components/site/worship/worship-platform";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 
 export const metadata = {
-  title: "Phụng Vụ — Giáo xứ Sa Nam",
-  description: "Thông tin phụng vụ tại Giáo xứ Sa Nam.",
+  title: "Truyền Thông Trực Tuyến — Giáo xứ Sa Nam",
+  description:
+    "Trang phát trực tiếp Thánh lễ và lưu trữ bài giảng, video phụng vụ của Giáo xứ Sa Nam.",
 };
 
-export default async function WorshipPage() {
+export default async function WorshipLivePage() {
   const bgSettings = await getBackgroundSettings().catch(() => null);
 
   return (
     <>
       <PageHeader
-        title="Phụng Vụ"
+        title="Truyền Thông"
         breadcrumbs={[
           { label: "Trang chủ", href: "/" },
-          { label: "Phụng vụ" },
+          { label: "Video & Livestream" },
         ]}
         backgroundImage={bgSettings?.worshipBg}
       />
       <main className="min-h-screen w-full bg-background px-4 py-8 md:px-8 lg:px-12">
-        <div className="mx-auto max-w-[900px] py-16 text-center">
-          <p className="font-display text-xl font-semibold text-primary md:text-2xl">
-            Nội dung đang được cập nhật
-          </p>
-          <p className="mt-3 font-sans text-sm text-foreground/70 md:text-base">
-            Vui lòng quay lại sau.
-          </p>
+        <div className="mx-auto max-w-[1300px]">
+          <WorshipPlatform />
         </div>
       </main>
     </>

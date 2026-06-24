@@ -19,3 +19,13 @@ export const vocationFilterOptions = [
 ] as const;
 
 export type VocationFilterId = (typeof vocationFilterOptions)[number]["id"];
+
+export function getVocationTypeLabel(type: VocationType): string {
+  return vocationTypeSectionTitles[type];
+}
+
+export function getVocationTypeBadgeClassName(type: VocationType): string {
+  if (type === VOCATION_TYPE_PRIEST) return "bg-blue-100 text-blue-700";
+  if (type === VOCATION_TYPE_BROTHER) return "bg-amber-100 text-amber-700";
+  return "bg-rose-100 text-rose-700";
+}
