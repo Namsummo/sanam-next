@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/site/shared/ui/table/table";
 import { AdminPagination } from "@/components/admin/shared/admin-pagination";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 import type { VocationFruit } from "@/lib/vocation/types";
 
 const actionButtonClassName =
@@ -75,7 +75,7 @@ export function AdminVocationFruitsTable({
                     {fruit.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={fruit.image}
+                        src={resolveApiUrl(fruit.image)}
                         alt=""
                         className="size-10 shrink-0 rounded-[8px] object-cover"
                       />

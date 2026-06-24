@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/site/shared/ui/table/table";
 import { AdminPagination } from "@/components/admin/shared/admin-pagination";
-import { cn } from "@/lib/utils";
+import { cn, resolveApiUrl } from "@/lib/utils";
 import type { Organization } from "@/lib/organization/types";
 
 export const ORGANIZATIONS_PAGE_SIZE = 10;
@@ -87,7 +87,7 @@ export function AdminOrganizationsTable({
                   <div className="flex items-center gap-3">
                     {org.image && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={org.image} alt="" className="size-10 rounded-[8px] object-cover shrink-0" />
+                      <img src={resolveApiUrl(org.image)} alt="" className="size-10 rounded-[8px] object-cover shrink-0" />
                     )}
                     <div>
                       <p className="font-medium text-card-foreground">{org.name}</p>

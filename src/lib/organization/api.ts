@@ -3,7 +3,7 @@ import {
   getOrganizationBySlug as getMockOrganizationBySlug,
   getVisibleOrganizations as getMockOrganizations,
 } from "./mock-organizations";
-import type { Organization } from "./types";
+import type { Organization, ExecutiveTerm } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -116,6 +116,63 @@ export async function toggleOrganizationVisibility(id: string): Promise<{ isVisi
     headers: authHeaders(token),
   });
   if (!res.ok) throw new Error("Failed to toggle visibility");
+  return res.json();
+}
+
+export async function addOrganizationTerm(id: string, term: Partial<ExecutiveTerm>): Promise<Organization> {
+  const token = getToken();
+  if (!token) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_BASE}/api/admin/organizations/${id}/terms`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(token),
+    },
+    body: JSON.stringify(term),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: "Failed to add term" }));
+    throw new Error(err.message);
+  }
+  return res.json();
+}
+
+export async function updateOrganizationTerm(
+  id: string,
+  termId: string,
+  termUpdates: Partial<ExecutiveTerm>
+): Promise<Organization> {
+  const token = getToken();
+  if (!token) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_BASE}/api/admin/organizations/${id}/terms/${termId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(token),
+    },
+    body: JSON.stringify(termUpdates),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: "Failed to update term" }));
+    throw new Error(err.message);
+  }
+  return res.json();
+}
+
+export async function deleteOrganizationTerm(id: string, termId: string): Promise<Organization> {
+  const token = getToken();
+  if (!token) throw new Error("Not authenticated");
+
+  const res = await fetch(`${API_BASE}/api/admin/organizations/${id}/terms/${termId}`, {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: "Failed to delete term" }));
+    throw new Error(err.message);
+  }
   return res.json();
 }
 

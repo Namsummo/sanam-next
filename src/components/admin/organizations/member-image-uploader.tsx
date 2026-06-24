@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { X, Loader2, Image as ImageIcon } from "lucide-react";
+import { resolveApiUrl } from "@/lib/utils";
 
 type MemberImageUploaderProps = {
   value?: string | null;
@@ -43,7 +44,7 @@ export function MemberImageUploader({
         <div className="group relative size-full overflow-hidden rounded-[8px] border border-border">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={value}
+            src={resolveApiUrl(value)}
             alt="Member"
             className="size-full object-cover"
           />
