@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { VocationFruitPageSection } from "@/components/site/vocation/vocation-fruit-page-section";
+import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 
 export const metadata: Metadata = {
   title: "Hoa trái ơn gọi",
@@ -8,7 +9,9 @@ export const metadata: Metadata = {
     "Danh sách các Cha, Thầy, Dì quê hương Giáo xứ Sa Nam — những hoa trái ơn gọi trong Giáo hội.",
 };
 
-export default function HoaTraiOnGoiPage() {
+export default async function HoaTraiOnGoiPage() {
+  const bgSettings = await getBackgroundSettings().catch(() => null);
+
   return (
     <>
       <PageHeader
@@ -18,6 +21,7 @@ export default function HoaTraiOnGoiPage() {
           { label: "Giới thiệu", href: "/introduce" },
           { label: "Hoa trái ơn gọi" },
         ]}
+        backgroundImage={bgSettings?.introduceBg}
       />
 
       <article className="px-6 py-16 md:py-[120px]">

@@ -145,7 +145,7 @@ export function CouncilMembersPanel({
             {filteredMembers.map((member) => (
               <li
                 key={member.id}
-                className="min-w-[42vw] shrink-0 sm:min-w-[28vw] md:min-w-0"
+                className="min-w-[28vw] shrink-0 sm:min-w-[22vw] md:min-w-0"
               >
                 <CouncilMemberCard
                   member={member}

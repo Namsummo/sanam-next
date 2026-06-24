@@ -56,7 +56,7 @@ export default async function OrganizationDetailPage(props: {
           { label: "Đoàn thể", href: "/organization" },
           { label: organization.name },
         ]}
-        backgroundImage={organization.image || bgSettings?.organizationBg}
+        backgroundImage={bgSettings?.organizationBg}
       />
 
       <article className="px-6 py-16 md:py-[120px]">
