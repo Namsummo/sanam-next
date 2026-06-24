@@ -12,13 +12,14 @@ import {
   type OurMissionItem,
 } from "@/shared/services/our-mission-settings-api";
 import { uploadImage } from "@/shared/services/news-api";
+import { resolveApiUrl } from "@/lib/utils";
 import { Input } from "@/components/site/shared/ui/input/input";
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
 
 type ImageUploadTarget = "image1" | "image2";
 
 function resolveMissionImageSrc(uploadUrl?: string, url?: string) {
-  return uploadUrl?.trim() || url || "";
+  return resolveApiUrl(uploadUrl?.trim() || url || "");
 }
 
 type MissionZone =
@@ -128,8 +129,10 @@ export function OurMissionSectionEditor() {
         setError(null);
         const url = await uploadImage(token, file);
         if (target === "image1") {
+          handleFieldChange("image1Url", url);
           handleFieldChange("image1UploadUrl", url);
         } else {
+          handleFieldChange("image2Url", url);
           handleFieldChange("image2UploadUrl", url);
         }
       } catch (err) {

@@ -135,14 +135,18 @@ export function AboutUsSectionEditor() {
         setError(null);
         const url = await uploadImage(token, file);
         if (target === "mainImage") {
+          handleFieldChange("mainImageUrl", url);
           handleFieldChange("mainImageUploadUrl", url);
         } else if (target === "authorImage") {
+          handleFieldChange("authorImageUrl", url);
           handleFieldChange("authorImageUploadUrl", url);
         } else if (target === "videoThumbnail") {
+          handleFieldChange("videoThumbnailUrl", url);
           handleFieldChange("videoThumbnailUploadUrl", url);
         } else if (target.startsWith("missionIcon:")) {
           const index = Number.parseInt(target.split(":")[1] ?? "", 10);
           if (!Number.isNaN(index)) {
+            handleMissionFieldChange(index, "iconUrl", url);
             handleMissionFieldChange(index, "iconUploadUrl", url);
           }
         }
