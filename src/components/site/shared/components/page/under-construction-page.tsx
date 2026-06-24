@@ -22,6 +22,16 @@ export function UnderConstructionPage({
   contactItems = [],
   socialLinks = [],
 }: UnderConstructionPageProps) {
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = window.localStorage.getItem("sanam_admin_token");
+      if (token) {
+        document.cookie = `sanam_admin_token=${encodeURIComponent(token)}; path=/; SameSite=Lax; max-age=604800`;
+        window.location.reload();
+      }
+    }
+  }, []);
+
   const phoneItem = contactItems.find((i) => i.id === "phone");
   const emailItem = contactItems.find((i) => i.id === "email");
 

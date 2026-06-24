@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/site/shared/components/page/site-header
 import { UnderConstructionPage } from "@/components/site/shared/components/page/under-construction-page";
 import { getPublicContactSettings } from "@/shared/services/contact-api";
 import { getPublicFooterSettings } from "@/shared/services/footer-settings-api";
+import { cookies } from "next/headers";
 
 export default async function SiteLayout({
   children,
@@ -11,8 +12,10 @@ export default async function SiteLayout({
   children: React.ReactNode;
 }>) {
   const isUnderConstruction = process.env.NEXT_PUBLIC_UNDER_CONSTRUCTION === "true";
+  const cookieStore = await cookies();
+  const isAdminLoggedIn = cookieStore.has("sanam_admin_token");
 
-  if (isUnderConstruction) {
+  if (isUnderConstruction && !isAdminLoggedIn) {
     let contactItems: any[] = [];
     let socialLinks: any[] = [];
     try {
