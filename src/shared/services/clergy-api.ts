@@ -18,6 +18,7 @@ export interface ApiClergyResponse {
   birthday?: string | null;
   sortOrder?: number | null;
   isVisible: boolean;
+  showOnHomepage?: boolean;
   image?: string | null;
   ordinationDate?: string | null;
   patronSaint?: string | null;
@@ -49,6 +50,7 @@ export function toClergyMember(data: ApiClergyResponse): ClergyMember {
     birthday: data.birthday || undefined,
     sortOrder: data.sortOrder ?? undefined,
     isVisible: data.isVisible,
+    showOnHomepage: data.showOnHomepage ?? false,
     image: data.image || undefined,
     ordinationDate: data.ordinationDate || undefined,
     patronSaint: data.patronSaint || undefined,
@@ -67,6 +69,7 @@ export interface CreateClergyData {
   birthday?: string;
   sortOrder?: number;
   isVisible?: boolean;
+  showOnHomepage?: boolean;
   image?: string;
   ordinationDate?: string;
   patronSaint?: string;
@@ -195,5 +198,17 @@ export async function toggleClergyVisibility(
     headers: authHeaders(token),
   });
   if (!res.ok) throw new Error("Failed to toggle visibility");
+  return res.json();
+}
+
+export async function toggleClergyHomepageVisibility(
+  token: string,
+  id: string,
+): Promise<{ showOnHomepage: boolean }> {
+  const res = await fetch(`${API_BASE}/api/admin/clergy/${id}/homepage-visibility`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) throw new Error("Failed to toggle homepage visibility");
   return res.json();
 }

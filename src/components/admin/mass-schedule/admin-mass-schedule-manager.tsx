@@ -25,15 +25,24 @@ import {
   deleteMassEntry,
   type ApiMassEntry,
   type MassScheduleGrouped,
+  type DayType,
 } from "@/shared/services/mass-schedule-api";
-const DAY_TYPE_LABELS: Record<string, string> = {
-  weekday: "Ngày thường",
+const DAY_TYPE_LABELS: Record<DayType, string> = {
+  monday: "Thứ Hai",
+  tuesday: "Thứ Ba",
+  wednesday: "Thứ Tư",
+  thursday: "Thứ Năm",
+  friday: "Thứ Sáu",
   saturday: "Thứ Bảy",
   sunday: "Chủ Nhật",
 };
 
 const DAY_TYPE_OPTIONS = [
-  { value: "weekday", label: "Ngày thường" },
+  { value: "monday", label: "Thứ Hai" },
+  { value: "tuesday", label: "Thứ Ba" },
+  { value: "wednesday", label: "Thứ Tư" },
+  { value: "thursday", label: "Thứ Năm" },
+  { value: "friday", label: "Thứ Sáu" },
   { value: "saturday", label: "Thứ Bảy" },
   { value: "sunday", label: "Chủ Nhật" },
 ] as const;
@@ -41,20 +50,24 @@ const DAY_TYPE_OPTIONS = [
 type FormMode = "create" | "edit";
 
 type FormData = {
-  dayType: "weekday" | "saturday" | "sunday";
+  dayType: DayType;
   time: string;
   title: string;
 };
 
 const emptyForm: FormData = {
-  dayType: "weekday",
+  dayType: "monday",
   time: "",
   title: "",
 };
 
 function groupEntries(entries: ApiMassEntry[]): MassScheduleGrouped {
   return {
-    weekday: entries.filter((e) => e.dayType === "weekday"),
+    monday: entries.filter((e) => e.dayType === "monday"),
+    tuesday: entries.filter((e) => e.dayType === "tuesday"),
+    wednesday: entries.filter((e) => e.dayType === "wednesday"),
+    thursday: entries.filter((e) => e.dayType === "thursday"),
+    friday: entries.filter((e) => e.dayType === "friday"),
     saturday: entries.filter((e) => e.dayType === "saturday"),
     sunday: entries.filter((e) => e.dayType === "sunday"),
   };
@@ -94,7 +107,11 @@ export function AdminMassScheduleManager() {
         const data = await getAdminMassSchedule(token);
         if (!cancelled) {
           setAllEntries([
-            ...data.weekday,
+            ...data.monday,
+            ...data.tuesday,
+            ...data.wednesday,
+            ...data.thursday,
+            ...data.friday,
             ...data.saturday,
             ...data.sunday,
           ]);
@@ -114,10 +131,10 @@ export function AdminMassScheduleManager() {
     return () => { cancelled = true; };
   }, [router]);
 
-  function openCreate(dayType?: "weekday" | "saturday" | "sunday") {
+  function openCreate(dayType?: DayType) {
     setFormMode("create");
     setEditingId(null);
-    setFormData({ ...emptyForm, dayType: dayType ?? "weekday" });
+    setFormData({ ...emptyForm, dayType: dayType ?? "monday" });
     setFormOpen(true);
   }
 
@@ -205,7 +222,7 @@ export function AdminMassScheduleManager() {
   }
 
   function renderSection(
-    dayType: "weekday" | "saturday" | "sunday",
+    dayType: DayType,
     entries: ApiMassEntry[],
   ) {
     return (
@@ -301,7 +318,7 @@ export function AdminMassScheduleManager() {
               Lịch Thánh Lễ
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Cấu hình giờ lễ theo ngày thường, Thứ Bảy và Chủ Nhật.
+              Cấu hình giờ lễ theo các ngày trong tuần.
             </p>
             {error ? (
               <p className="mt-1 text-sm text-destructive">{error}</p>
@@ -309,13 +326,17 @@ export function AdminMassScheduleManager() {
           </div>
         </div>
       </div>
-
+ 
       <div className="mt-6 space-y-5">
-        {renderSection("weekday", grouped.weekday)}
+        {renderSection("monday", grouped.monday)}
+        {renderSection("tuesday", grouped.tuesday)}
+        {renderSection("wednesday", grouped.wednesday)}
+        {renderSection("thursday", grouped.thursday)}
+        {renderSection("friday", grouped.friday)}
         {renderSection("saturday", grouped.saturday)}
         {renderSection("sunday", grouped.sunday)}
       </div>
-
+ 
       <AdminFormDialog
         open={formOpen}
         onOpenChange={(open) => {
@@ -348,7 +369,7 @@ export function AdminMassScheduleManager() {
               onValueChange={(value) =>
                 setFormData((prev) => ({
                   ...prev,
-                  dayType: value as "weekday" | "saturday" | "sunday",
+                  dayType: value as DayType,
                 }))
               }
             >

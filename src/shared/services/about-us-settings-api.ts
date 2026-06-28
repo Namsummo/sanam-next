@@ -22,6 +22,7 @@ export interface AboutUsVisibilityData {
   missionItems: boolean;
   button: boolean;
   author: boolean;
+  author2: boolean;
 }
 
 export interface AboutUsSettingsData {
@@ -42,6 +43,10 @@ export interface AboutUsSettingsData {
   authorImageUploadUrl?: string;
   authorName: string;
   authorTitle: string;
+  author2ImageUrl: string;
+  author2ImageUploadUrl?: string;
+  author2Name: string;
+  author2Title: string;
   visibility: AboutUsVisibilityData;
   createdAt?: string;
   updatedAt?: string;
@@ -78,6 +83,10 @@ export const DEFAULT_ABOUT_US_SETTINGS: AboutUsSettingsData = {
   authorImageUploadUrl: "",
   authorName: "Cody Fisher",
   authorTitle: "CEO & Lead Pastor",
+  author2ImageUrl: "/images/author-2.jpg",
+  author2ImageUploadUrl: "",
+  author2Name: "Jane Doe",
+  author2Title: "Co-Founder & Pastor",
   visibility: {
     mainImage: true,
     video: true,
@@ -87,6 +96,7 @@ export const DEFAULT_ABOUT_US_SETTINGS: AboutUsSettingsData = {
     missionItems: true,
     button: true,
     author: true,
+    author2: true,
   },
 };
 

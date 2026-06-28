@@ -15,6 +15,7 @@ export type ClergyFormValues = {
   birthday: string;
   sortOrder: string;
   isVisible: boolean;
+  showOnHomepage: boolean;
   image: string;
   ordinationDate: string;
   patronSaint: string;
@@ -34,6 +35,7 @@ export function createEmptyClergyFormValues(): ClergyFormValues {
     birthday: "",
     sortOrder: "",
     isVisible: true,
+    showOnHomepage: false,
     image: "",
     ordinationDate: "",
     patronSaint: "",
@@ -54,6 +56,7 @@ export function mapClergyToFormValues(member: ClergyMember): ClergyFormValues {
     birthday: member.birthday ?? "",
     sortOrder: member.sortOrder ? String(member.sortOrder) : "",
     isVisible: member.isVisible ?? true,
+    showOnHomepage: member.showOnHomepage ?? false,
     image: member.image ?? "",
     ordinationDate: member.ordinationDate ?? "",
     patronSaint: member.patronSaint ?? "",

@@ -16,7 +16,7 @@ import { resolveApiUrl } from "@/lib/utils";
 import { Input } from "@/components/site/shared/ui/input/input";
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
 
-type ImageUploadTarget = "mainImage" | "authorImage" | "videoThumbnail" | `missionIcon:${number}`;
+type ImageUploadTarget = "mainImage" | "authorImage" | "author2Image" | "videoThumbnail" | `missionIcon:${number}`;
 
 type AboutZone =
   | "mainImage"
@@ -31,7 +31,10 @@ type AboutZone =
   | "buttonLink"
   | "authorImage"
   | "authorName"
-  | "authorTitle";
+  | "authorTitle"
+  | "author2Image"
+  | "author2Name"
+  | "author2Title";
 
 function zoneLabel(zone: AboutZone): string {
   if (typeof zone === "string") {
@@ -45,9 +48,12 @@ function zoneLabel(zone: AboutZone): string {
       description: "Mô tả",
       buttonText: "Nội dung nút",
       buttonLink: "Đường dẫn nút",
-      authorImage: "Ảnh tác giả",
-      authorName: "Tên tác giả",
-      authorTitle: "Chức danh tác giả",
+      authorImage: "Ảnh tác giả 1",
+      authorName: "Tên tác giả 1",
+      authorTitle: "Chức danh tác giả 1",
+      author2Image: "Ảnh tác giả 2",
+      author2Name: "Tên tác giả 2",
+      author2Title: "Chức danh tác giả 2",
     };
     return labels[zone] ?? zone;
   }
@@ -140,6 +146,9 @@ export function AboutUsSectionEditor() {
         } else if (target === "authorImage") {
           handleFieldChange("authorImageUrl", url);
           handleFieldChange("authorImageUploadUrl", url);
+        } else if (target === "author2Image") {
+          handleFieldChange("author2ImageUrl", url);
+          handleFieldChange("author2ImageUploadUrl", url);
         } else if (target === "videoThumbnail") {
           handleFieldChange("videoThumbnailUrl", url);
           handleFieldChange("videoThumbnailUploadUrl", url);
@@ -407,7 +416,7 @@ export function AboutUsSectionEditor() {
         {zoneType === "authorImage" && (
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="text-sm font-medium text-card-foreground">URL ảnh tác giả</label>
+              <label className="text-sm font-medium text-card-foreground">URL ảnh tác giả 1</label>
               <button type="button" onClick={() => handleVisibilityToggle("author")} className="text-muted-foreground hover:text-foreground">
                 {settings.visibility.author ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
@@ -446,7 +455,7 @@ export function AboutUsSectionEditor() {
         {zoneType === "authorName" && (
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="text-sm font-medium text-card-foreground">Tên tác giả</label>
+              <label className="text-sm font-medium text-card-foreground">Tên tác giả 1</label>
               <button type="button" onClick={() => handleVisibilityToggle("author")} className="text-muted-foreground hover:text-foreground">
                 {settings.visibility.author ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
@@ -459,12 +468,77 @@ export function AboutUsSectionEditor() {
         {zoneType === "authorTitle" && (
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="text-sm font-medium text-card-foreground">Chức danh tác giả</label>
+              <label className="text-sm font-medium text-card-foreground">Chức danh tác giả 1</label>
               <button type="button" onClick={() => handleVisibilityToggle("author")} className="text-muted-foreground hover:text-foreground">
                 {settings.visibility.author ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
               </button>
             </div>
             <Input type="text" value={settings.authorTitle} onChange={(e) => handleFieldChange("authorTitle", e.target.value)}
+              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
+          </div>
+        )}
+
+        {zoneType === "author2Image" && (
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="text-sm font-medium text-card-foreground">URL ảnh tác giả 2</label>
+              <button type="button" onClick={() => handleVisibilityToggle("author2")} className="text-muted-foreground hover:text-foreground">
+                {settings.visibility.author2 ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={settings.author2ImageUrl}
+                onChange={(e) => handleFieldChange("author2ImageUrl", e.target.value)}
+                className="min-w-0 flex-1 rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
+                placeholder="/images/author-2.jpg"
+              />
+              <button
+                type="button"
+                onClick={() => handleImageUpload("author2Image")}
+                disabled={uploading === "author2Image"}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 py-2 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploading === "author2Image" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Upload className="size-4" />
+                )}
+                Tải lên
+              </button>
+            </div>
+            {settings.author2ImageUploadUrl ? (
+              <div className="mt-3">
+                <p className="mb-1.5 text-xs text-muted-foreground">Ảnh đã tải lên</p>
+                {renderImageUploadPreview(settings.author2ImageUploadUrl)}
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {zoneType === "author2Name" && (
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="text-sm font-medium text-card-foreground">Tên tác giả 2</label>
+              <button type="button" onClick={() => handleVisibilityToggle("author2")} className="text-muted-foreground hover:text-foreground">
+                {settings.visibility.author2 ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+              </button>
+            </div>
+            <Input type="text" value={settings.author2Name} onChange={(e) => handleFieldChange("author2Name", e.target.value)}
+              className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
+          </div>
+        )}
+
+        {zoneType === "author2Title" && (
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="text-sm font-medium text-card-foreground">Chức danh tác giả 2</label>
+              <button type="button" onClick={() => handleVisibilityToggle("author2")} className="text-muted-foreground hover:text-foreground">
+                {settings.visibility.author2 ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+              </button>
+            </div>
+            <Input type="text" value={settings.author2Title} onChange={(e) => handleFieldChange("author2Title", e.target.value)}
               className="w-full rounded-[10px] border border-border bg-background px-3 py-2 text-sm text-card-foreground outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent" />
           </div>
         )}
@@ -626,6 +700,27 @@ function AboutUsPreview({ settings, selectedZone, onSelectZone }: {
                     <button type="button" onClick={() => onSelectZone("authorTitle")}
                       className={`mt-1 w-full text-left font-sans text-sm text-[var(--foreground)]/80 leading-none transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "authorTitle" ? "ring-2 ring-accent" : ""}`}>
                       {settings.authorTitle} <Pencil className="ml-1 inline-block size-3 opacity-60" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className={`about-author-box ${!settings.visibility.author2 ? "opacity-40" : ""}`}>
+                  <button type="button" onClick={() => onSelectZone("author2Image")}
+                    className={`about-author-image overflow-hidden rounded-full w-[50px] h-[50px] relative transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "author2Image" ? "ring-2 ring-accent" : ""}`}>
+                    <img
+                      src={resolveAboutImageSrc(settings.author2ImageUploadUrl, settings.author2ImageUrl)}
+                      alt={settings.author2Name}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                  <div className="about-author-content">
+                    <button type="button" onClick={() => onSelectZone("author2Name")}
+                      className={`w-full text-left font-display font-semibold text-lg text-[var(--primary-color)] leading-none transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "author2Name" ? "ring-2 ring-accent" : ""}`}>
+                      {settings.author2Name} <Pencil className="ml-1 inline-block size-3 opacity-60" />
+                    </button>
+                    <button type="button" onClick={() => onSelectZone("author2Title")}
+                      className={`mt-1 w-full text-left font-sans text-sm text-[var(--foreground)]/80 leading-none transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "author2Title" ? "ring-2 ring-accent" : ""}`}>
+                      {settings.author2Title} <Pencil className="ml-1 inline-block size-3 opacity-60" />
                     </button>
                   </div>
                 </div>

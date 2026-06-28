@@ -27,11 +27,5 @@ export function getVisibleCouncilMembers(members: ClergyMember[]): ClergyMember[
 
 export function getCurrentCouncilMembers(members: ClergyMember[]): ClergyMember[] {
   const visible = getVisibleCouncilMembers(members);
-  const currentTermId = getDefaultCouncilTermId(visible);
-
-  if (!currentTermId) {
-    return visible;
-  }
-
-  return visible.filter((member) => member.termId === currentTermId);
+  return visible.filter((member) => member.showOnHomepage === true);
 }

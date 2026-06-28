@@ -6,9 +6,11 @@ function authHeaders(token: string): HeadersInit {
   };
 }
 
+export type DayType = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+
 export interface ApiMassEntry {
   _id: string;
-  dayType: "weekday" | "saturday" | "sunday";
+  dayType: DayType;
   time: string;
   title: string;
   sortOrder: number;
@@ -18,7 +20,11 @@ export interface ApiMassEntry {
 }
 
 export interface MassScheduleGrouped {
-  weekday: ApiMassEntry[];
+  monday: ApiMassEntry[];
+  tuesday: ApiMassEntry[];
+  wednesday: ApiMassEntry[];
+  thursday: ApiMassEntry[];
+  friday: ApiMassEntry[];
   saturday: ApiMassEntry[];
   sunday: ApiMassEntry[];
 }
@@ -42,7 +48,7 @@ export async function getAdminMassSchedule(
 export async function createMassEntry(
   token: string,
   data: {
-    dayType: "weekday" | "saturday" | "sunday";
+    dayType: DayType;
     time: string;
     title?: string;
   },
@@ -68,7 +74,7 @@ export async function updateMassEntry(
   token: string,
   id: string,
   data: Partial<{
-    dayType: "weekday" | "saturday" | "sunday";
+    dayType: DayType;
     time: string;
     title: string;
     sortOrder: number;

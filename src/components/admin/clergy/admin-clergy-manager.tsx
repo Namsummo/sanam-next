@@ -28,6 +28,7 @@ import {
   toClergyMember,
   updateClergy,
   toggleClergyVisibility,
+  toggleClergyHomepageVisibility,
 } from "@/shared/services/clergy-api";
 import { uploadEventImage } from "@/shared/services/events-api";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
@@ -207,6 +208,25 @@ export function AdminClergyManager() {
     }
   }
 
+  async function handleToggleHomepageVisibility(memberId: string) {
+    const token = getToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    try {
+      const result = await toggleClergyHomepageVisibility(token, memberId);
+      setMembers((current) =>
+        current.map((m) =>
+          String(m.id) === memberId ? { ...m, showOnHomepage: result.showOnHomepage } : m,
+        ),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to toggle homepage visibility");
+    }
+  }
+
   async function handleFormSubmit(values: ClergyFormValues) {
     const token = getToken();
     if (!token) {
@@ -224,6 +244,7 @@ export function AdminClergyManager() {
         birthday: values.birthday.trim() || undefined,
         sortOrder: values.sortOrder ? Number(values.sortOrder) : undefined,
         isVisible: values.isVisible,
+        showOnHomepage: values.showOnHomepage,
         image: values.image.trim() || undefined,
         ordinationDate: values.ordinationDate.trim() || undefined,
         patronSaint: values.patronSaint.trim() || undefined,
@@ -317,6 +338,7 @@ export function AdminClergyManager() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onToggleVisibility={handleToggleVisibility}
+        onToggleHomepageVisibility={handleToggleHomepageVisibility}
       />
 
       <AdminClergyFormModal

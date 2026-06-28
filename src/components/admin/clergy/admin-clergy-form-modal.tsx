@@ -280,29 +280,57 @@ export function AdminClergyFormModal({
           )}
         </div>
 
-        <ControlledField
-          control={form.control}
-          name="isVisible"
-          label="Hiển thị"
-        >
-          {({ field, id }) => (
-            <label
-              htmlFor={id}
-              className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-[10px] border border-border px-3"
+        <div className="flex flex-wrap gap-4">
+          <ControlledField
+            control={form.control}
+            name="isVisible"
+            label="Trạng thái hiển thị"
+          >
+            {({ field, id }) => (
+              <label
+                htmlFor={id}
+                className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-[10px] border border-border px-3"
+              >
+                <input
+                  id={id}
+                  type="checkbox"
+                  checked={field.value}
+                  onChange={(changeEvent) => field.onChange(changeEvent.target.checked)}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  className="size-4 rounded border-border text-accent focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                <span className="text-sm text-card-foreground">Hiển thị hồ sơ</span>
+              </label>
+            )}
+          </ControlledField>
+
+          {clergyType === 2 && (
+            <ControlledField
+              control={form.control}
+              name="showOnHomepage"
+              label="Hiển thị ở homepage"
             >
-              <input
-                id={id}
-                type="checkbox"
-                checked={field.value}
-                onChange={(changeEvent) => field.onChange(changeEvent.target.checked)}
-                onBlur={field.onBlur}
-                ref={field.ref}
-                className="size-4 rounded border-border text-accent focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              <span className="text-sm text-card-foreground">Hiển thị trên trang chủ</span>
-            </label>
+              {({ field, id }) => (
+                <label
+                  htmlFor={id}
+                  className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-[10px] border border-border px-3"
+                >
+                  <input
+                    id={id}
+                    type="checkbox"
+                    checked={field.value}
+                    onChange={(changeEvent) => field.onChange(changeEvent.target.checked)}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    className="size-4 rounded border-border text-accent focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  <span className="text-sm text-card-foreground">Hiển thị ở mục Đương nhiệm trang chủ</span>
+                </label>
+              )}
+            </ControlledField>
           )}
-        </ControlledField>
+        </div>
       </form>
     </AdminFormDialog>
   );

@@ -23,5 +23,6 @@ export type ClergyMember = {
   hometown?: string;       // Quê quán / Giáo họ
   /** Ban Hành Giáo: khóa nhiệm kỳ, format YYYY-YYYY */
   termId?: string;
+  showOnHomepage?: boolean;
 };
 

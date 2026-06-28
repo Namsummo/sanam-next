@@ -147,7 +147,7 @@ export function AboutUs() {
                   </ScrollReveal>
                 )}
 
-                {(settings.visibility?.button || settings.visibility?.author) && (
+                {(settings.visibility?.button || settings.visibility?.author || settings.visibility?.author2) && (
                   <ScrollReveal delay={0.6}>
                     <div className="about-us-footer">
                       {settings.visibility?.button && (
@@ -161,23 +161,47 @@ export function AboutUs() {
                       {settings.visibility?.author && (
                         <div className="about-author-box">
                           <div className="about-author-image overflow-hidden rounded-full w-[50px] h-[50px] relative">
-                        <figure className="image-anime w-full h-full">
-                          <Image
-                            src={resolveApiUrl(settings.authorImageUploadUrl || settings.authorImageUrl)}
-                            alt={`Author ${settings.authorName}`}
-                            fill
-                            sizes="50px"
-                            className="object-cover"
-                          />
-                        </figure>
-                      </div>
-                      <div className="about-author-content">
-                        <h3 className="font-display font-semibold text-lg text-primary leading-none">
-                          {settings.authorName}
-                        </h3>
-                        <p className="font-sans text-sm text-foreground/80 mt-1 leading-none">
-                          {settings.authorTitle}
-                        </p>
+                            <figure className="image-anime w-full h-full">
+                              <Image
+                                src={resolveApiUrl(settings.authorImageUploadUrl || settings.authorImageUrl)}
+                                alt={`Author ${settings.authorName}`}
+                                fill
+                                sizes="50px"
+                                className="object-cover"
+                              />
+                            </figure>
+                          </div>
+                          <div className="about-author-content">
+                            <h3 className="font-display font-semibold text-lg text-primary leading-none">
+                              {settings.authorName}
+                            </h3>
+                            <p className="font-sans text-sm text-foreground/80 mt-1 leading-none">
+                              {settings.authorTitle}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {settings.visibility?.author2 && (
+                        <div className="about-author-box">
+                          <div className="about-author-image overflow-hidden rounded-full w-[50px] h-[50px] relative">
+                            <figure className="image-anime w-full h-full">
+                              <Image
+                                src={resolveApiUrl(settings.author2ImageUploadUrl || settings.author2ImageUrl)}
+                                alt={`Author 2 ${settings.author2Name}`}
+                                fill
+                                sizes="50px"
+                                className="object-cover"
+                              />
+                            </figure>
+                          </div>
+                          <div className="about-author-content">
+                            <h3 className="font-display font-semibold text-lg text-primary leading-none">
+                              {settings.author2Name}
+                            </h3>
+                            <p className="font-sans text-sm text-foreground/80 mt-1 leading-none">
+                              {settings.author2Title}
+                            </p>
                           </div>
                         </div>
                       )}

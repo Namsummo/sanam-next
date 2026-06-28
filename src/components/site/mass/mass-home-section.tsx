@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MassWeekSchedule } from "@/components/site/mass/mass-schedule-panel";
 import type { MassScheduleGroup } from "@/lib/mass/mock-mass";
-import { getMassScheduleGroups, getIsoDayOfWeek } from "@/lib/mass/mock-mass";
+import { getMassScheduleGroups, getIsoDayOfWeek, dayIdMap } from "@/lib/mass/mock-mass";
 import {
   getPublicMassSchedule,
   type MassScheduleGrouped,
@@ -17,33 +17,29 @@ type MassHomeSectionProps = {
 function getTodayGroupIdFromApi(
   today: ReturnType<typeof getIsoDayOfWeek>,
 ): MassScheduleGroup["id"] {
-  if (today === 7) return "sunday";
-  if (today === 6) return "saturday";
-  return "weekday";
+  return dayIdMap[today];
 }
 
 function buildGroupsFromApi(data: MassScheduleGrouped): MassScheduleGroup[] {
   const groupDefs: { id: MassScheduleGroup["id"]; label: string }[] = [
-    { id: "weekday", label: "Ngày thường" },
+    { id: "monday", label: "Thứ Hai" },
+    { id: "tuesday", label: "Thứ Ba" },
+    { id: "wednesday", label: "Thứ Tư" },
+    { id: "thursday", label: "Thứ Năm" },
+    { id: "friday", label: "Thứ Sáu" },
     { id: "saturday", label: "Thứ Bảy" },
     { id: "sunday", label: "Chủ Nhật" },
   ];
 
   const groups: MassScheduleGroup[] = groupDefs.map((def) => ({
     ...def,
-    entries: data[def.id].map((entry) => ({
+    entries: (data[def.id] || []).map((entry) => ({
       time: entry.time,
       title: entry.title || undefined,
     })),
   }));
 
-  const today = getIsoDayOfWeek(new Date());
-  const todayGroupId = getTodayGroupIdFromApi(today);
-  const todayGroup = groups.find((g) => g.id === todayGroupId);
-  const otherGroups = groups.filter((g) => g.id !== todayGroupId);
-
-  if (!todayGroup) return groups;
-  return [todayGroup, ...otherGroups];
+  return groups;
 }
 
 export function MassHomeSection({ className }: MassHomeSectionProps) {

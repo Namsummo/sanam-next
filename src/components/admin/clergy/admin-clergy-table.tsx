@@ -31,6 +31,7 @@ type AdminClergyTableProps = {
   onEdit: (member: ClergyMember) => void;
   onDelete: (memberId: string) => void;
   onToggleVisibility: (memberId: string) => void;
+  onToggleHomepageVisibility: (memberId: string) => void;
 };
 
 export function AdminClergyTable({
@@ -44,6 +45,7 @@ export function AdminClergyTable({
   onEdit,
   onDelete,
   onToggleVisibility,
+  onToggleHomepageVisibility,
 }: AdminClergyTableProps) {
   return (
     <section
@@ -70,13 +72,14 @@ export function AdminClergyTable({
             <TableHead className="px-4">Phân loại</TableHead>
             <TableHead className="px-4">Nhiệm kỳ</TableHead>
             <TableHead className="px-4">Hiển thị</TableHead>
+            <TableHead className="px-4">Hiện ở homepage</TableHead>
             <TableHead className="px-4 text-right">Hành động</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {members.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+              <TableCell colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                 Không có thành viên phù hợp bộ lọc hiện tại.
               </TableCell>
             </TableRow>
@@ -123,6 +126,28 @@ export function AdminClergyTable({
                       <><EyeOff className="size-3" aria-hidden /> Ẩn</>
                     )}
                   </button>
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  {member.type === 2 ? (
+                    <button
+                      type="button"
+                      onClick={() => onToggleHomepageVisibility(String(member.id))}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+                        member.showOnHomepage
+                          ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200",
+                      )}
+                    >
+                      {member.showOnHomepage ? (
+                        <><Eye className="size-3" aria-hidden /> Hiện</>
+                      ) : (
+                        <><EyeOff className="size-3" aria-hidden /> Ẩn</>
+                      )}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
                 </TableCell>
                 <TableCell className="px-4 py-3 text-right">
                   <div className="inline-flex items-center gap-2">

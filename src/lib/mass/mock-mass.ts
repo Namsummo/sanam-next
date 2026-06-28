@@ -6,7 +6,7 @@ export type MassEntry = {
 };
 
 export type MassScheduleGroup = {
-  id: "weekday" | "saturday" | "sunday";
+  id: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
   label: string;
   entries: MassEntry[];
 };
@@ -16,7 +16,17 @@ export function getIsoDayOfWeek(date: Date): DayOfWeek {
   return (jsDay === 0 ? 7 : jsDay) as DayOfWeek;
 }
 
-export const weekdayEntries: MassEntry[] = [{ time: "05:30" }];
+export const dayIdMap: Record<DayOfWeek, MassScheduleGroup["id"]> = {
+  1: "monday",
+  2: "tuesday",
+  3: "wednesday",
+  4: "thursday",
+  5: "friday",
+  6: "saturday",
+  7: "sunday",
+};
+
+export const defaultEntries: MassEntry[] = [{ time: "05:30" }];
 
 export const saturdayEntries: MassEntry[] = [
   { time: "05:30" },
@@ -32,42 +42,25 @@ export const sundayEntries: MassEntry[] = [
 ];
 
 const massScheduleGroups: MassScheduleGroup[] = [
-  { id: "weekday", label: "Ngày thường", entries: weekdayEntries },
+  { id: "monday", label: "Thứ Hai", entries: defaultEntries },
+  { id: "tuesday", label: "Thứ Ba", entries: defaultEntries },
+  { id: "wednesday", label: "Thứ Tư", entries: defaultEntries },
+  { id: "thursday", label: "Thứ Năm", entries: defaultEntries },
+  { id: "friday", label: "Thứ Sáu", entries: defaultEntries },
   { id: "saturday", label: "Thứ Bảy", entries: saturdayEntries },
   { id: "sunday", label: "Chủ Nhật", entries: sundayEntries },
 ];
 
-function getTodayGroupId(today: DayOfWeek): MassScheduleGroup["id"] {
-  if (today === 7) {
-    return "sunday";
-  }
-  if (today === 6) {
-    return "saturday";
-  }
-  return "weekday";
+export function getTodayGroupId(today: DayOfWeek): MassScheduleGroup["id"] {
+  return dayIdMap[today];
 }
 
-export function getMassScheduleGroups(
-  anchor = new Date(),
-): MassScheduleGroup[] {
-  const today = getIsoDayOfWeek(anchor);
-  const todayGroupId = getTodayGroupId(today);
-  const todayGroup = massScheduleGroups.find(
-    (group) => group.id === todayGroupId,
-  );
-  const otherGroups = massScheduleGroups.filter(
-    (group) => group.id !== todayGroupId,
-  );
-
-  if (!todayGroup) {
-    return massScheduleGroups;
-  }
-
-  return [todayGroup, ...otherGroups];
+export function getMassScheduleGroups(): MassScheduleGroup[] {
+  return massScheduleGroups;
 }
 
 export function isTodayGroup(
-  groupId: MassScheduleGroup["id"],
+  groupId: string,
   anchor = new Date(),
 ): boolean {
   return groupId === getTodayGroupId(getIsoDayOfWeek(anchor));

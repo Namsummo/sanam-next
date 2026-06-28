@@ -46,10 +46,11 @@ function MassDayCard({ group, isToday }: MassDayCardProps) {
   return (
     <section
       className={cn(
-        "rounded-[20px] border px-4 py-4 transition-colors md:px-5 md:py-5",
+        "rounded-[20px] border px-4 py-4 transition-all duration-300 md:px-5 md:py-5",
         isToday
-          ? "border-accent/60 bg-accent/5 shadow-[0_8px_30px_rgba(176,6,31,0.08)]"
-          : "border-border/50 bg-card",
+          ? "border-accent bg-accent/[0.03] ring-1 ring-accent/30 shadow-[0_8px_30px_rgba(176,6,31,0.08)]"
+          : "border-border/60 bg-card hover:border-border hover:shadow-sm",
+        group.id === "sunday" && "md:col-span-2 lg:col-span-3"
       )}
     >
       <div className="flex flex-wrap items-center gap-2">
@@ -71,11 +72,31 @@ function MassDayCard({ group, isToday }: MassDayCardProps) {
       </div>
 
       {group.entries.length > 0 ? (
-        <p className="mt-3 font-sans text-sm leading-relaxed text-foreground md:text-base">
-          {group.entries.map(formatEntry).join(", ")}
-        </p>
+        <div className="mt-3.5 flex flex-wrap gap-2.5">
+          {group.entries.map((entry, idx) => (
+            <div
+              key={idx}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-xl px-3 py-1.5 border transition-all duration-300",
+                isToday
+                  ? "bg-accent/10 border-accent/20 text-accent font-semibold"
+                  : "bg-muted/50 border-border text-foreground hover:bg-muted"
+              )}
+            >
+              <span className="font-mono text-sm">{entry.time}</span>
+              {entry.title ? (
+                <span className={cn(
+                  "text-[10px] uppercase tracking-wide font-bold px-1.5 py-0.5 rounded",
+                  isToday ? "bg-accent text-white" : "bg-primary/10 text-primary"
+                )}>
+                  {entry.title}
+                </span>
+              ) : null}
+            </div>
+          ))}
+        </div>
       ) : (
-        <p className="mt-3 font-sans text-sm text-foreground/70">
+        <p className="mt-3.5 font-sans text-sm text-foreground/50 italic">
           Không có lịch lễ.
         </p>
       )}
@@ -85,7 +106,7 @@ function MassDayCard({ group, isToday }: MassDayCardProps) {
 
 export function MassWeekSchedule({ groups, className }: MassWeekScheduleProps) {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6", className)}>
       {groups.map((group) => (
         <MassDayCard
           key={group.id}
