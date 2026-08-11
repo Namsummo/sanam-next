@@ -27,7 +27,7 @@ export function AboutUs() {
   useEffect(() => {
     getAboutUsSettings()
       .then((data) => setSettings(data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const openVideo = (e: React.MouseEvent) => {
@@ -47,51 +47,36 @@ export function AboutUs() {
             <div className="w-full xl:w-1/2 px-4">
               <ScrollReveal>
                 <div className="about-us-image-box">
-                  {settings.visibility?.mainImage && (
-                    <div className="about-us-image">
-                      <figure className="image-anime relative w-full h-full aspect-[570/517] min-h-[400px]">
-                      <Image
-                        src={resolveApiUrl(settings.mainImageUploadUrl || settings.mainImageUrl)}
-                        alt="About Us"
-                        fill
-                        sizes="(max-width: 1280px) 100vw, 570px"
-                        priority
-                        className="object-cover rounded-[20px]"
-                      />
-                    </figure>
-                    </div>
-                  )}
-
                   {settings.visibility?.video && (
-                    <div className="about-us-video-box shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
-                      <div className="about-video-image relative w-full aspect-[215/130]">
-                      <figure className="w-full h-full relative">
+                    <button
+                      type="button"
+                      onClick={openVideo}
+                      className="group block w-full overflow-hidden rounded-[20px] bg-card text-left shadow-[0_15px_45px_rgba(0,0,0,0.1)]"
+                      aria-label={`Phát video ${settings.videoTitle}`}
+                    >
+                      <figure className="relative aspect-video w-full overflow-hidden">
                         <Image
                           src={resolveApiUrl(settings.videoThumbnailUploadUrl || settings.videoThumbnailUrl)}
-                          alt="Watch Our Video Cover"
+                          alt={settings.videoTitle}
                           fill
-                          sizes="215px"
-                          className="object-cover rounded-[10px]"
+                          sizes="(max-width: 1280px) 100vw, 634px"
+                          priority
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         />
+                        <span
+                          className="absolute inset-0 bg-black/25 transition-colors group-hover:bg-black/35"
+                          aria-hidden
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="flex size-16 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-transform duration-300 group-hover:scale-110 md:size-20">
+                            <Play className="ml-1 size-7 fill-current md:size-9" />
+                          </span>
+                        </span>
                       </figure>
-                      <div className="video-play-button">
-                        <a
-                          href={settings.videoUrl}
-                          onClick={openVideo}
-                          className="popup-video bg-effect cursor-pointer flex items-center justify-center"
-                          aria-label="Play Video"
-                        >
-                          <Play className="size-3 fill-current text-white ml-[3px]" />
-                        </a>
-                      </div>
-                    </div>
-
-                    <div className="about-video-content">
-                      <h2 className="font-display font-semibold text-lg text-primary text-center mt-2">
+                      <span className="block px-5 py-4 text-center font-display text-xl font-semibold text-primary md:text-2xl">
                         {settings.videoTitle}
-                      </h2>
-                      </div>
-                    </div>
+                      </span>
+                    </button>
                   )}
                 </div>
               </ScrollReveal>
@@ -121,29 +106,29 @@ export function AboutUs() {
 
                 {settings.visibility?.missionItems && (
                   <ScrollReveal delay={0.4}>
-                  <div className="about-us-item-list">
-                    {settings.missionItems.map((item, index) => (
-                      <div key={index} className="about-us-item">
-                        <div className="icon-box shrink-0">
-                          <Image
-                            src={resolveApiUrl(item.iconUploadUrl || item.iconUrl)}
-                            alt={`${item.title} Icon`}
-                            width={24}
-                            height={24}
-                            className="w-6 h-6"
-                          />
+                    <div className="about-us-item-list">
+                      {settings.missionItems.map((item, index) => (
+                        <div key={index} className="about-us-item">
+                          <div className="icon-box shrink-0">
+                            <Image
+                              src={resolveApiUrl(item.iconUploadUrl || item.iconUrl)}
+                              alt={`${item.title} Icon`}
+                              width={24}
+                              height={24}
+                              className="w-6 h-6"
+                            />
+                          </div>
+                          <div className="about-us-item-content">
+                            <h3 className="font-display font-semibold text-lg text-primary">
+                              {item.title}
+                            </h3>
+                            <p className="font-sans text-sm text-foreground leading-relaxed mt-1">
+                              {item.description}
+                            </p>
+                          </div>
                         </div>
-                        <div className="about-us-item-content">
-                          <h3 className="font-display font-semibold text-lg text-primary">
-                            {item.title}
-                          </h3>
-                          <p className="font-sans text-sm text-foreground leading-relaxed mt-1">
-                            {item.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
                   </ScrollReveal>
                 )}
 

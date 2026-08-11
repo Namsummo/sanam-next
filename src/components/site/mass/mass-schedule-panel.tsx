@@ -36,10 +36,6 @@ function getUpcomingTime(entries: MassEntry[], now = new Date()): string | null 
   return null;
 }
 
-function formatEntry(entry: MassEntry): string {
-  return entry.title ? `${entry.time}(${entry.title})` : entry.time;
-}
-
 function MassDayCard({ group, isToday }: MassDayCardProps) {
   const upcomingTime = isToday ? getUpcomingTime(group.entries) : null;
 

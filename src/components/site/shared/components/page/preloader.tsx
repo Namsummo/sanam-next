@@ -85,25 +85,24 @@ export function Preloader() {
 
   return (
     <div
-      className={`fixed inset-0 z-1000 flex items-center justify-center bg-primary transition-[opacity,visibility] duration-600 ease-in-out motion-reduce:duration-200 ${
-        isHiding ? "pointer-events-none opacity-0 invisible" : ""
-      }`}
+      className={`fixed inset-0 z-1000 flex items-center justify-center bg-primary transition-[opacity,visibility] duration-600 ease-in-out motion-reduce:duration-200 ${isHiding ? "pointer-events-none opacity-0 invisible" : ""
+        }`}
       role="status"
       aria-live="polite"
       aria-label="Loading"
     >
-      <div className="relative size-[100px] rounded-full">
+      <div className="relative size-24 rounded-full">
         <span
           className="absolute inset-0 rounded-full border border-transparent border-r-white border-l-white animate-preloader-spin motion-reduce:animate-none origin-center"
           aria-hidden
         />
         <Image
-          src="/images/loader.svg"
-          alt=""
+          src="/images/sanam-cropped.png"
+          alt="loader"
           width={66}
           height={66}
           priority
-          className="absolute top-1/2 left-1/2 h-auto max-w-[66px] w-[66px] -translate-x-1/2 -translate-y-1/2"
+          className="absolute top-1/2 left-1/2 h-auto max-w-15px w-15px -translate-x-1/2 -translate-y-1/2"
         />
       </div>
     </div>

@@ -11,9 +11,9 @@ export default function HomePage() {
     <main className="flex w-full flex-col">
       <Hero />
       <AboutUs />
+      <ClergyHomeSection />
       <OurMission />
       <EventsHomeSection />
-      <ClergyHomeSection />
       <MassHomeSection />
       <FeaturedNewsSection />
     </main>

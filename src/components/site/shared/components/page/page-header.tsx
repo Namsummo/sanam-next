@@ -47,7 +47,7 @@ export function PageHeader({
       />
 
       <div className="relative z-1 mx-auto max-w-[1300px] text-center wow fadeInUp" data-wow-delay="0.1s">
-        <h1 className="mb-2.5 inline-block font-display text-4xl font-semibold uppercase leading-none text-white md:text-5xl lg:text-[65px]">
+        <h1 className="mb-2.5 inline-block font-display text-4xl font-semibold uppercase leading-[1.2] text-white md:text-5xl lg:text-[65px]">
           {title}
         </h1>
 

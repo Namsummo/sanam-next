@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getHeroSettings, DEFAULT_HERO_SETTINGS, type HeroSettingsData } from "@/shared/services/hero-settings-api";
 import { ScrollReveal, TextAnime } from "../animation";
 import { resolveApiUrl } from "@/lib/utils";
+import { formatLocaleNumber } from "@/lib/format";
 
 export function Hero() {
   const [settings, setSettings] = useState<HeroSettingsData>(DEFAULT_HERO_SETTINGS);
@@ -13,7 +14,7 @@ export function Hero() {
   useEffect(() => {
     getHeroSettings()
       .then((data) => setSettings(data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -98,16 +99,16 @@ export function Hero() {
               {settings.visibility?.counters && (
                 <ScrollReveal delay={0.2}>
                   <div className="hero-counter-list">
-                  {settings.counters.map((counter, index) => (
-                    <div key={index} className="hero-counter-item">
-                      <h2 className="font-display text-[40px] font-semibold uppercase leading-none text-white">
-                        <span>{counts[index]}</span>+
-                      </h2>
-                      <p className="font-sans text-sm text-white mt-1">
-                        {counter.label}
-                      </p>
-                    </div>
-                  ))}
+                    {settings.counters.map((counter, index) => (
+                      <div key={index} className="hero-counter-item">
+                        <h2 className="font-display text-[40px] font-semibold uppercase leading-none text-white">
+                          <span>{formatLocaleNumber(counts[index] ?? 0)}</span>
+                        </h2>
+                        <p className="font-sans text-sm text-white mt-1">
+                          {counter.label}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 </ScrollReveal>
               )}

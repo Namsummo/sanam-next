@@ -10,7 +10,7 @@ type FeaturedNewsSectionProps = {
 
 async function fetchFeaturedArticles(): Promise<NewsArticle[]> {
   try {
-    const data = await getPublicNews({ page: 1, limit: 3, featured: true });
+    const data = await getPublicNews({ page: 1, limit: 100, featured: true });
     return data.articles.map((a) => ({
       id: a._id,
       slug: a.slug,
@@ -26,7 +26,7 @@ async function fetchFeaturedArticles(): Promise<NewsArticle[]> {
     }));
   } catch {
     const { getFeaturedNews } = await import("@/lib/news/mock-news");
-    return getFeaturedNews(3);
+    return getFeaturedNews(100);
   }
 }
 

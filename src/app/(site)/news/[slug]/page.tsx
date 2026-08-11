@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
@@ -9,6 +10,8 @@ import { formatNewsDate } from "@/lib/format";
 import { getPublicNewsBySlug, getPublicNews } from "@/shared/services/news-api";
 import type { NewsArticle } from "@/lib/news/types";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
+import { DEFAULT_COVER_ALT } from "@/lib/image-constants";
+import { resolveApiUrl } from "@/lib/utils";
 
 type NewsDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -107,7 +110,7 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
         meta={
           <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 font-sans text-lg text-white">
             <li className="flex items-center gap-1.5">
-              <Clock className="size-[18px] shrink-0" aria-hidden />
+              <Clock className="size-4 shrink-0" aria-hidden />
               <time dateTime={article.publishedAt}>
                 {formatNewsDate(article.publishedAt)}
               </time>
@@ -118,6 +121,20 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
 
       <article className="px-6 py-16 md:py-[120px]">
         <div className="mx-auto max-w-[1100px]">
+          {article.coverImage ? (
+            <figure className="mb-8 overflow-hidden rounded-2xl">
+              <Image
+                src={resolveApiUrl(article.coverImage)}
+                alt={article.title || DEFAULT_COVER_ALT}
+                width={1100}
+                height={688}
+                unoptimized
+                priority
+                className="aspect-16/10 w-full object-contain"
+              />
+            </figure>
+          ) : null}
+
           <div className="mb-8 flex flex-wrap items-center gap-2">
             {categoryLabel ? (
               <span className="rounded-[10px] bg-accent px-3 py-1.5 font-sans text-sm font-medium text-white">

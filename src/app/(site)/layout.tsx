@@ -2,8 +2,10 @@ import { SiteFooter } from "@/components/site/shared/components/page/footer";
 import { Preloader } from "@/components/site/shared/components/page/preloader";
 import { SiteHeader } from "@/components/site/shared/components/page/site-header";
 import { UnderConstructionPage } from "@/components/site/shared/components/page/under-construction-page";
-import { getPublicContactSettings } from "@/shared/services/contact-api";
-import { getPublicFooterSettings } from "@/shared/services/footer-settings-api";
+import {
+  getPublicContactSettings,
+  type ContactInfoItemData,
+} from "@/shared/services/contact-api";
 import { cookies } from "next/headers";
 
 export default async function SiteLayout({
@@ -16,24 +18,17 @@ export default async function SiteLayout({
   const isAdminLoggedIn = cookieStore.has("sanam_admin_token");
 
   if (isUnderConstruction && !isAdminLoggedIn) {
-    let contactItems: any[] = [];
-    let socialLinks: any[] = [];
+    let contactItems: ContactInfoItemData[] = [];
     try {
       const contactData = await getPublicContactSettings();
       contactItems = contactData.contactItems || [];
     } catch {
       // fallback handled inside component
     }
-    try {
-      const footerData = await getPublicFooterSettings();
-      socialLinks = footerData.socialLinks || [];
-    } catch {
-      // fallback handled inside component
-    }
 
     return (
       <div data-theme="site" className="flex min-h-full flex-col px-0 min-[992px]:px-4">
-        <UnderConstructionPage contactItems={contactItems} socialLinks={socialLinks} />
+        <UnderConstructionPage contactItems={contactItems} />
       </div>
     );
   }

@@ -89,6 +89,7 @@ export function AdminWorshipVideoModal({
   onUploadVideo,
 }: AdminWorshipVideoModalProps) {
   const form = useForm<WorshipVideoFormValues>({ defaultValues });
+  const categoryId = useWatch({ control: form.control, name: "categoryId" });
   const sourceType = useWatch({ control: form.control, name: "sourceType" });
   const youtubeUrl = useWatch({ control: form.control, name: "youtubeUrl" });
   const uploadUrl = useWatch({ control: form.control, name: "uploadUrl" });
@@ -96,12 +97,17 @@ export function AdminWorshipVideoModal({
   const [youtubeFetchError, setYoutubeFetchError] = useState<string | null>(null);
   const lastFetchedYoutubeId = useRef("");
 
+  function handleClose() {
+    lastFetchedYoutubeId.current = "";
+    setYoutubeFetchError(null);
+    setIsFetchingYoutube(false);
+    onClose();
+  }
+
   useEffect(() => {
     if (open) {
       form.reset(defaultValues);
       lastFetchedYoutubeId.current = "";
-      setYoutubeFetchError(null);
-      setIsFetchingYoutube(false);
     }
   }, [defaultValues, form, open]);
 
@@ -110,7 +116,6 @@ export function AdminWorshipVideoModal({
 
     const { youtubeId } = parseYoutubeInput(youtubeUrl ?? "");
     if (!youtubeId || youtubeId.length !== 11) {
-      setYoutubeFetchError(null);
       return;
     }
 
@@ -181,13 +186,13 @@ export function AdminWorshipVideoModal({
     <AdminFormDialog
       open={open}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose();
+        if (!nextOpen) handleClose();
       }}
       title={editingId ? "Chỉnh sửa video" : "Thêm video mới"}
       className="sm:max-w-3xl"
       footer={
         <div className="flex justify-end gap-2">
-          <AdminOutlineButton type="button" onClick={onClose}>
+          <AdminOutlineButton type="button" onClick={handleClose}>
             Hủy
           </AdminOutlineButton>
           <AdminOutlineButton
@@ -208,7 +213,7 @@ export function AdminWorshipVideoModal({
         <label className="block space-y-1.5">
           <span className="text-sm font-medium text-card-foreground">Danh mục</span>
           <AdminSelect
-            value={form.watch("categoryId")}
+            value={categoryId ?? ""}
             onChange={(value) => form.setValue("categoryId", value)}
             options={categories.map((category) => ({
               value: category.id,
@@ -249,7 +254,9 @@ export function AdminWorshipVideoModal({
               Link YouTube
             </span>
             <Input
-              {...form.register("youtubeUrl")}
+              {...form.register("youtubeUrl", {
+                onChange: () => setYoutubeFetchError(null),
+              })}
               placeholder="https://www.youtube.com/watch?v=..."
               className="rounded-[10px]"
             />

@@ -55,6 +55,23 @@ async function uploadVideoPreview(file: File): Promise<string> {
   });
 }
 
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 export function AdminWorshipManager() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<WorshipAdminTab>("categories");
@@ -152,9 +169,9 @@ export function AdminWorshipManager() {
       const updated = await updateAdminLiveSettings(token, live);
       setLive(toLiveSettings(updated));
       showSavedMessage("Đã lưu cấu hình livestream.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      showSavedMessage(`Lỗi: ${err.message || "Không lưu được livestream"}`);
+      showSavedMessage(`Lỗi: ${getErrorMessage(err, "Không lưu được livestream")}`);
     } finally {
       setIsSavingLive(false);
     }
@@ -204,9 +221,9 @@ export function AdminWorshipManager() {
       setCategoryModalOpen(false);
       setEditingCategoryId(null);
       showSavedMessage("Đã lưu danh mục.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      showSavedMessage(`Lỗi: ${err.message || "Không lưu được danh mục"}`);
+      showSavedMessage(`Lỗi: ${getErrorMessage(err, "Không lưu được danh mục")}`);
     }
   }
 
@@ -233,9 +250,9 @@ export function AdminWorshipManager() {
 
       setDeleteCategoryTarget(null);
       showSavedMessage("Đã xóa danh mục.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      showSavedMessage(`Lỗi: ${err.message || "Không xóa được danh mục"}`);
+      showSavedMessage(`Lỗi: ${getErrorMessage(err, "Không xóa được danh mục")}`);
     }
   }
 
@@ -258,7 +275,8 @@ export function AdminWorshipManager() {
     if (!token) return;
     try {
       const payloadWithId = mapFormValuesToVideo(values, editingVideoId);
-      const { id: _, ...payload } = payloadWithId;
+      const { id, ...payload } = payloadWithId;
+      void id;
 
       if (editingVideoId) {
         const updated = await updateAdminWorshipVideo(token, editingVideoId, payload);
@@ -273,9 +291,9 @@ export function AdminWorshipManager() {
       setVideoModalOpen(false);
       setEditingVideoId(null);
       showSavedMessage("Đã lưu video.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      showSavedMessage(`Lỗi: ${err.message || "Không lưu được video"}`);
+      showSavedMessage(`Lỗi: ${getErrorMessage(err, "Không lưu được video")}`);
     }
   }
 
@@ -289,9 +307,9 @@ export function AdminWorshipManager() {
       setVideos(nextVideos);
       setDeleteVideoTarget(null);
       showSavedMessage("Đã xóa video.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      showSavedMessage(`Lỗi: ${err.message || "Không xóa được video"}`);
+      showSavedMessage(`Lỗi: ${getErrorMessage(err, "Không xóa được video")}`);
     }
   }
 
@@ -322,12 +340,12 @@ export function AdminWorshipManager() {
       </div>
 
       {saveMessage ? (
-        <div className="rounded-[12px] border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent">
+        <div className="rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent">
           {saveMessage}
         </div>
       ) : null}
 
-      <div className="inline-flex rounded-[12px] border border-border bg-card p-1">
+      <div className="inline-flex rounded-xl border border-border bg-card p-1">
         {tabs.map((tab) => (
           <button
             key={tab.id}

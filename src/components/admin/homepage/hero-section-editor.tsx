@@ -1,7 +1,6 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertCircle,
   Check,
@@ -24,6 +23,7 @@ import {
   type HeroCounterData,
 } from "@/shared/services/hero-settings-api";
 import { resolveApiUrl } from "@/lib/utils";
+import { formatLocaleNumber } from "@/lib/format";
 
 type HeroZone =
   | "background"
@@ -71,7 +71,9 @@ export function HeroSectionEditor() {
   }, []);
 
   useEffect(() => {
-    loadSettings();
+    (async () => {
+      await loadSettings();
+    })();
   }, [loadSettings]);
 
   function handleFieldChange(field: string, value: string | number | HeroButtonData | HeroCounterData[]) {
@@ -394,7 +396,7 @@ function HeroPreview({ settings, selectedZone, onSelectZone }: {
                 {settings.counters.map((counter, index) => (
                   <button key={index} type="button" onClick={() => onSelectZone({ type: "counter", index })}
                     className={`hero-counter-item !w-[calc(33.33%-40px)] text-center transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone && typeof selectedZone !== "string" && selectedZone.type === "counter" && selectedZone.index === index ? "ring-2 ring-accent" : ""}`}>
-                    <h2 className="font-display text-[40px] font-semibold uppercase leading-none text-white"><span>{counter.value}</span>+</h2>
+                    <h2 className="font-display text-[40px] font-semibold uppercase leading-none text-white"><span>{formatLocaleNumber(counter.value)}</span></h2>
                     <p className="font-sans text-sm text-white mt-1">{counter.label} <Pencil className="ml-2 inline-block size-3 opacity-60" /></p>
                   </button>
                 ))}

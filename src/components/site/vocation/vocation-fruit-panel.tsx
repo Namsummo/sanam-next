@@ -109,7 +109,7 @@ export function VocationFruitPanel({ fruits, className }: VocationFruitPanelProp
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tên, dòng tu, nơi phục vụ hoặc giáo họ..."
-              className="w-full rounded-[12px] border border-border bg-white py-3.5 pl-11 pr-4 font-sans text-base text-primary outline-none transition-colors placeholder:text-foreground/50 focus:border-accent"
+              className="w-full rounded-xl border border-border bg-white py-3.5 pl-11 pr-4 font-sans text-base text-primary outline-none transition-colors placeholder:text-foreground/50 focus:border-accent"
             />
           </div>
         </div>
@@ -125,7 +125,7 @@ export function VocationFruitPanel({ fruits, className }: VocationFruitPanelProp
             id="vocation-fruit-filter"
             value={filter}
             onChange={(e) => setFilter(e.target.value as VocationFilterId)}
-            className="w-full cursor-pointer appearance-none rounded-[12px] border border-border bg-white px-4 py-3.5 font-sans text-base text-primary outline-none transition-colors focus:border-accent"
+            className="w-full cursor-pointer appearance-none rounded-xl border border-border bg-white px-4 py-3.5 font-sans text-base text-primary outline-none transition-colors focus:border-accent"
           >
             {vocationFilterOptions.map((option) => (
               <option key={option.id} value={option.id}>

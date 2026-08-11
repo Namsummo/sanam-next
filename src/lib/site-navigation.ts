@@ -32,8 +32,8 @@ export const siteMainNav: SiteNavItem[] = [
     label: "Giới thiệu",
     children: [
       { label: "Giáo xứ", href: "/introduce" },
-      { label: "Ban Hành Giáo", href: "/introduce/ban-hanh-giao" },
       { label: "Hoa trái ơn gọi", href: "/introduce/hoa-trai-on-goi" },
+      { label: "Ban Hành Giáo", href: "/introduce/ban-hanh-giao" },
     ],
   },
   { label: "Đoàn thể", href: "/organization" },

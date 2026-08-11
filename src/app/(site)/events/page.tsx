@@ -9,9 +9,15 @@ export const metadata: Metadata = {
   description: "Lịch sự kiện và hoạt động của Giáo xứ Sa Nam",
 };
 
+function eventSortKey(event: { startDate: string; startTime?: string }): string {
+  return `${event.startDate}T${event.startTime ?? "00:00"}`;
+}
+
 export default async function EventsPage() {
   const res = await getPublicEvents({ limit: 100 });
-  const events = res.events.map(toParishEvent);
+  const events = res.events
+    .map(toParishEvent)
+    .sort((a, b) => eventSortKey(b).localeCompare(eventSortKey(a)));
   const bgSettings = await getBackgroundSettings().catch(() => null);
 
   return (

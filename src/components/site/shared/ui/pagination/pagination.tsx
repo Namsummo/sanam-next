@@ -60,7 +60,7 @@ export function PaginationLink({
   ...props
 }: PaginationLinkProps) {
   if (href) {
-    const { onClick, disabled, type, ...linkProps } = props;
+    const { ...linkProps } = props;
     return (
       <Link
         href={href}

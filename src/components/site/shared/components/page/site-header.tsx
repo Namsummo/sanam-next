@@ -63,11 +63,6 @@ export function SiteHeader() {
     };
   }, [mobileOpen]);
 
-  const toggleMobileMenu = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    setMobileOpen((open) => !open);
-  };
-
   const closeMobile = () => setMobileOpen(false);
 
   return (

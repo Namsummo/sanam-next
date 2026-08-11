@@ -143,12 +143,19 @@ export function AdminUsersManager() {
   }, [debouncedSearch, page, token, router]);
 
   useEffect(() => {
-    if (sessionUser && sessionUser.role === "admin") {
-      loadUsers();
-    } else {
-      setLoading(false);
+    if (!sessionUser) {
+      router.push("/admin/login");
+      return;
     }
-  }, [loadUsers, sessionUser]);
+
+    if (sessionUser.role !== "admin") return;
+
+    const timer = window.setTimeout(() => {
+      void loadUsers();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadUsers, router, sessionUser]);
 
   // Auth Protection Guard
   if (sessionUser && sessionUser.role !== "admin") {
@@ -163,7 +170,7 @@ export function AdminUsersManager() {
             Về Tổng quan
           </Link>
         </div>
-        <div className="rounded-[20px] border border-border bg-card p-8 text-center shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-8 text-center shadow-sm">
           <h2 className="font-display text-xl font-semibold text-destructive">
             Không có quyền truy cập
           </h2>

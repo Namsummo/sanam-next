@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { NewsCard } from "@/components/site/news/news-card";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
-import { getPublicNews } from "@/shared/services/news-api";
+import { getCategories, getPublicNews } from "@/shared/services/news-api";
 import type { NewsArticle } from "@/lib/news/types";
 
 async function fetchArticles(page: number, category?: string): Promise<NewsArticle[]> {
@@ -41,8 +42,12 @@ export default async function NewsPage(props: {
   const categoryStr = searchParams.category;
   const category = typeof categoryStr === "string" ? categoryStr : undefined;
 
-  const bgSettings = await getBackgroundSettings().catch(() => null);
-  const articles = await fetchArticles(page, category);
+  const [bgSettings, categories] = await Promise.all([
+    getBackgroundSettings().catch(() => null),
+    getCategories().catch(() => []),
+  ]);
+  const activeCategory = categories.find((item) => item.slug === category);
+  const articles = await fetchArticles(page, activeCategory?._id);
 
   return (
     <>
@@ -56,6 +61,40 @@ export default async function NewsPage(props: {
       />
       <section className="px-6 py-16 md:py-[120px]">
         <div className="mx-auto max-w-[1300px]">
+          <nav
+            aria-label="Danh mục tin tức"
+            className="mb-10 flex flex-wrap justify-center gap-3 md:mb-12"
+          >
+            <Link
+              href="/news"
+              aria-current={!activeCategory ? "page" : undefined}
+              className={
+                !activeCategory
+                  ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white"
+                  : "rounded-full border border-border bg-card px-5 py-2.5 font-sans text-sm font-semibold text-primary transition-colors hover:border-accent hover:text-accent"
+              }
+            >
+              Tất cả
+            </Link>
+            {categories.map((item) => {
+              const isActive = item._id === activeCategory?._id;
+              return (
+                <Link
+                  key={item._id}
+                  href={`/news?category=${encodeURIComponent(item.slug)}`}
+                  aria-current={isActive ? "page" : undefined}
+                  className={
+                    isActive
+                      ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white"
+                      : "rounded-full border border-border bg-card px-5 py-2.5 font-sans text-sm font-semibold text-primary transition-colors hover:border-accent hover:text-accent"
+                  }
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
           {articles.length === 0 ? (
             <p className="text-center font-sans text-lg text-foreground">
               Chưa có tin tức nào được đăng.

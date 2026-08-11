@@ -19,29 +19,29 @@ export function NewsCard({ article, className }: NewsCardProps) {
   return (
     <article
       className={cn(
-        "mb-[30px] flex h-[calc(100%-30px)] flex-col",
+        "flex h-full flex-col pb-8",
         className,
       )}
     >
-      <div className="mb-5 overflow-hidden rounded-[20px]">
+      <div className="mb-5 overflow-hidden rounded-2xl bg-muted">
         <Link href={href} className="block">
-          <figure className="overflow-hidden rounded-[20px]">
+          <figure className="aspect-4/3 overflow-hidden rounded-2xl bg-muted">
             <Image
               src={resolveApiUrl(article.coverImage) || DEFAULT_COVER}
               alt={article.title || DEFAULT_COVER_ALT}
               width={640}
-              height={556}
+              height={480}
               unoptimized={!!article.coverImage}
-              className="aspect-[1/0.87] w-full object-cover transition-transform duration-600 ease-in-out hover:scale-[1.06]"
+              className="size-full object-cover transition-transform duration-500 hover:scale-105"
             />
           </figure>
         </Link>
       </div>
 
-      <div className="flex flex-1 flex-col px-[15px]">
+      <div className="flex flex-1 flex-col px-4">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {categoryLabel ? (
-            <span className="rounded-[10px] bg-accent px-3 py-1.5 font-sans text-sm font-medium text-white">
+            <span className="rounded-lg bg-accent px-3 py-1.5 font-sans text-sm font-medium text-white">
               {categoryLabel}
             </span>
           ) : null}
@@ -54,7 +54,7 @@ export function NewsCard({ article, className }: NewsCardProps) {
         </div>
 
         <div className="flex-1">
-          <h2 className="font-display text-xl leading-[1.4] text-primary">
+          <h2 className="font-display text-xl leading-relaxed text-primary">
             <Link
               href={href}
               className="text-inherit transition-colors hover:text-accent"

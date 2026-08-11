@@ -70,14 +70,18 @@ export function FooterSectionEditor() {
       await updateFooterSettings(data);
       alert("Lưu thành công!");
       setSelectedZone(null);
-    } catch (error: any) {
-      alert(error.message || "Lưu thất bại.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("Lưu thất bại.");
+      }
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleFieldChange = (field: keyof FooterSettingsPayload, value: any) => {
+  const handleFieldChange = (field: keyof FooterSettingsPayload, value: string) => {
     setData({ ...data, [field]: value });
   };
 
@@ -300,9 +304,9 @@ function FooterPreview({
   onSelectZone: (zone: FooterZone) => void;
 }) {
   return (
-    <footer className="mb-[15px] w-full rounded-[20px] bg-primary bg-[url('/images/dark-section-bg-image.png')] bg-cover bg-top bg-no-repeat pt-[120px] max-lg:mb-0 max-lg:rounded-none max-lg:pt-[60px]">
-      <div className="mx-auto w-full max-w-[1300px] px-[15px]">
-        <div className="mb-[60px] flex flex-wrap items-center justify-between gap-5 border-b border-white/10 pb-[60px] max-lg:mb-[30px] max-lg:pb-[30px]">
+    <footer className="mb-3.5 w-full rounded-xl bg-primary bg-[url('/images/dark-section-bg-image.png')] bg-cover bg-top bg-no-repeat pt-[120px] max-lg:mb-0 max-lg:rounded-none max-lg:pt-[60px]">
+      <div className="mx-auto w-full max-w-[1300px] px-3.5">
+        <div className="mb-15 flex flex-wrap items-center justify-between gap-5 border-b border-white/10 pb-15 max-lg:mb-7.5 max-lg:pb-7.5">
           <button type="button" onClick={() => onSelectZone("newsletterTitle")}
             className={`max-w-[750px] text-left font-display text-3xl font-semibold uppercase leading-[1.2] text-white md:text-4xl lg:text-[42px] transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "newsletterTitle" ? "ring-2 ring-accent" : ""}`}>
             {settings.newsletterTitle} <Pencil className="ml-2 inline-block size-4 opacity-60" />
@@ -315,17 +319,17 @@ function FooterPreview({
             </button>
             <form action="#" method="post" className="opacity-50 pointer-events-none">
               <button type="button" onClick={() => onSelectZone("newsletterPlaceholder")}
-                className={`flex rounded-full bg-white/10 p-[5px] backdrop-blur-[30px] w-full transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "newsletterPlaceholder" ? "ring-2 ring-accent" : ""}`}>
+                className={`flex rounded-full bg-white/10 p-1.5 backdrop-blur-[30px] w-full transition-all hover:ring-2 hover:ring-accent/50 ${selectedZone === "newsletterPlaceholder" ? "ring-2 ring-accent" : ""}`}>
                 <input type="email" placeholder={settings.newsletterPlaceholder} readOnly className="min-w-0 flex-1 bg-transparent px-6 py-1.5 text-base text-white outline-none placeholder:text-white/60 pointer-events-none" />
-                <span className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-accent text-white transition-colors duration-400 max-lg:size-10">
-                  <Send className="size-[22px] max-lg:size-[18px]" aria-hidden />
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent text-white transition-colors duration-400 max-lg:size-10">
+                  <Send className="size-5 max-lg:size-4" aria-hidden />
                 </span>
               </button>
             </form>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-[30px] xl:grid-cols-12">
+        <div className="grid grid-cols-1 gap-7 xl:grid-cols-12">
           <div className="xl:col-span-3">
             <div className="inline-block opacity-50">
               <Image src="/images/logo.svg" alt="sanam" className="h-[40px] w-auto max-w-[151px]" width={151} height={40} />

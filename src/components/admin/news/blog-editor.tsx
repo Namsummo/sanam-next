@@ -32,7 +32,7 @@ export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
   );
 
   return (
-    <div className={cn("overflow-hidden rounded-[16px] border border-border", className)}>
+    <div className={cn("overflow-hidden rounded-2xl border border-border", className)}>
       <ReactQuill
         value={content}
         onChange={onChange}

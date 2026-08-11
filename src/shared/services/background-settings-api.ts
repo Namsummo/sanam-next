@@ -19,16 +19,9 @@ export async function getBackgroundSettings(): Promise<BackgroundSettingsPayload
       throw new Error("Failed to fetch background settings");
     }
     return await res.json();
-  } catch (error) {
-    return {
-      introduceBg: "",
-      organizationBg: "",
-      eventsBg: "",
-      newsBg: "",
-      worshipBg: "",
-      contactBg: "",
-      libraryBg: "",
-    };
+  } catch (error: unknown) {
+    console.error(error);
+    throw error;
   }
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Save, CheckCircle2 } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { ImageUploader } from "@/components/admin/news/image-uploader";
 import { uploadImage } from "@/shared/services/news-api";
 import { getToken } from "@/lib/admin/mock-auth";
@@ -34,8 +34,12 @@ export function AdminLibraryManager() {
       setIsSaving(true);
       await updateBackgroundSettings(data);
       alert("Lưu thành công!");
-    } catch (error: any) {
-      alert(error.message || "Lưu thất bại.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("Lưu thất bại.");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -89,7 +93,7 @@ export function AdminLibraryManager() {
               {route.title}
             </h3>
             <p className="mb-4 text-sm text-muted-foreground">Path: {route.path}</p>
-            
+
             <ImageUploader
               value={data[route.key as keyof BackgroundSettingsPayload]}
               onChange={(url) => handleChange(route.key as keyof BackgroundSettingsPayload, url)}

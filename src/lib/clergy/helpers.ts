@@ -1,4 +1,3 @@
-import { getDefaultCouncilTermId } from "@/lib/clergy/council-terms";
 import {
   CLERGY_TYPE_COUNCIL,
   CLERGY_TYPE_PRIEST,
@@ -12,20 +11,26 @@ export function sortClergyByOrder(members: ClergyMember[]): ClergyMember[] {
 export function getVisiblePriests(members: ClergyMember[]): ClergyMember[] {
   return sortClergyByOrder(
     members.filter(
-      (member) => member.isVisible !== false && member.type === CLERGY_TYPE_PRIEST,
+      (member) =>
+        member.isVisible !== false && member.type === CLERGY_TYPE_PRIEST,
     ),
   );
 }
 
-export function getVisibleCouncilMembers(members: ClergyMember[]): ClergyMember[] {
+export function getVisibleCouncilMembers(
+  members: ClergyMember[],
+): ClergyMember[] {
   return sortClergyByOrder(
     members.filter(
-      (member) => member.isVisible !== false && member.type === CLERGY_TYPE_COUNCIL,
+      (member) =>
+        member.isVisible !== false && member.type === CLERGY_TYPE_COUNCIL,
     ),
   );
 }
 
-export function getCurrentCouncilMembers(members: ClergyMember[]): ClergyMember[] {
+export function getCurrentCouncilMembers(
+  members: ClergyMember[],
+): ClergyMember[] {
   const visible = getVisibleCouncilMembers(members);
   return visible.filter((member) => member.showOnHomepage === true);
 }

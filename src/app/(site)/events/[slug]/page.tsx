@@ -11,7 +11,7 @@ import {
   toParishEvent,
 } from "@/shared/services/events-api";
 import { formatEventDateTime } from "@/lib/format";
-import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
+import { DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import type { ParishEvent } from "@/lib/events/types";
 import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 
@@ -97,7 +97,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       <article className="px-6 py-16 md:py-[120px]">
         <div className="mx-auto max-w-[1100px]">
           {event.image ? (
-            <figure className="mb-8 overflow-hidden rounded-[20px]">
+            <figure className="mb-8 overflow-hidden rounded-2xl">
               <Image
                 src={event.image}
                 alt={event.name || DEFAULT_COVER_ALT}

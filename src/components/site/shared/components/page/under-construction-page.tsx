@@ -2,25 +2,20 @@
 
 import React from "react";
 import Image from "next/image";
-import { Mail, Phone, Globe } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { ScrollReveal, TextAnime } from "../animation";
 
-interface UnderConstructionPageProps {
+type UnderConstructionPageProps = {
   contactItems?: Array<{
     id: string;
     title: string;
     value: string;
     href?: string;
   }>;
-  socialLinks?: Array<{
-    network: string;
-    url: string;
-  }>;
 }
 
 export function UnderConstructionPage({
   contactItems = [],
-  socialLinks = [],
 }: UnderConstructionPageProps) {
   React.useEffect(() => {
     if (typeof window !== "undefined") {

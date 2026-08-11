@@ -87,6 +87,7 @@
 
 /* ─── Quill overrides ─── */
 .ql-snow .ql-editor {
+	position: relative;
 	font-family: var(--font-sans);
 	font-size: 1rem;
 	line-height: 1.7;
@@ -157,9 +158,27 @@
 	font-size: 1rem;
 }
 
+/*
+ * Quill placeholder uses .ql-editor.ql-blank::before.
+ * Tailwind preflight / cascade can leave the ::before visible over typed text;
+ * force hide when the editor is not blank and restore absolute positioning.
+ */
 .ql-editor.ql-blank::before {
 	color: var(--muted-foreground);
+	content: attr(data-placeholder);
 	font-style: normal;
+	left: 15px;
+	right: 15px;
+	top: 12px;
+	pointer-events: none;
+	position: absolute;
+	height: auto;
+	float: none;
+}
+
+.ql-editor:not(.ql-blank)::before {
+	display: none !important;
+	content: none !important;
 }
 
 /* Site: text selection */

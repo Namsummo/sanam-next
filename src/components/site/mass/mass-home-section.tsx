@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MassWeekSchedule } from "@/components/site/mass/mass-schedule-panel";
 import type { MassScheduleGroup } from "@/lib/mass/mock-mass";
-import { getMassScheduleGroups, getIsoDayOfWeek, dayIdMap } from "@/lib/mass/mock-mass";
+import { getMassScheduleGroups } from "@/lib/mass/mock-mass";
 import {
   getPublicMassSchedule,
   type MassScheduleGrouped,
@@ -13,12 +13,6 @@ import { cn } from "@/lib/utils";
 type MassHomeSectionProps = {
   className?: string;
 };
-
-function getTodayGroupIdFromApi(
-  today: ReturnType<typeof getIsoDayOfWeek>,
-): MassScheduleGroup["id"] {
-  return dayIdMap[today];
-}
 
 function buildGroupsFromApi(data: MassScheduleGrouped): MassScheduleGroup[] {
   const groupDefs: { id: MassScheduleGroup["id"]; label: string }[] = [

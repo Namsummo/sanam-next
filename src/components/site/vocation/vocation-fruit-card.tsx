@@ -16,13 +16,12 @@ export function VocationFruitCard({ fruit, className }: VocationFruitCardProps) 
         className,
       )}
     >
-      <figure className="mx-auto mb-4 size-[120px] overflow-hidden rounded-[20px] shadow-sm md:size-[130px]">
+      <figure className="relative mx-auto mb-4 size-30 overflow-hidden rounded-xl shadow-sm md:size-32">
         <Image
+          fill
           src={resolveApiUrl(fruit.image) || DEFAULT_COVER}
           alt={`Chân dung ${fruit.fullName}`}
-          width={130}
-          height={130}
-          className="size-full object-cover"
+          className="size-full object-cover object-top"
         />
       </figure>
 

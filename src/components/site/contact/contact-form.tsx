@@ -22,11 +22,11 @@ export function ContactForm({ title, className }: ContactFormProps) {
   return (
     <div
       className={cn(
-        "rounded-[20px] bg-secondary p-[3.125vw] max-md:p-[30px] max-sm:p-5",
+        "rounded-[20px] bg-secondary p-[3.125vw] max-md:p-7.5 max-sm:p-5",
         className,
       )}
     >
-      <div className="mb-10 max-md:mb-[30px]">
+      <div className="mb-10 max-md:mb-7.5">
         <h2 className="font-display text-[30px] font-semibold uppercase leading-none text-primary max-md:text-[26px] max-sm:text-[22px]">
           {title}
         </h2>
@@ -99,7 +99,7 @@ export function ContactForm({ title, className }: ContactFormProps) {
               name="message"
               rows={5}
               placeholder="Nội dung tin nhắn hoặc yêu cầu cầu nguyện"
-              className={cn(inputClassName, "min-h-[140px] resize-y leading-normal")}
+              className={cn(inputClassName, "min-h-35 resize-y leading-normal")}
             />
           </div>
 

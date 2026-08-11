@@ -661,45 +661,79 @@ Nguồn: `src/lib/contact/site-contact.ts`
 
 Nguồn: `src/lib/contact/site-donations.ts`
 
+Một website chỉ có **2 Destination** (nơi nhận quyên góp):
+- `giao-xu` — Giáo xứ Sa Nam
+- `ban-truyen-thong` — Ban Truyền Thông
+
+Mỗi Destination có thể có **nhiều Bank Account**. Website chỉ hiển thị thông tin chuyển khoản, không xử lý thanh toán.
+
+Khi nhúng trong `ContactSettings` (admin/public contact API), field tương ứng là `donationDestinations`.
+
 ```json
 {
   "data": {
     "subtitle": "Quyên góp",
     "title": "Đồng hành cùng Giáo xứ Sa Nam",
     "description": "...",
-    "options": [
+    "destinations": [
       {
-        "id": "parish",
+        "id": "giao-xu",
         "tabLabel": "Giáo xứ",
-        "headline": "...",
+        "headline": "Ủng hộ Giáo xứ Sa Nam",
+        "subtitle": "Giáo xứ Sa Nam — Giáo phận Bùi Chu",
         "description": "...",
         "status": "updating",
-        "account": null,
+        "accounts": [],
         "contact": {
           "phone": "(028) 1234 5678",
           "email": "lienhe@sanam.org"
         }
       },
       {
-        "id": "developer",
-        "tabLabel": "Phát triển website",
+        "id": "ban-truyen-thong",
+        "tabLabel": "Ban Truyền Thông",
+        "headline": "Ủng hộ phát triển website",
+        "description": "...",
         "status": "available",
-        "account": {
-          "bankBrand": "techcombank",
-          "bankDisplayName": "Techcombank",
-          "accountNumber": "1234567890",
-          "accountHolder": "NGUYEN VAN A",
-          "transferContent": "UNG HO PHAT TRIEN WEB GIAO XU SA NAM",
-          "cardImageSrc": "https://cdn.example.com/donation/card.png",
-          "qrImageSrc": "https://cdn.example.com/donation/qr.jpg"
-        }
+        "accounts": [
+          {
+            "id": "acc-tcb-001",
+            "bankBrand": "techcombank",
+            "bankDisplayName": "Techcombank",
+            "accountNumber": "1234567890",
+            "accountHolder": "NGUYEN VAN A",
+            "transferContent": "UNG HO PHAT TRIEN WEB GIAO XU SA NAM",
+            "isDefault": true,
+            "cardImageSrc": "https://cdn.example.com/donation/card.png",
+            "qrImageSrc": "https://cdn.example.com/donation/qr.jpg"
+          },
+          {
+            "id": "acc-mb-002",
+            "bankBrand": "mb",
+            "bankDisplayName": "MB Bank",
+            "accountNumber": "9876543210",
+            "accountHolder": "NGUYEN VAN A",
+            "transferContent": "UNG HO BAN TRUYEN THONG",
+            "isDefault": false,
+            "qrImageSrc": "https://cdn.example.com/donation/qr-mb.jpg"
+          }
+        ]
       }
     ]
   }
 }
 ```
 
-`status`: `"available"` | `"updating"`
+| Field | Ghi chú |
+|-------|---------|
+| `destinations` | Tối đa **2** Destination: `giao-xu`, `ban-truyen-thong` |
+| `destinations[].id` | Chỉ nhận `"giao-xu"` \| `"ban-truyen-thong"` |
+| `destinations[].accounts` | Mảng tài khoản ngân hàng (1 Destination → N accounts) |
+| `accounts[].id` | ID ổn định của tài khoản |
+| `accounts[].isDefault` | Tài khoản hiển thị mặc định khi Destination có nhiều tài khoản |
+| `status` | `"available"` \| `"updating"` |
+
+**Backward compatibility (FE):** nếu backend vẫn trả `donationOptions` / `account` (số ít), FE normalize thành `donationDestinations` / `accounts: [account]`.
 
 ---
 

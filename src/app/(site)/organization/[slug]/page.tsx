@@ -5,7 +5,6 @@ import { getBackgroundSettings } from "@/shared/services/background-settings-api
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { OrganizationMembersPanel } from "@/components/site/organization/organization-members-panel";
 import { getOrganizationBySlug, getOrganizations } from "@/lib/organization/api";
-import type { Organization } from "@/lib/organization/types";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -72,9 +71,9 @@ export default async function OrganizationDetailPage(props: {
               <h2 className="mb-10 text-center font-display text-2xl font-semibold uppercase tracking-tight text-primary md:text-3xl">
                 Lịch sử hình thành
               </h2>
-              <div 
+              <div
                 className="prose prose-lg mx-auto max-w-[900px] text-foreground prose-headings:font-display prose-headings:text-primary prose-a:text-accent prose-img:rounded-[12px]"
-                dangerouslySetInnerHTML={{ __html: organization.history }} 
+                dangerouslySetInnerHTML={{ __html: organization.history }}
               />
             </div>
           ) : null}
