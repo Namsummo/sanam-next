@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { NewsForm } from "@/components/admin/news/news-form";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import { getNewsById, type NewsArticleResponse } from "@/shared/services/news-api";
 
 type AdminNewsEditPageProps = {
@@ -22,7 +22,7 @@ export function AdminNewsEditPage({ params }: AdminNewsEditPageProps) {
 
   useEffect(() => {
     if (!id) return;
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { BlogEditor } from "@/components/admin/news/blog-editor";
 import { ImageUploader } from "@/components/admin/news/image-uploader";
 import { AdminSelect } from "@/components/admin/shared/admin-select";
-import { getToken, getSessionUser } from "@/lib/admin/mock-auth";
+import { getAccessToken, getCurrentUser } from "@/lib/admin/auth-session";
 import {
   createNews,
   updateNews,
@@ -55,13 +55,13 @@ export function NewsForm({ article }: NewsFormProps) {
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [catError, setCatError] = useState("");
 
-  const sessionUser = getSessionUser();
+  const sessionUser = getCurrentUser();
   const isAdmin = sessionUser?.role === "admin";
 
   useEffect(() => {
     getCategories()
       .then(setCategories)
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const displayedSlug = useMemo(() => {
@@ -78,7 +78,7 @@ export function NewsForm({ article }: NewsFormProps) {
   }
 
   async function handleImageUpload(file: File): Promise<string> {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) throw new Error("Not authenticated");
     return uploadImage(token, file);
   }
@@ -99,7 +99,7 @@ export function NewsForm({ article }: NewsFormProps) {
     setSaving(true);
 
     try {
-      const token = getToken();
+      const token = getAccessToken();
       if (!token) {
         router.push("/admin/login");
         return;
@@ -148,7 +148,7 @@ export function NewsForm({ article }: NewsFormProps) {
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         {error ? (
-          <div className="rounded-[12px] border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             {error}
           </div>
         ) : null}
@@ -163,7 +163,7 @@ export function NewsForm({ article }: NewsFormProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Nhập tiêu đề bài viết"
-              className="w-full rounded-[12px] border border-border bg-card px-4 py-3 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
             />
           </div>
 
@@ -171,13 +171,13 @@ export function NewsForm({ article }: NewsFormProps) {
             <label className="mb-1.5 block text-sm font-medium text-card-foreground">
               Đường dẫn
             </label>
-              <input
-                type="text"
-                value={displayedSlug}
-                onChange={(e) => handleSlugChange(e.target.value)}
-                placeholder="tu-dong-tao-tu-tieu-de"
-                className="w-full rounded-[12px] border border-border bg-card px-4 py-3 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
-              />
+            <input
+              type="text"
+              value={displayedSlug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              placeholder="tu-dong-tao-tu-tieu-de"
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+            />
           </div>
 
           <div>
@@ -261,7 +261,7 @@ export function NewsForm({ article }: NewsFormProps) {
                       type="button"
                       disabled={creatingCategory}
                       onClick={async () => {
-                        const token = getToken();
+                        const token = getAccessToken();
                         if (!token) return;
 
                         const slug = newCatSlug.trim() || newCatAutoSlug;

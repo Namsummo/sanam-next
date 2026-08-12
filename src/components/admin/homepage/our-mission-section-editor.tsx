@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, Check, Eye, EyeOff, Image as ImageIcon, Loader2, Pencil, Upload } from "lucide-react";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   getOurMissionSettings,
   updateOurMissionSettings,
@@ -97,7 +97,7 @@ export function OurMissionSectionEditor() {
   }
 
   async function handleSave() {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
     try {
       setSaving(true);
@@ -113,7 +113,7 @@ export function OurMissionSectionEditor() {
   }
 
   async function handleImageUpload(target: ImageUploadTarget) {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
 
     const input = document.createElement("input");

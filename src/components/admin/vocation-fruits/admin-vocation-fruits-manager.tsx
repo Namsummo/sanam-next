@@ -13,7 +13,7 @@ import { AdminVocationFruitFormModal } from "@/components/admin/vocation-fruits/
 import { AdminVocationFruitFilters } from "@/components/admin/vocation-fruits/admin-vocation-fruit-filters";
 import { AdminVocationFruitsTable } from "@/components/admin/vocation-fruits/admin-vocation-fruits-table";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import type { VocationFruit, VocationType } from "@/lib/vocation/types";
 import { AdminOutlineButton } from "../shared/admin-outline-button";
 import {
@@ -56,7 +56,7 @@ export function AdminVocationFruitsManager() {
   }, [searchQuery]);
 
   const fetchFruits = useCallback(async () => {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -113,7 +113,7 @@ export function AdminVocationFruitsManager() {
   async function confirmDelete() {
     if (!deleteTarget) return;
 
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -133,7 +133,7 @@ export function AdminVocationFruitsManager() {
   }
 
   async function handleFormSubmit(values: VocationFruitFormValues) {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -165,7 +165,7 @@ export function AdminVocationFruitsManager() {
   }
 
   async function handleUploadImage(file: File): Promise<string> {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) throw new Error("Not authenticated");
     return uploadEventImage(token, file);
   }

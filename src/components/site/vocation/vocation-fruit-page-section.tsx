@@ -14,7 +14,7 @@ export async function VocationFruitPageSection() {
 
   return (
     <>
-      <p className="mx-auto mb-12 max-w-[800px] text-center font-sans text-lg leading-relaxed text-foreground md:mb-16">
+      <p className="mx-auto mb-12 max-w-3xl text-center font-sans text-lg leading-relaxed text-foreground md:mb-16">
         Danh sách các Quý Cha, Quý Thầy và Quý Dì xuất thân từ quê hương giáo
         xứ Sa Nam — những hoa trái ơn gọi trong vườn nho Chúa.
       </p>

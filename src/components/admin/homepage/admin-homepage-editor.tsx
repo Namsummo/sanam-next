@@ -8,11 +8,13 @@ import { HeroSectionEditor } from "./hero-section-editor";
 import { AboutUsSectionEditor } from "./about-us-section-editor";
 import { OurMissionSectionEditor } from "./our-mission-section-editor";
 import { FooterSectionEditor } from "./footer-section-editor";
+import { IntroduceEditor } from "./introduce-editor";
 
-type Tab = "hero" | "about-us" | "our-mission" | "footer";
+type Tab = "hero" | "about-us" | "our-mission" | "footer" | "introduce";
 
 const tabs: { id: Tab; label: string }[] = [
   { id: "hero", label: "Hero Section" },
+  { id: "introduce", label: "Giới thiệu" },
   { id: "about-us", label: "About Us" },
   { id: "our-mission", label: "Our Mission" },
   { id: "footer", label: "Footer" },
@@ -61,6 +63,7 @@ export function AdminHomepageEditor() {
 
       <div>
         {activeTab === "hero" && <HeroSectionEditor />}
+        {activeTab === "introduce" && <IntroduceEditor />}
         {activeTab === "about-us" && <AboutUsSectionEditor />}
         {activeTab === "our-mission" && <OurMissionSectionEditor />}
         {activeTab === "footer" && <FooterSectionEditor />}

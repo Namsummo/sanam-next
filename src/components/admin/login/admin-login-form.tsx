@@ -1,33 +1,39 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/site/shared/ui/button/button";
 import { ControlledField, FieldGroup } from "@/components/site/shared/ui/field/field";
 import { Input } from "@/components/site/shared/ui/input/input";
 import { loginApi } from "@/shared/services/auth-api";
-import { getToken, setMockAdminSession } from "@/lib/admin/mock-auth";
+import {
+  getSafeAdminNextPath,
+  getAccessToken,
+  setSession,
+} from "@/lib/admin/auth-session";
 
 type AdminLoginValues = {
   email: string;
   password: string;
 };
 
-export function AdminLoginForm() {
+function AdminLoginFormInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [ready, setReady] = useState(false);
+  const nextPath = getSafeAdminNextPath(searchParams.get("next"));
 
   useEffect(() => {
-    if (getToken()) {
-      router.replace("/admin");
-    } else {
-      // Defer state update to avoid cascading render warning
-      const id = requestAnimationFrame(() => setReady(true));
-      return () => cancelAnimationFrame(id);
+    if (getAccessToken()) {
+      router.replace(nextPath);
+      return;
     }
-  }, [router]);
+    // Defer state update to avoid cascading render warning
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, [router, nextPath]);
 
   const form = useForm<AdminLoginValues>({
     defaultValues: {
@@ -50,8 +56,8 @@ export function AdminLoginForm() {
 
     try {
       const result = await loginApi(values.email, values.password);
-      setMockAdminSession(result.token, result.user);
-      router.push("/admin");
+      setSession(result.token, result.user);
+      router.push(nextPath);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Đăng nhập thất bại",
@@ -148,5 +154,17 @@ export function AdminLoginForm() {
         Đăng nhập bằng tài khoản quản trị
       </p>
     </form>
+  );
+}
+
+export function AdminLoginForm() {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-center text-sm text-muted-foreground">Đang kiểm tra...</p>
+      }
+    >
+      <AdminLoginFormInner />
+    </Suspense>
   );
 }

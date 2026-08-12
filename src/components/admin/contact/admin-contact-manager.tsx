@@ -12,7 +12,7 @@ import {
   type ContactInfoItemData,
   type DonationOptionData,
 } from "@/shared/services/contact-api";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/site/shared/ui/input/input";
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
@@ -120,7 +120,7 @@ export function AdminContactManager() {
   const [deleteTarget, setDeleteTarget] = useState<{ type: "contact-item" | "donation-option"; idx: number } | null>(null);
 
   const loadSettings = useCallback(async () => {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -148,7 +148,7 @@ export function AdminContactManager() {
 
   async function handleSave() {
     if (!settings) return;
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;

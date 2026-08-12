@@ -1,16 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/layout/admin-sidebar";
 import { cn } from "@/lib/utils";
 import {
-  getToken,
-  getSessionUser,
+  getAccessToken,
+  getCurrentUser,
   subscribeSession,
-} from "@/lib/admin/mock-auth";
+} from "@/lib/admin/auth-session";
 import { Button } from "@/components/site/shared/ui/button/button";
 
 type AdminShellProps = {
@@ -19,23 +19,34 @@ type AdminShellProps = {
 
 export function AdminShell({ children }: AdminShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
   const token = useSyncExternalStore(
     subscribeSession,
-    getToken,
+    getAccessToken,
     () => null,
   );
   const sessionUser = useSyncExternalStore(
     subscribeSession,
-    getSessionUser,
+    getCurrentUser,
     () => null,
   );
 
   useEffect(() => {
-    if (token === null) {
-      router.replace("/admin/login");
-    }
-  }, [token, router]);
+    // Defer until after hydration so localStorage token is readable.
+    // A false "null" token would redirect to login and lose the page.
+    const id = requestAnimationFrame(() => setSessionReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+    if (token !== null) return;
+
+    const next = encodeURIComponent(pathname || "/admin");
+    router.replace(`/admin/login?next=${next}`);
+  }, [sessionReady, token, pathname, router]);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -61,7 +72,7 @@ export function AdminShell({ children }: AdminShellProps) {
     setMobileOpen(false);
   }
 
-  if (token === null) {
+  if (!sessionReady || token === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <p className="text-sm text-muted-foreground">Đang tải...</p>

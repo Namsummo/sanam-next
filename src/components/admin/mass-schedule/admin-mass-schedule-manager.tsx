@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/site/shared/ui/select/select";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   getAdminMassSchedule,
   createMassEntry,
@@ -95,7 +95,7 @@ export function AdminMassScheduleManager() {
     let cancelled = false;
 
     async function load() {
-      const token = getToken();
+      const token = getAccessToken();
       if (!token) {
         router.push("/admin/login");
         return;
@@ -161,7 +161,7 @@ export function AdminMassScheduleManager() {
       return;
     }
 
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -205,7 +205,7 @@ export function AdminMassScheduleManager() {
   async function handleDelete() {
     if (!deletingId) return;
 
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;

@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/site/shared/ui/select/select";
-import { getToken, getSessionUser } from "@/lib/admin/mock-auth";
+import { getAccessToken, getCurrentUser } from "@/lib/admin/auth-session";
 
 const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
@@ -103,8 +103,8 @@ export function AdminUsersManager() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const sessionUser = getSessionUser();
-  const token = typeof window !== "undefined" ? getToken() : null;
+  const sessionUser = getCurrentUser();
+  const token = typeof window !== "undefined" ? getAccessToken() : null;
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

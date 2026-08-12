@@ -14,7 +14,7 @@ import { AdminEventFormModal } from "@/components/admin/events/admin-event-form-
 import { AdminEventsFilters } from "@/components/admin/events/admin-events-filters";
 import { AdminEventsTable } from "@/components/admin/events/admin-events-table";
 import { EVENTS_PAGE_SIZE } from "@/components/admin/events/admin-events-table";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   createEvent,
   deleteEvent,
@@ -60,7 +60,7 @@ export function AdminEventsManager() {
   }, [searchQuery]);
 
   const fetchEvents = useCallback(async () => {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -90,7 +90,7 @@ export function AdminEventsManager() {
   }, [categoryFilter, debouncedSearch, page, router, statusFilter]);
 
   useEffect(() => {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -142,7 +142,7 @@ export function AdminEventsManager() {
       return;
     }
 
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -160,13 +160,13 @@ export function AdminEventsManager() {
   }
 
   async function handleUploadImage(file: File): Promise<string> {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) throw new Error("Not authenticated");
     return uploadEventImage(token, file);
   }
 
   async function handleFormSubmit(values: EventFormValues) {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;

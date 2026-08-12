@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   getAllNews,
   deleteNews,
@@ -38,7 +38,7 @@ export function NewsList() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [page, setPage] = useState(1);
 
-  const token = getToken();
+  const token = getAccessToken();
 
   useEffect(() => {
     if (!token) {

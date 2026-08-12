@@ -18,7 +18,7 @@ import {
   mapVideoToFormValues,
   type WorshipVideoFormValues,
 } from "@/components/admin/worship/admin-worship-video-modal";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   createEmptyCategory,
   createEmptyVideo,
@@ -117,7 +117,7 @@ export function AdminWorshipManager() {
     useState<WorshipVideoItem | null>(null);
 
   useEffect(() => {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -162,7 +162,7 @@ export function AdminWorshipManager() {
   }
 
   async function handleSaveLive() {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
     setIsSavingLive(true);
     try {
@@ -191,7 +191,7 @@ export function AdminWorshipManager() {
   }
 
   async function handleCategorySubmit(values: WorshipCategoryFormValues) {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
     try {
       const payload = {
@@ -229,7 +229,7 @@ export function AdminWorshipManager() {
 
   async function confirmDeleteCategory() {
     if (!deleteCategoryTarget) return;
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
     try {
       await deleteAdminWorshipCategory(token, deleteCategoryTarget.id);
@@ -271,7 +271,7 @@ export function AdminWorshipManager() {
   }
 
   async function handleVideoSubmit(values: WorshipVideoFormValues) {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
     try {
       const payloadWithId = mapFormValuesToVideo(values, editingVideoId);
@@ -299,7 +299,7 @@ export function AdminWorshipManager() {
 
   async function confirmDeleteVideo() {
     if (!deleteVideoTarget) return;
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
     try {
       await deleteAdminWorshipVideo(token, deleteVideoTarget.id);

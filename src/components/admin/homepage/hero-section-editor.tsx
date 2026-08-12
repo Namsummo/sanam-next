@@ -12,7 +12,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   getHeroSettings,
   updateHeroSettings,
@@ -108,7 +108,7 @@ export function HeroSectionEditor() {
   }
 
   async function handleSave() {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
     try {
       setSaving(true);
@@ -124,7 +124,7 @@ export function HeroSectionEditor() {
   }
 
   async function handleUpload(target: "video" | "image") {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
 
     const input = document.createElement("input");

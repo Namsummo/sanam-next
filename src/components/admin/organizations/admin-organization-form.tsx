@@ -7,7 +7,7 @@ import Link from "next/link";
 import { BlogEditor } from "@/components/admin/news/blog-editor";
 import { ImageUploader } from "@/components/admin/news/image-uploader";
 import { AdminOrganizationTermMembersTable } from "./admin-organization-term-members-table";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import { uploadImage } from "@/shared/services/news-api";
 import { createOrganization, updateOrganization } from "@/lib/organization/api";
 import { slugify } from "@/shared/lib/slugify";
@@ -87,7 +87,7 @@ export function AdminOrganizationForm({ organization }: AdminOrganizationFormPro
   }
 
   async function handleImageUpload(file: File): Promise<string> {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) throw new Error("Not authenticated");
     return uploadImage(token, file);
   }

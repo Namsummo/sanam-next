@@ -12,7 +12,7 @@ import {
 import { AdminClergyFormModal } from "@/components/admin/clergy/admin-clergy-form-modal";
 import { AdminClergyFilters } from "@/components/admin/clergy/admin-clergy-filters";
 import { AdminClergyTable } from "@/components/admin/clergy/admin-clergy-table";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   loadExtraCouncilTerms,
   mergeCouncilTerms,
@@ -92,7 +92,7 @@ export function AdminClergyManager() {
   }, [searchQuery]);
 
   const fetchMembers = useCallback(async () => {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -163,7 +163,7 @@ export function AdminClergyManager() {
   async function confirmDelete() {
     if (!deleteTarget) return;
 
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -184,13 +184,13 @@ export function AdminClergyManager() {
   }
 
   async function handleUploadImage(file: File): Promise<string> {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) throw new Error("Not authenticated");
     return uploadEventImage(token, file);
   }
 
   async function handleToggleVisibility(memberId: string) {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -209,7 +209,7 @@ export function AdminClergyManager() {
   }
 
   async function handleToggleHomepageVisibility(memberId: string) {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
@@ -228,7 +228,7 @@ export function AdminClergyManager() {
   }
 
   async function handleFormSubmit(values: ClergyFormValues) {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;

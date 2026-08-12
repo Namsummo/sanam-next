@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Save } from "lucide-react";
 import { ImageUploader } from "@/components/admin/news/image-uploader";
 import { uploadImage } from "@/shared/services/news-api";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import { getBackgroundSettings, updateBackgroundSettings, type BackgroundSettingsPayload } from "@/shared/services/background-settings-api";
 
 const routesConfig = [
@@ -50,7 +50,7 @@ export function AdminLibraryManager() {
   };
 
   const handleImageUpload = async (file: File): Promise<string> => {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) throw new Error("Not authenticated");
     return uploadImage(token, file);
   };

@@ -5,7 +5,7 @@ import { Tag, X } from "lucide-react";
 import { AdminOutlineButton } from "@/components/admin/shared/admin-outline-button";
 import { Button } from "@/components/site/shared/ui/button/button";
 import { Input } from "@/components/site/shared/ui/input/input";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import { slugify } from "@/shared/lib/slugify";
 import {
   createEventCategory,
@@ -36,7 +36,7 @@ export function AdminEventNewCategoryForm({
   }
 
   async function handleCreate() {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
 
     const resolvedSlug = slug.trim() || autoSlug;

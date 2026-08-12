@@ -1,4 +1,4 @@
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   getOrganizationBySlug as getMockOrganizationBySlug,
   getVisibleOrganizations as getMockOrganizations,
@@ -28,7 +28,7 @@ export async function getAdminOrganizations(params?: {
   search?: string;
   visibility?: string;
 }): Promise<AdminOrganizationsResponse> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const searchParams = new URLSearchParams();
@@ -48,7 +48,7 @@ export async function getAdminOrganizations(params?: {
 }
 
 export async function getAdminOrganization(id: string): Promise<Organization> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const res = await fetch(`${API_BASE}/api/admin/organizations/${id}`, {
@@ -59,7 +59,7 @@ export async function getAdminOrganization(id: string): Promise<Organization> {
 }
 
 export async function createOrganization(data: Partial<Organization>): Promise<Organization> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const res = await fetch(`${API_BASE}/api/admin/organizations`, {
@@ -78,7 +78,7 @@ export async function createOrganization(data: Partial<Organization>): Promise<O
 }
 
 export async function updateOrganization(id: string, data: Partial<Organization>): Promise<Organization> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const res = await fetch(`${API_BASE}/api/admin/organizations/${id}`, {
@@ -97,7 +97,7 @@ export async function updateOrganization(id: string, data: Partial<Organization>
 }
 
 export async function deleteOrganization(id: string): Promise<void> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const res = await fetch(`${API_BASE}/api/admin/organizations/${id}`, {
@@ -108,7 +108,7 @@ export async function deleteOrganization(id: string): Promise<void> {
 }
 
 export async function toggleOrganizationVisibility(id: string): Promise<{ isVisible: boolean }> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const res = await fetch(`${API_BASE}/api/admin/organizations/${id}/visibility`, {
@@ -151,7 +151,7 @@ export type AdminTerm = {
 };
 
 export async function getAdminTerms(): Promise<AdminTerm[]> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const res = await fetch(`${API_BASE}/api/admin/terms`, {
@@ -162,7 +162,7 @@ export async function getAdminTerms(): Promise<AdminTerm[]> {
 }
 
 export async function createAdminTerm(startYear: number, endYear: number): Promise<AdminTerm> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const res = await fetch(`${API_BASE}/api/admin/terms`, {
@@ -181,7 +181,7 @@ export async function createAdminTerm(startYear: number, endYear: number): Promi
 }
 
 export async function deleteAdminTerm(id: string): Promise<void> {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) throw new Error("Not authenticated");
 
   const res = await fetch(`${API_BASE}/api/admin/terms/${id}`, {

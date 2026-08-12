@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminNavItems, isAdminNavActive } from "@/lib/admin/modules";
-import { clearSession } from "@/lib/admin/mock-auth";
+import { clearSession } from "@/lib/admin/auth-session";
 
 type AdminSidebarProps = {
   email: string;

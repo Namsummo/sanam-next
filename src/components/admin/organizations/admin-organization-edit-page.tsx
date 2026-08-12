@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { AdminOrganizationForm } from "./admin-organization-form";
-import { getToken } from "@/lib/admin/mock-auth";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import { getAdminOrganization } from "@/lib/organization/api";
 import type { Organization } from "@/lib/organization/types";
 
@@ -25,7 +25,7 @@ export function AdminOrganizationEditPage({ params }: AdminOrganizationEditPageP
   useEffect(() => {
     if (!id) return;
 
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
