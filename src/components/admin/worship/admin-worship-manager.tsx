@@ -90,7 +90,7 @@ export function AdminWorshipManager() {
   const [isSyncingViews, setIsSyncingViews] = useState(false);
 
   async function handleSyncViews() {
-    const token = getToken();
+    const token = getAccessToken();
     if (!token) return;
     setIsSyncingViews(true);
     try {
