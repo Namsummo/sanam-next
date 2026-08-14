@@ -67,7 +67,7 @@ export function VideoCard({ video, isActive, onSelect }: VideoCardProps) {
             </div>
           )}
 
-          {video.views && (
+          {video.views !== undefined && (
             <div className="flex items-center gap-1 font-mono">
               <Eye className="size-3" />
               {video.views.toLocaleString()} lượt xem

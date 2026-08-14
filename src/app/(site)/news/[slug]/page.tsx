@@ -148,7 +148,7 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
               <NewsHtmlContent html={article.content} />
             ) : (
               <div className="border-b border-border pb-8">
-                <p className="font-sans text-lg leading-relaxed text-foreground whitespace-pre-line">
+                <p className="font-sans text-lg leading-relaxed text-foreground whitespace-pre-line [word-break:keep-all] [overflow-wrap:break-word]">
                   {article.content}
                 </p>
               </div>
