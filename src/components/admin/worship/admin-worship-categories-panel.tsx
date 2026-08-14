@@ -221,6 +221,7 @@ export function AdminWorshipCategoriesPanel({
                   <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                     {video.speaker ? <span>{video.speaker}</span> : null}
                     <span>{video.publishedAt}</span>
+                    {video.views !== undefined ? <span>{video.views.toLocaleString()} lượt xem</span> : null}
                   </div>
                 </div>
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import { AdminWorshipCategoriesPanel } from "@/components/admin/worship/admin-worship-categories-panel";
 import {
@@ -42,6 +42,7 @@ import {
   toWorshipVideoCategory,
   toWorshipVideoItem,
   toLiveSettings,
+  syncAdminWorshipVideoViews,
 } from "@/shared/services/worship-api";
 
 type WorshipAdminTab = "categories" | "live";
@@ -86,6 +87,26 @@ export function AdminWorshipManager() {
   const [isSavingLive, setIsSavingLive] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncingViews, setIsSyncingViews] = useState(false);
+
+  async function handleSyncViews() {
+    const token = getToken();
+    if (!token) return;
+    setIsSyncingViews(true);
+    try {
+      const res = await syncAdminWorshipVideoViews(token);
+      showSavedMessage(res.message);
+      
+      // Reload video list to show updated views
+      const vidsRes = await getAdminWorshipVideos(token);
+      setVideos(vidsRes.videos.map(toWorshipVideoItem));
+    } catch (err: unknown) {
+      console.error(err);
+      showSavedMessage(`Lỗi: ${getErrorMessage(err, "Không thể đồng bộ lượt xem")}`);
+    } finally {
+      setIsSyncingViews(false);
+    }
+  }
 
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
@@ -329,13 +350,30 @@ export function AdminWorshipManager() {
           Về Tổng quan
         </Link>
 
-        <div className="mt-3">
-          <h1 className="font-display text-3xl font-semibold text-card-foreground">
-            Video & Livestream
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Quản lý danh mục video và cấu hình phát trực tiếp Thánh lễ.
-          </p>
+        <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="font-display text-3xl font-semibold text-card-foreground">
+              Video & Livestream
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Quản lý danh mục video và cấu hình phát trực tiếp Thánh lễ.
+            </p>
+          </div>
+          {activeTab === "categories" && (
+            <button
+              type="button"
+              disabled={isSyncingViews}
+              onClick={handleSyncViews}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-card-foreground hover:bg-muted disabled:opacity-50"
+            >
+              {isSyncingViews ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <RefreshCw className="size-4" />
+              )}
+              Đồng bộ lượt xem YouTube
+            </button>
+          )}
         </div>
       </div>
 

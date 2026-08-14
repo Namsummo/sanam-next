@@ -246,6 +246,15 @@ export async function deleteAdminWorshipVideo(token: string, id: string): Promis
   if (!res.ok) throw new Error("Failed to delete video");
 }
 
+export async function syncAdminWorshipVideoViews(token: string): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE}/api/admin/worship/videos/sync-views`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) throw new Error("Failed to sync YouTube views");
+  return res.json();
+}
+
 export async function getAdminLiveSettings(token: string): Promise<ApiLiveSettingResponse> {
   const res = await fetch(`${API_BASE}/api/admin/worship/live`, {
     headers: authHeaders(token),
