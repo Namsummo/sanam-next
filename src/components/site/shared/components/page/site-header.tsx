@@ -43,7 +43,11 @@ export function SiteHeader() {
         setIsSticky(false);
       }
 
-      if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
+      if (
+        !mobileOpen &&
+        currentScrollY > lastScrollY.current &&
+        currentScrollY > 150
+      ) {
         setIsHidden(true);
       } else {
         setIsHidden(false);
@@ -54,7 +58,7 @@ export function SiteHeader() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [mobileOpen]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -70,11 +74,12 @@ export function SiteHeader() {
       <div
         className={cn(
           "header-sticky",
-          isSticky && "active",
-          isHidden && "hide"
+          (isSticky || mobileOpen) && "active",
+          isHidden && !mobileOpen && "hide",
+          mobileOpen && "transform-none!"
         )}
       >
-        <nav className="navbar navbar-expand-lg py-5 lg:py-[30px] border-b border-white/10">
+        <nav className="navbar navbar-expand-lg relative z-60 border-b border-white/10 py-5 lg:py-[30px]">
           <div className="container mx-auto flex w-full max-w-[1300px] items-center justify-between px-4 min-[992px]:px-8">
             <Link href="/" className="navbar-brand">
               <Image
@@ -97,9 +102,10 @@ export function SiteHeader() {
                         <li key={item.href} className="nav-item relative">
                           <Link
                             href={item.href}
+                            aria-current={active ? "page" : undefined}
                             className={cn(
-                              "nav-link text-white hover:text-accent transition-colors font-sans text-base font-semibold py-3 px-2.5 block",
-                              active && "text-accent"
+                              "nav-link block py-3 px-2.5 font-sans text-base font-semibold transition-colors hover:text-accent",
+                              active ? "text-accent" : "text-white"
                             )}
                           >
                             {item.label}
@@ -115,8 +121,8 @@ export function SiteHeader() {
                       <li key={item.label} className="nav-item submenu group relative">
                         <span
                           className={cn(
-                            "nav-link text-white hover:text-accent transition-colors font-sans text-base font-semibold py-3 px-2.5 flex items-center gap-1 cursor-pointer",
-                            active && "text-accent"
+                            "nav-link flex cursor-pointer items-center gap-1 py-3 px-2.5 font-sans text-base font-semibold transition-colors hover:text-accent",
+                            active ? "text-accent" : "text-white"
                           )}
                         >
                           {item.label}
@@ -128,7 +134,7 @@ export function SiteHeader() {
                               <Link
                                 href={child.href}
                                 className={cn(
-                                  "block text-white hover:text-primary font-sans text-base font-medium py-2 px-5 hover:pl-[23px] transition-all",
+                                  "block py-2 px-5 font-sans text-base font-medium text-white transition-all hover:pl-[23px] hover:text-primary",
                                   isSiteNavActive(pathname, child.href, { exact: true }) && "font-bold underline"
                                 )}
                               >
@@ -154,12 +160,13 @@ export function SiteHeader() {
               </div>
             </div>
 
-            <div className="navbar-toggle">
+            <div className="navbar-toggle relative z-60">
               <button
                 type="button"
-                className={cn(
-                  "text-white hover:text-accent border border-primary rounded-sm bg-accent p-2 flex items-center gap-1 cursor-pointer",
-                )}
+                aria-expanded={mobileOpen}
+                aria-controls="site-mobile-nav"
+                aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
+                className="flex cursor-pointer items-center justify-center rounded-[10px] border border-white/20 bg-accent p-2 text-white transition-colors hover:bg-accent/90"
                 onClick={() => setMobileOpen((open) => !open)}
               >
                 {mobileOpen ? <X className="size-5" aria-hidden /> : <Menu className="size-5" />}

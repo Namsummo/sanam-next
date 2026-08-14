@@ -279,8 +279,10 @@ export async function SiteFooter() {
                       <li key={network}>
                         <a
                           href={url}
+                          // target="_blank"
+                          rel="noopener noreferrer"
                           aria-label={network}
-                          className="flex size-10 items-center justify-center rounded-full border border-white/10 text-white transition-colors duration-400 hover:bg-accent"
+                          className="flex size-10 items-center justify-center rounded-full border border-white/80 text-white transition-colors duration-400 hover:bg-accent"
                         >
                           <Icon className="size-4.5" aria-hidden />
                         </a>

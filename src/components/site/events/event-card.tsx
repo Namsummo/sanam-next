@@ -35,12 +35,12 @@ export function EventCard({ event, className }: EventCardProps) {
             width={640}
             height={556}
             unoptimized={!!event.image}
-            className="aspect-5/3 w-full object-cover"
+            className="aspect-4/3 w-full object-cover md:aspect-5/3"
           />
         </figure>
       </Link>
 
-      <div className="flex flex-1 flex-col gap-2.5 px-5 py-3.5 md:px-6 md:py-4">
+      <div className="flex flex-1 flex-col gap-3 px-5 py-5 md:gap-2.5 md:px-6 md:py-4">
         <div
           className={cn(
             "flex min-h-7 flex-wrap items-center gap-2",
@@ -48,19 +48,19 @@ export function EventCard({ event, className }: EventCardProps) {
           )}
         >
           {event.isFeatured ? (
-            <span className="rounded-sm bg-primary px-2.5 py-1 font-sans text-xs font-medium text-white md:text-sm">
+            <span className="rounded-sm bg-primary px-2.5 py-1 font-sans text-sm font-medium text-white">
               Nổi bật
             </span>
           ) : null}
           {categoryLabel ? (
-            <span className="rounded-sm bg-accent px-2.5 py-1 font-sans text-xs font-medium text-white md:text-sm">
+            <span className="rounded-sm bg-accent px-2.5 py-1 font-sans text-sm font-medium text-white">
               {categoryLabel}
             </span>
           ) : null}
         </div>
 
-        <div className="flex flex-1 flex-col gap-2">
-          <h2 className="min-h-10 font-display text-lg leading-snug text-primary">
+        <div className="flex flex-1 flex-col gap-2.5 md:gap-2">
+          <h2 className="font-display text-xl leading-snug text-primary md:min-h-10 md:text-lg">
             <Link
               href={href}
               title={event.name}
@@ -70,14 +70,14 @@ export function EventCard({ event, className }: EventCardProps) {
             </Link>
           </h2>
 
-          <ul className="space-y-1 font-sans text-xs leading-snug text-foreground/85 md:text-sm">
+          <ul className="space-y-1.5 font-sans text-sm leading-snug text-foreground/85 md:space-y-1">
             <li className="flex items-start gap-2">
-              <CalendarClock className="mt-0.5 size-3.5 shrink-0 text-accent" />
+              <CalendarClock className="mt-0.5 size-4 shrink-0 text-accent md:size-3.5" />
               <span>{formatEventDateTime(event)}</span>
             </li>
             <li className="flex items-start gap-2">
               <MapPin
-                className="mt-0.5 size-3.5 shrink-0 text-accent"
+                className="mt-0.5 size-4 shrink-0 text-accent md:size-3.5"
                 aria-hidden
               />
               <span className="line-clamp-2" title={event.location}>
@@ -87,7 +87,7 @@ export function EventCard({ event, className }: EventCardProps) {
           </ul>
         </div>
 
-        <div className="mt-auto border-t border-border pt-3.5">
+        <div className="mt-auto border-t border-border pt-4 md:pt-3.5">
           <NewsReadMoreLink href={href} />
         </div>
       </div>

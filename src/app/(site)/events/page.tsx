@@ -30,14 +30,14 @@ export default async function EventsPage() {
         ]}
         backgroundImage={bgSettings?.eventsBg}
       />
-      <section className="px-6 py-16 md:py-[120px]">
+      <section className="px-4 py-12 md:px-6 md:py-[120px]">
         <div className="mx-auto max-w-[1300px]">
           {events.length === 0 ? (
             <p className="text-center font-sans text-lg text-foreground">
               Hiện chưa có sự kiện nào được đăng.
             </p>
           ) : (
-            <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 md:gap-x-8 md:gap-y-10 xl:grid-cols-3">
+            <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 md:gap-x-8 md:gap-y-10 xl:grid-cols-3">
               {events.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}

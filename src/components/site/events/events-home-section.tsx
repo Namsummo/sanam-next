@@ -81,7 +81,7 @@ export async function EventsHomeSection() {
       </div>
 
       <ScrollReveal delay={0.3}>
-        <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-2 xl:grid-cols-4 md:gap-3 px-12">
+        <div className="grid grid-cols-1 items-stretch gap-6 px-4 md:grid-cols-2 md:gap-3 md:px-12 xl:grid-cols-4">
           {displayEvents.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}

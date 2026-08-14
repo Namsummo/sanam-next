@@ -40,7 +40,7 @@ export async function FeaturedNewsSection({ className }: FeaturedNewsSectionProp
   return (
     <section
       className={cn(
-        "w-full px-6 py-16 md:px-10 md:py-[120px] md:pb-[90px]",
+        "w-full px-4 py-12 md:px-10 md:py-[120px] md:pb-[90px]",
         className,
       )}
     >
@@ -62,7 +62,7 @@ export async function FeaturedNewsSection({ className }: FeaturedNewsSectionProp
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 md:gap-x-8 md:gap-y-10 xl:grid-cols-3">
           {articles.map((article) => (
             <NewsCard key={article.id} article={article} />
           ))}

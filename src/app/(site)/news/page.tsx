@@ -59,7 +59,7 @@ export default async function NewsPage(props: {
         ]}
         backgroundImage={bgSettings?.newsBg ?? undefined}
       />
-      <section className="px-6 py-16 md:py-[120px]">
+      <section className="px-4 py-12 md:px-6 md:py-[120px]">
         <div className="mx-auto max-w-[1300px]">
           <nav
             aria-label="Danh mục tin tức"
@@ -100,7 +100,7 @@ export default async function NewsPage(props: {
               Chưa có tin tức nào được đăng.
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 md:gap-x-8 md:gap-y-10 xl:grid-cols-3">
               {articles.map((article) => (
                 <NewsCard key={article.id} article={article} />
               ))}

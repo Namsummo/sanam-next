@@ -629,7 +629,6 @@ header.main-header .header-sticky.active {
 	font-weight: 500;
 	line-height: 1em;
 	padding: 12px 10px !important;
-	color: var(--white-color);
 	background: transparent;
 	border-radius: 0px;
 	text-transform: capitalize;
@@ -642,11 +641,6 @@ header.main-header .header-sticky.active {
 	font-weight: 900;
 	font-size: 14px;
 	margin-left: 8px;
-}
-
-.main-menu ul li a:hover,
-.main-menu ul li a:focus {
-	color: var(--accent-color);
 }
 
 .main-menu ul ul {
@@ -695,14 +689,12 @@ header.main-header .header-sticky.active {
 }
 
 .main-menu ul ul li a {
-	color: var(--white-color);
 	padding: 8px 20px !important;
 	transition: all 0.3s ease-in-out;
 }
 
 .main-menu ul ul li a:hover,
 .main-menu ul ul li a:focus {
-	color: var(--primary-color);
 	background-color: transparent;
 	padding: 8px 20px 8px 23px !important;
 }

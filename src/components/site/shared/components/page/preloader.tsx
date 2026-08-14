@@ -7,70 +7,87 @@ const FADE_MS = 600;
 const MIN_VISIBLE_MS = 400;
 const PRELOADER_DONE_KEY = "sanam-preloader-done";
 
-function isDocumentReady(): boolean {
-  return document.readyState === "complete" || document.readyState === "interactive";
+function hasSeenPreloader(): boolean {
+  try {
+    return sessionStorage.getItem(PRELOADER_DONE_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
-function getInitialPhase(): "visible" | "hiding" | "hidden" {
-  if (typeof window === "undefined") return "visible";
-  return sessionStorage.getItem(PRELOADER_DONE_KEY) === "1" ? "hidden" : "visible";
+function markPreloaderDone() {
+  try {
+    sessionStorage.setItem(PRELOADER_DONE_KEY, "1");
+  } catch {
+    // Safari private mode can block sessionStorage
+  }
 }
 
 export function Preloader() {
-  const [phase, setPhase] = useState<"visible" | "hiding" | "hidden">(getInitialPhase);
+  const [phase, setPhase] = useState<"visible" | "hiding" | "hidden">("visible");
 
   useEffect(() => {
-    if (sessionStorage.getItem(PRELOADER_DONE_KEY) === "1") {
-      return;
-    }
-
-    let hideTimer: ReturnType<typeof setTimeout>;
-    let unmountTimer: ReturnType<typeof setTimeout>;
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+    let unmountTimer: ReturnType<typeof setTimeout> | undefined;
     let started = false;
     const startedAt = Date.now();
 
-    const hide = () => {
-      if (started) return;
+    const hide = (immediate = false) => {
+      if (started && !immediate) return;
       started = true;
 
-      const elapsed = Date.now() - startedAt;
-      const delay = Math.max(0, MIN_VISIBLE_MS - elapsed);
+      if (immediate || hasSeenPreloader()) {
+        markPreloaderDone();
+        setPhase("hidden");
+        return;
+      }
 
+      const delay = Math.max(0, MIN_VISIBLE_MS - (Date.now() - startedAt));
       hideTimer = setTimeout(() => {
         setPhase("hiding");
         unmountTimer = setTimeout(() => {
-          sessionStorage.setItem(PRELOADER_DONE_KEY, "1");
+          markPreloaderDone();
           setPhase("hidden");
         }, FADE_MS);
       }, delay);
     };
 
-    const onReadyStateChange = () => {
-      if (document.readyState === "complete") {
-        hide();
-      }
+    const onReady = () => {
+      if (document.readyState === "complete") hide();
     };
 
     const onPageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) {
-        hide();
+      if (event.persisted || hasSeenPreloader()) {
+        hide(true);
+        return;
+      }
+      if (document.readyState === "complete") hide();
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible" && hasSeenPreloader()) {
+        hide(true);
       }
     };
 
-    if (isDocumentReady()) {
+    if (hasSeenPreloader()) {
+      hide(true);
+    } else if (document.readyState === "complete") {
       hide();
     } else {
-      window.addEventListener("load", hide, { once: true });
-      document.addEventListener("readystatechange", onReadyStateChange);
+      window.addEventListener("load", onReady, { once: true });
+      document.addEventListener("readystatechange", onReady);
     }
 
     window.addEventListener("pageshow", onPageShow);
-    const fallbackTimer = setTimeout(hide, 4000);
+    document.addEventListener("visibilitychange", onVisibility);
+    const fallbackTimer = setTimeout(() => hide(), 2500);
 
     return () => {
-      window.removeEventListener("load", hide);
-      document.removeEventListener("readystatechange", onReadyStateChange);
+      window.removeEventListener("load", onReady);
+      document.removeEventListener("readystatechange", onReady);
       window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("visibilitychange", onVisibility);
       clearTimeout(hideTimer);
       clearTimeout(unmountTimer);
       clearTimeout(fallbackTimer);
@@ -85,8 +102,10 @@ export function Preloader() {
 
   return (
     <div
-      className={`fixed inset-0 z-1000 flex items-center justify-center bg-primary transition-[opacity,visibility] duration-600 ease-in-out motion-reduce:duration-200 ${isHiding ? "pointer-events-none opacity-0 invisible" : ""
-        }`}
+      data-preloader=""
+      className={`fixed inset-0 z-1000 flex items-center justify-center bg-primary transition-[opacity,visibility] duration-600 ease-in-out motion-reduce:duration-200 [html[data-preloader-done]_&]:hidden ${
+        isHiding ? "pointer-events-none opacity-0 invisible" : ""
+      }`}
       role="status"
       aria-live="polite"
       aria-label="Loading"
