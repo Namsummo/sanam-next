@@ -34,6 +34,10 @@ export const siteMainNav: SiteNavItem[] = [
       { label: "Giáo xứ", href: "/introduce" },
       { label: "Hoa trái ơn gọi", href: "/introduce/hoa-trai-on-goi" },
       { label: "Ban Hành Giáo", href: "/introduce/ban-hanh-giao" },
+      {
+        label: "Sổ Gia Đình Công Giáo",
+        href: "/introduce/so-gia-dinh-cong-giao",
+      },
     ],
   },
   { label: "Đoàn thể", href: "/organization" },
