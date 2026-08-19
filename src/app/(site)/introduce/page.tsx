@@ -21,6 +21,12 @@ const introduceLinks = [
     description:
       "Danh sách các Cha, Thầy, Dì quê hương xuất thân từ giáo xứ Sa Nam.",
   },
+  {
+    href: "/introduce/so-gia-dinh-cong-giao",
+    title: "Sổ Gia Đình Công Giáo",
+    description:
+      "Danh sách các gia đình Công giáo đang sinh hoạt tại Giáo xứ Sa Nam.",
+  },
 ] as const;
 
 export default async function IntroducePage() {

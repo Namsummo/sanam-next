@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  BookOpen,
   CalendarDays,
   Church,
   Contact,
@@ -103,6 +104,14 @@ export const adminModules: AdminModule[] = [
     description: "Quản lý hình ảnh nền của các trang.",
     href: "/admin/library",
     icon: ImageIcon,
+    status: "available",
+  },
+  {
+    id: "family-registry",
+    title: "Sổ Gia Đình",
+    description: "Quản lý hồ sơ cá nhân và gia đình Công giáo.",
+    href: "/admin/family-registry",
+    icon: BookOpen,
     status: "available",
   },
   {
