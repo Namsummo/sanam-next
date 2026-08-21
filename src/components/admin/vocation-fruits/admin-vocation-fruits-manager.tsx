@@ -15,7 +15,6 @@ import { AdminVocationFruitsTable } from "@/components/admin/vocation-fruits/adm
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import { getAccessToken } from "@/lib/admin/auth-session";
 import type { VocationFruit, VocationType } from "@/lib/vocation/types";
-import { AdminOutlineButton } from "../shared/admin-outline-button";
 import {
   getAllVocationFruits,
   createVocationFruit,
@@ -201,10 +200,10 @@ export function AdminVocationFruitsManager() {
               </p>
             )}
           </div>
-          <AdminOutlineButton type="button" onClick={openCreateForm}>
+          <button type="button" className='bg-accent text-white px-4 py-2 rounded-xl cursor-pointer flex items-center gap-2 justify-center' onClick={openCreateForm}>
             <Plus className="size-4" aria-hidden />
             Thêm hoa trái
-          </AdminOutlineButton>
+          </button>
         </div>
       </div>
 

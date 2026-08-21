@@ -16,6 +16,7 @@ import {
 import { AdminPagination } from "@/components/admin/shared/admin-pagination";
 import { cn } from "@/lib/utils";
 import type { ClergyMember } from "@/lib/clergy/types";
+import Image from "next/image";
 
 const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
@@ -68,11 +69,12 @@ export function AdminClergyTable({
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="min-w-[250px] px-4">Thông tin</TableHead>
+            <TableHead className="px-4">STT</TableHead>
+            <TableHead className="min-w-72 px-4">Thông tin</TableHead>
             <TableHead className="px-4">Phân loại</TableHead>
             <TableHead className="px-4">Nhiệm kỳ</TableHead>
             <TableHead className="px-4">Hiển thị</TableHead>
-            <TableHead className="px-4">Hiện ở homepage</TableHead>
+            <TableHead className="px-4">Hiện ở Trang chủ</TableHead>
             <TableHead className="px-4 text-right">Hành động</TableHead>
           </TableRow>
         </TableHeader>
@@ -84,17 +86,22 @@ export function AdminClergyTable({
               </TableCell>
             </TableRow>
           ) : (
-            members.map((member) => (
+            members.map((member, index) => (
               <TableRow
                 key={member.id}
                 className={cn(editingId === member.id && "bg-accent/5 hover:bg-accent/10")}
               >
-                <TableCell className="min-w-[250px] px-4 py-3 whitespace-normal">
-                  <p className="font-medium text-card-foreground">{member.fullName}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{member.position}</p>
-                  {member.hometown ? (
-                    <p className="mt-0.5 text-xs text-muted-foreground">{member.hometown}</p>
-                  ) : null}
+                <TableCell className="px-4 py-3 text-center text-sm text-muted-foreground">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="min-w-72 px-4 py-3 whitespace-normal flex items-center gap-2">
+                  <Image src={member.image || ""} alt={member.fullName} width={50} height={50} />
+                  <div className="flex flex-col">                      <p className="font-medium text-card-foreground">{member.fullName}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{member.position}</p>
+                    {member.hometown ? (
+                      <p className="mt-0.5 text-xs text-muted-foreground">{member.hometown}</p>
+                    ) : null}
+                  </div>
                 </TableCell>
                 <TableCell className="px-4 py-3">
                   <span

@@ -59,10 +59,10 @@ export default async function ContactPage() {
         backgroundImage={bgSettings?.contactBg}
       />
 
-      <section className="px-6 py-16 md:pb-[60px] md:pt-[120px]">
-        <div className="mx-auto max-w-[1300px]">
-          <div className="grid grid-cols-1 items-center gap-10 xl:grid-cols-2 xl:gap-[30px]">
-            <div className="max-xl:mb-[30px] wow fadeInLeft" data-wow-delay="0.1s">
+      <section className="px-6 py-16 md:pb-15 md:pt-30">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 items-center gap-10 xl:grid-cols-2 xl:gap-7">
+            <div className="max-xl:mb-7 wow fadeInLeft" data-wow-delay="0.1s">
               <ContactSectionSubtitle>{data.subtitle}</ContactSectionSubtitle>
               <h2 className="font-display text-3xl font-semibold uppercase leading-none text-primary md:text-4xl lg:text-5xl">
                 {data.title}

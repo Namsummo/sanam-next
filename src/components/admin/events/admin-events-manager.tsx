@@ -14,6 +14,7 @@ import { AdminEventFormModal } from "@/components/admin/events/admin-event-form-
 import { AdminEventsFilters } from "@/components/admin/events/admin-events-filters";
 import { AdminEventsTable } from "@/components/admin/events/admin-events-table";
 import { EVENTS_PAGE_SIZE } from "@/components/admin/events/admin-events-table";
+import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   createEvent,
@@ -27,9 +28,6 @@ import {
 } from "@/shared/services/events-api";
 import { slugify } from "@/shared/lib/slugify";
 import type { EventStatus, ParishEvent } from "@/lib/events/types";
-
-const actionButtonClassName =
-  "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
 const SEARCH_DEBOUNCE_MS = 1000;
 
@@ -50,6 +48,8 @@ export function AdminEventsManager() {
   const [statusFilter, setStatusFilter] = useState<"all" | EventStatus>("all");
   const [categoryFilter, setCategoryFilter] = useState<"all" | string>("all");
   const [formOpen, setFormOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ParishEvent | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -131,16 +131,13 @@ export function AdminEventsManager() {
     setFormOpen(true);
   }
 
-  async function handleDelete(eventId: string) {
+  function handleDelete(eventId: string) {
     const target = events.find((event) => event.id === eventId);
-    if (!target) {
-      return;
-    }
+    if (target) setDeleteTarget(target);
+  }
 
-    const shouldDelete = window.confirm(`Xóa sự kiện "${target.name}"?`);
-    if (!shouldDelete) {
-      return;
-    }
+  async function confirmDelete() {
+    if (!deleteTarget) return;
 
     const token = getAccessToken();
     if (!token) {
@@ -149,13 +146,17 @@ export function AdminEventsManager() {
     }
 
     try {
-      await deleteEvent(token, eventId);
-      if (editingId === eventId) {
+      setDeleting(true);
+      await deleteEvent(token, deleteTarget.id);
+      if (editingId === deleteTarget.id) {
         closeForm();
       }
+      setDeleteTarget(null);
       await fetchEvents();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete event");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -243,9 +244,9 @@ export function AdminEventsManager() {
               <p className="mt-1 text-sm text-destructive">{error}</p>
             ) : null}
           </div>
-          <button type="button" className={actionButtonClassName} onClick={openCreateForm}>
+          <button type="button" className='bg-accent text-white px-4 py-2 rounded-xl cursor-pointer flex items-center gap-2 justify-center' onClick={openCreateForm}>
             <Plus className="size-4" aria-hidden />
-            Tạo mới
+            Tạo sự kiện
           </button>
         </div>
       </div>
@@ -290,6 +291,20 @@ export function AdminEventsManager() {
         onClose={closeForm}
         onSubmit={handleFormSubmit}
         onUploadImage={handleUploadImage}
+      />
+
+      <AdminConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeleteTarget(null);
+        }}
+        title="Xóa sự kiện"
+        description="Bạn có chắc muốn xóa sự kiện này? Hành động không thể hoàn tác."
+        confirmLabel="Xóa"
+        cancelLabel="Hủy"
+        onConfirm={confirmDelete}
+        loading={deleting}
+        variant="danger"
       />
     </div>
   );

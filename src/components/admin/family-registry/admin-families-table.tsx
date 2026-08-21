@@ -12,10 +12,13 @@ import {
 import { cn } from "@/lib/utils";
 import type { Family, FamilyMember, Person } from "@/lib/family-registry/types";
 import { FAMILY_STATUS_LABELS } from "@/lib/family-registry/constants";
-import { formatPersonDisplayName, getFamilyStatusBadgeClassName } from "@/lib/family-registry/helpers";
+import {
+  formatPersonDisplayName,
+  getFamilyStatusBadgeClassName,
+} from "@/lib/family-registry/helpers";
 
 const actionBtn =
-  "inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-card px-2 text-xs text-card-foreground transition-colors hover:bg-muted";
+  "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
 type AdminFamiliesTableProps = {
   families: Family[];
@@ -46,47 +49,87 @@ export function AdminFamiliesTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-25">Mã GĐ</TableHead>
+              <TableHead className="w-25">Mã GĐ</TableHead>
               <TableHead className="min-w-50">Tên gia đình</TableHead>
               <TableHead className="min-w-50">Người đứng đầu</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Thành viên</TableHead>
-              <TableHead className="w-25" />
+              <TableHead className="w-35">Trạng thái</TableHead>
+              <TableHead className="w-30">Thành viên</TableHead>
+              <TableHead className="w-55 text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {families.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="py-10 text-center text-muted-foreground"
+                >
                   Chưa có gia đình nào
                 </TableCell>
               </TableRow>
             ) : (
               families.map((family) => {
                 const head = personMap.get(family.headPersonId);
-                const count = members.filter((m) => m.familyId === family.id).length;
+                const count = members.filter(
+                  (m) => m.familyId === family.id,
+                ).length;
+
                 return (
                   <TableRow
                     key={family.id}
                     className="cursor-pointer"
                     onClick={() => onEdit(family)}
                   >
-                    <TableCell className="font-mono text-sm">{family.familyCode}</TableCell>
-                    <TableCell className="font-medium">{family.name}</TableCell>
-                    <TableCell>{head ? formatPersonDisplayName(head) : "—"}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {family.familyCode}
+                    </TableCell>
+
+                    <TableCell className="font-medium">
+                      {family.name}
+                    </TableCell>
+
                     <TableCell>
-                      <span className={getFamilyStatusBadgeClassName(family.status)}>
+                      {head ? formatPersonDisplayName(head) : "—"}
+                    </TableCell>
+
+                    <TableCell>
+                      <span
+                        className={getFamilyStatusBadgeClassName(
+                          family.status,
+                        )}
+                      >
                         {FAMILY_STATUS_LABELS[family.status] ?? "—"}
                       </span>
                     </TableCell>
+
                     <TableCell>{count} người</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        <button type="button" className={actionBtn} onClick={() => onEdit(family)} title="Chỉnh sửa">
-                          <Pencil className="size-3.5" />
+
+                    <TableCell className="text-right">
+                      <div
+                        className="flex items-center justify-end gap-1.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          className={actionBtn}
+                          onClick={() => onEdit(family)}
+                        >
+                          <Pencil className="size-4" aria-hidden />
+                          Sửa
                         </button>
-                        <button type="button" className={cn(actionBtn, "hover:border-destructive hover:text-destructive")} onClick={() => onDelete(family.id)} title="Xóa">
-                          <Trash2 className="size-3.5" />
+
+                        <button
+                          type="button"
+                          className={cn(
+                            actionBtn,
+                            "text-destructive hover:bg-destructive/10",
+                          )}
+                          onClick={() => onDelete(family.id)}
+                          title="Xóa"
+                        >
+                          <Trash2 className="size-4" aria-hidden />
+                          Xóa
                         </button>
                       </div>
                     </TableCell>

@@ -15,7 +15,7 @@ import { GENDER_LABELS, MARITAL_STATUS_LABELS, PERSON_STATUS_LABELS } from "@/li
 import { formatDate, getPersonStatusBadgeClassName } from "@/lib/family-registry/helpers";
 
 const actionBtn =
-  "inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-card px-2 text-xs text-card-foreground transition-colors hover:bg-muted";
+  "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
 type AdminPersonsTableProps = {
   persons: Person[];
@@ -39,7 +39,8 @@ export function AdminPersonsTable({
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-2 text-center">STT</TableHead>
               <TableHead className="min-w-25">Tên thánh</TableHead>
               <TableHead className="min-w-50">Họ và tên</TableHead>
               <TableHead className="min-w-25">Ngày sinh</TableHead>
@@ -58,8 +59,11 @@ export function AdminPersonsTable({
                 </TableCell>
               </TableRow>
             ) : (
-              persons.map((person) => (
+              persons.map((person, index) => (
                 <TableRow key={person.id}>
+                  <TableCell className="px-2 py-3 text-center text-sm text-muted-foreground">
+                    {index + 1}
+                  </TableCell>
                   <TableCell>{person.saintName || "—"}</TableCell>
                   <TableCell className="font-medium">{person.fullName}</TableCell>
                   <TableCell className="tabular-nums">{formatDate(person.dateOfBirth)}</TableCell>
@@ -73,11 +77,13 @@ export function AdminPersonsTable({
                   <TableCell>{person.giaoXu || "—"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1.5">
-                      <button type="button" className={actionBtn} onClick={() => onEdit(person)} title="Chỉnh sửa">
-                        <Pencil className="size-3.5" />
+                      <button type="button" className={actionBtn} onClick={() => onEdit(person)}>
+                        <Pencil className="size-4" aria-hidden />
+                        Sửa
                       </button>
-                      <button type="button" className={cn(actionBtn, "hover:border-destructive hover:text-destructive")} onClick={() => onDelete(person.id)} title="Xóa">
-                        <Trash2 className="size-3.5" />
+                      <button type="button" className={cn(actionBtn, "text-destructive hover:bg-destructive/10")} onClick={() => onDelete(person.id)}>
+                        <Trash2 className="size-4" aria-hidden />
+                        Xóa
                       </button>
                     </div>
                   </TableCell>

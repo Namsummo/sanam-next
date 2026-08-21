@@ -20,7 +20,7 @@ export default async function WorshipPage() {
         backgroundImage={bgSettings?.worshipBg}
       />
       <main className="min-h-screen w-full bg-background px-4 py-8 md:px-8 lg:px-12">
-        <div className="mx-auto max-w-[900px] py-16 text-center">
+        <div className="mx-auto max-w-225 py-16 text-center">
           <p className="font-display text-xl font-semibold text-primary md:text-2xl">
             Nội dung đang được cập nhật
           </p>

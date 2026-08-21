@@ -11,8 +11,14 @@ import { AdminOutlineButton } from "@/components/admin/shared/admin-outline-butt
 import { AdminSelect } from "@/components/admin/shared/admin-select";
 import { ControlledField, FieldGroup } from "@/components/site/shared/ui/field/field";
 import { Input } from "@/components/site/shared/ui/input/input";
-import { ImageUploader } from "@/components/admin/news/image-uploader";
+import { ImageUploader } from "@/components/admin/shared/image-uploader";
 import type { VocationType } from "@/lib/vocation/types";
+
+function RequiredMark() {
+  return (
+    <span className="text-red-500">*</span>
+  );
+}
 
 type AdminVocationFruitFormModalProps = {
   open: boolean;
@@ -73,7 +79,9 @@ export function AdminVocationFruitFormModal({
           <ControlledField
             control={form.control}
             name="fullName"
-            label="Họ tên"
+            label={<>
+              Họ tên <RequiredMark />
+            </>}
             rules={{ required: "Vui lòng nhập họ tên" }}
           >
             {({ field, fieldState, id }) => (

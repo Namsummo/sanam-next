@@ -34,6 +34,12 @@ type AdminFamilyFormModalProps = {
   onSubmit: (values: FamilyFormValues) => void;
 };
 
+function RequiredMark() {
+  return (
+    <span className="text-red-500">*</span>
+  );
+}
+
 export function AdminFamilyFormModal({
   open,
   defaultValues,
@@ -124,7 +130,7 @@ export function AdminFamilyFormModal({
         <ControlledField
           control={form.control}
           name="name"
-          label="Tên gia đình *"
+          label={<>Tên gia đình <RequiredMark /></>}
           rules={{ required: "Vui lòng nhập tên gia đình" }}
         >
           {({ controlProps }) => (
@@ -135,7 +141,7 @@ export function AdminFamilyFormModal({
         <ControlledField
           control={form.control}
           name="headPersonId"
-          label="Người đứng đầu *"
+          label={<>Người đứng đầu <RequiredMark /></>}
           rules={{ required: "Vui lòng chọn người đứng đầu" }}
         >
           {({ field }) => (
@@ -224,7 +230,7 @@ export function AdminFamilyFormModal({
                     {/* Chọn người */}
                     <div>
                       <label className="mb-1 block text-xs font-medium text-card-foreground">
-                        Thành viên *
+                        Thành viên <RequiredMark />
                       </label>
                       <AdminSelect
                         value={entry.personId}
@@ -238,7 +244,7 @@ export function AdminFamilyFormModal({
                     {/* Vai trò */}
                     <div>
                       <label className="mb-1 block text-xs font-medium text-card-foreground">
-                        Vai trò *
+                        Vai trò  <RequiredMark />
                       </label>
                       <Select
                         value={entry.role}

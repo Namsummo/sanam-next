@@ -55,7 +55,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
         onClick={onClose}
       />
 
-      <div className="relative z-10 max-h-[92vh] w-full max-w-[800px] overflow-y-auto rounded-[20px] border border-border bg-[#f5f3ec] shadow-[0_35px_70px_rgba(0,0,0,0.25)] transition-all duration-300 md:flex md:max-h-none md:overflow-hidden md:rounded-[32px]">
+      <div className="relative z-10 max-h-[92vh] w-full max-w-200 overflow-y-auto rounded-[20px] border border-border bg-[#f5f3ec] shadow-[0_35px_70px_rgba(0,0,0,0.25)] transition-all duration-300 md:flex md:max-h-none md:overflow-hidden md:rounded-4xl">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-20 flex size-8 cursor-pointer items-center justify-center rounded-full bg-[#010101]/10 text-primary transition-all duration-300 hover:bg-accent hover:text-white md:top-5 md:right-5 md:size-10"
@@ -65,7 +65,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
         </button>
 
         <div className="relative flex w-full shrink-0 flex-col items-center justify-center border-b border-border/40 bg-[#eae7de]/70 p-4 text-center sm:p-6 md:w-[260px] md:border-r md:border-b-0 md:p-6">
-          <figure className="relative mb-2 aspect-3/4 w-[112px] overflow-hidden transition-transform duration-500 hover:scale-[1.02] sm:mb-3 sm:w-[130px] md:mb-3 md:w-[140px]">
+          <figure className="relative mb-2 aspect-3/4 w-28 overflow-hidden transition-transform duration-500 hover:scale-[1.02] sm:mb-3 sm:w-32 md:mb-3 md:w-[140px]">
             <Image
               src={imageSrc}
               alt={`Chân dung ${member.fullName}`}
@@ -81,7 +81,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
             {isPriest ? "Linh mục" : "Ban Hành Giáo"}
           </span>
 
-          <p className="mt-0.5 font-sans text-xs font-semibold text-foreground/80 md:mt-1 md:text-sm">
+          <p className="mt-0.5 font-sans text-xs font-semibold text-accent md:mt-1 md:text-sm up">
             {member.position}
           </p>
           <h3 className="font-display text-base font-bold leading-tight text-primary md:text-lg">
@@ -102,7 +102,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
 
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:gap-4">
               {member.birthday ? (
-                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-[16px] md:p-3">
+                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-2xl md:p-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
                     <Calendar className="size-4 md:size-5" />
                   </div>
@@ -114,7 +114,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
               ) : null}
 
               {isPriest && member.ordinationDate ? (
-                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-[16px] md:p-3">
+                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-2xl md:p-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
                     <Award className="size-4 md:size-5" />
                   </div>
@@ -126,7 +126,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
               ) : null}
 
               {member.patronSaint ? (
-                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-[16px] md:p-3">
+                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-2xl md:p-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
                     <Heart className="size-4 md:size-5" />
                   </div>
@@ -138,7 +138,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
               ) : null}
 
               {member.patronDate ? (
-                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-[16px] md:p-3">
+                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-2xl md:p-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
                     <BookOpen className="size-4 md:size-5" />
                   </div>
@@ -150,7 +150,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
               ) : null}
 
               {member.hometown ? (
-                <div className="flex items-center gap-2 rounded-[12px] border border-border/30 bg-white/50 p-2.5 sm:col-span-2 md:gap-3 md:rounded-[16px] md:p-3">
+                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 sm:col-span-2 md:gap-3 md:rounded-2xl md:p-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
                     <MapPin className="size-4 md:size-5" />
                   </div>

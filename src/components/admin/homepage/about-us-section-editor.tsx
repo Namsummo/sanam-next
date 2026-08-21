@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -86,6 +85,9 @@ export function AboutUsSectionEditor() {
   }, []);
 
   useEffect(() => {
+    async function loadSettings() {
+      await loadSettings();
+    }
     loadSettings();
   }, [loadSettings]);
 
@@ -173,7 +175,7 @@ export function AboutUsSectionEditor() {
     if (!src.trim()) return null;
 
     return (
-      <div className="overflow-hidden rounded-[12px] border border-border bg-muted/20">
+      <div className="overflow-hidden rounded-xl border border-border bg-muted/20">
         <img src={resolveApiUrl(src)} alt="Xem trước" className="max-h-56 w-full object-cover" />
       </div>
     );

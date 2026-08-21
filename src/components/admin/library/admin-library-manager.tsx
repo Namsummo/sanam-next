@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Save } from "lucide-react";
-import { ImageUploader } from "@/components/admin/news/image-uploader";
+import { ImageUploader } from "@/components/admin/shared/image-uploader";
 import { uploadImage } from "@/shared/services/news-api";
 import { getAccessToken } from "@/lib/admin/auth-session";
 import { getBackgroundSettings, updateBackgroundSettings, type BackgroundSettingsPayload } from "@/shared/services/background-settings-api";

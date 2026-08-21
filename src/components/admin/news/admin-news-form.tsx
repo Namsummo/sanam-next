@@ -4,8 +4,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Eye, EyeOff, Star, X, Tag } from "lucide-react";
 import Link from "next/link";
-import { BlogEditor } from "@/components/admin/news/blog-editor";
-import { ImageUploader } from "@/components/admin/news/image-uploader";
+import { BlogEditor } from "@/components/admin/shared/blog-editor";
+import { ImageUploader } from "@/components/admin/shared/image-uploader";
 import { AdminSelect } from "@/components/admin/shared/admin-select";
 import { getAccessToken, getCurrentUser } from "@/lib/admin/auth-session";
 import {
@@ -18,10 +18,19 @@ import {
   type NewsArticleResponse,
 } from "@/shared/services/news-api";
 import { slugify } from "@/shared/lib/slugify";
+import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
 
 type NewsFormProps = {
   article?: NewsArticleResponse;
 };
+
+function RequiredMark() {
+  return (
+    <span className="text-destructive" aria-hidden>
+      *
+    </span>
+  );
+}
 
 export function NewsForm({ article }: NewsFormProps) {
   const router = useRouter();
@@ -156,7 +165,7 @@ export function NewsForm({ article }: NewsFormProps) {
         <div className="grid gap-6 md:grid-cols-2">
           <div className="md:col-span-2">
             <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Tiêu đề *
+              Tiêu đề <RequiredMark />
             </label>
             <input
               type="text"
@@ -198,7 +207,7 @@ export function NewsForm({ article }: NewsFormProps) {
             />
 
             {showNewCategory ? (
-              <div className="mt-3 overflow-hidden rounded-[12px] border border-border bg-card shadow-sm">
+              <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex items-center justify-between border-b border-border px-4 py-3">
                   <span className="flex items-center gap-2 text-sm font-medium text-card-foreground">
                     <Tag className="size-4 text-accent" />
@@ -321,12 +330,12 @@ export function NewsForm({ article }: NewsFormProps) {
               type="datetime-local"
               value={publishedAt}
               onChange={(e) => setPublishedAt(e.target.value)}
-              className="w-full rounded-[12px] border border-border bg-card px-4 py-3 text-sm text-card-foreground focus:border-accent focus:outline-none"
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground focus:border-accent focus:outline-none"
             />
           </div>
 
           <div className="flex items-end gap-4">
-            <label className="flex cursor-pointer items-center gap-2 rounded-[12px] border border-border bg-card px-4 py-3 text-sm text-card-foreground transition-colors hover:border-accent">
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground transition-colors hover:border-accent">
               <input
                 type="checkbox"
                 checked={isFeatured}
@@ -337,7 +346,7 @@ export function NewsForm({ article }: NewsFormProps) {
               <span>Bài nổi bật</span>
             </label>
 
-            <label className="flex cursor-pointer items-center gap-2 rounded-[12px] border border-border bg-card px-4 py-3 text-sm text-card-foreground transition-colors hover:border-accent">
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground transition-colors hover:border-accent">
               <input
                 type="checkbox"
                 checked={isVisible}
@@ -357,12 +366,10 @@ export function NewsForm({ article }: NewsFormProps) {
             <label className="mb-1.5 block text-sm font-medium text-card-foreground">
               Mô tả ngắn
             </label>
-            <textarea
+            <Textarea
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
-              rows={3}
               placeholder="Mô tả ngắn cho bài viết..."
-              className="w-full resize-none rounded-[12px] border border-border bg-card px-4 py-3 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
             />
           </div>
 
@@ -379,7 +386,7 @@ export function NewsForm({ article }: NewsFormProps) {
 
           <div className="md:col-span-2">
             <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Nội dung *
+              Nội dung <RequiredMark />
             </label>
             <BlogEditor
               content={content}

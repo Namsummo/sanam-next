@@ -1,4 +1,4 @@
-import { NewsForm } from "@/components/admin/news/news-form";
+import { NewsForm } from "@/components/admin/news/admin-news-form";
 
 export default function AdminNewsCreatePage() {
   return <NewsForm />;

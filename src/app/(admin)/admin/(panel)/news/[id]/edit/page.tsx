@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminNewsEditPage } from "@/components/admin/news/edit-page";
+import { AdminNewsEditPage } from "@/components/admin/news/admin-edit-page";
 
 type Props = {
   params: Promise<{ id: string }>;

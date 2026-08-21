@@ -34,9 +34,6 @@ import { uploadEventImage } from "@/shared/services/events-api";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import type { ClergyMember } from "@/lib/clergy/types";
 
-const actionButtonClassName =
-  "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
-
 const SEARCH_DEBOUNCE_MS = 1000;
 const PAGE_SIZE = 11;
 
@@ -294,7 +291,7 @@ export function AdminClergyManager() {
               <p className="mt-1 text-sm text-destructive">{error}</p>
             ) : null}
           </div>
-          <button type="button" className={actionButtonClassName} onClick={openCreateForm}>
+          <button type="button" className='bg-accent text-white px-4 py-2 rounded-xl cursor-pointer flex items-center gap-2 justify-center' onClick={openCreateForm}>
             <Plus className="size-4" aria-hidden />
             Thêm thành viên
           </button>

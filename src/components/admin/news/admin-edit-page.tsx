@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { NewsForm } from "@/components/admin/news/news-form";
+import { NewsForm } from "@/components/admin/news/admin-news-form";
 import { getAccessToken } from "@/lib/admin/auth-session";
 import { getNewsById, type NewsArticleResponse } from "@/shared/services/news-api";
 

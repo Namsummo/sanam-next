@@ -14,8 +14,9 @@ import {
   TableRow,
 } from "@/components/site/shared/ui/table/table";
 import { AdminPagination } from "@/components/admin/shared/admin-pagination";
-import { cn, resolveApiUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { VocationFruit } from "@/lib/vocation/types";
+import Image from "next/image";
 
 const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
@@ -52,7 +53,8 @@ export function AdminVocationFruitsTable({
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="min-w-[250px] px-4">Thông tin</TableHead>
+            <TableHead className="px-4">STT</TableHead>
+            <TableHead className="min-w-72 px-4">Thông tin</TableHead>
             <TableHead className="px-4">Nhóm</TableHead>
             <TableHead className="px-4 text-right">Hành động</TableHead>
           </TableRow>
@@ -65,19 +67,22 @@ export function AdminVocationFruitsTable({
               </TableCell>
             </TableRow>
           ) : (
-            fruits.map((fruit) => (
+            fruits.map((fruit, index) => (
               <TableRow
                 key={fruit.id}
                 className={cn(editingId === fruit.id && "bg-accent/5 hover:bg-accent/10")}
               >
-                <TableCell className="min-w-[250px] px-4 py-3 whitespace-normal">
+                <TableCell className="px-4 py-3 text-center text-sm text-muted-foreground">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="min-w-72 px-4 py-3 whitespace-normal">
                   <div className="flex items-start gap-3">
                     {fruit.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={resolveApiUrl(fruit.image)}
-                        alt=""
-                        className="size-10 shrink-0 rounded-[8px] object-cover"
+                      <Image
+                        src={fruit.image}
+                        alt={fruit.fullName}
+                        width={50}
+                        height={50}
                       />
                     ) : null}
                     <div>

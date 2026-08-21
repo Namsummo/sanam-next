@@ -59,8 +59,8 @@ export default async function NewsPage(props: {
         ]}
         backgroundImage={bgSettings?.newsBg ?? undefined}
       />
-      <section className="px-4 py-12 md:px-6 md:py-[120px]">
-        <div className="mx-auto max-w-[1300px]">
+      <section className="px-4 py-12 md:px-6 md:py-30">
+        <div className="mx-auto max-w-7xl">
           <nav
             aria-label="Danh mục tin tức"
             className="mb-10 flex flex-wrap justify-center gap-3 md:mb-12"

@@ -1,5 +1,5 @@
-import { NewsList } from "@/components/admin/news/news-list";
+import { AdminNewsList } from "@/components/admin/news/admin-news-list";
 
 export default function AdminNewsPage() {
-  return <NewsList />;
+  return <AdminNewsList />;
 }

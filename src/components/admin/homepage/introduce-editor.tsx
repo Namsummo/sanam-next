@@ -1,6 +1,6 @@
 "use client";
 
-import { BlogEditor } from "@/components/admin/news/blog-editor";
+import { BlogEditor } from "@/components/admin/shared/blog-editor";
 import { Button } from "@/components/site/shared/ui/button/button";
 
 export function IntroduceEditor() {

@@ -68,19 +68,16 @@ export function ClergyHomeSectionClient({
 
           {council.length > 0 ? (
             <ScrollReveal delay={0.6}>
-              <div className="rounded-md border border-border/50 bg-[#eae7de]/60 p-8 shadow-[0_10px_40px_rgba(0,0,0,0.015)] md:p-12">
-                <div className="mb-8 text-center md:mb-10">
+              <div className="rounded-md border border-border/50 bg-[#eae7de]/60 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.015)] sm:p-8 md:p-12">
+                <div className="mb-5 text-center sm:mb-6 md:mb-10">
                   <h3 className="font-sans text-xs font-bold uppercase tracking-[0.2em] text-primary/70 md:text-sm">
                     Ban Hành Giáo Đương Nhiệm
                   </h3>
                 </div>
 
-                <ul className="flex list-none justify-center gap-4 overflow-x-auto pb-1 sm:gap-8 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:pb-0">
+                <ul className="grid list-none grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 md:gap-6">
                   {councilPreview.map((member) => (
-                    <li
-                      key={member.id}
-                      className="min-w-[42vw] shrink-0 sm:min-w-[28vw] md:min-w-0"
-                    >
+                    <li key={member.id}>
                       <CouncilMemberCard
                         member={member}
                         onClick={() => setSelectedMember(member)}
@@ -90,10 +87,10 @@ export function ClergyHomeSectionClient({
                   ))}
                 </ul>
 
-                <p className="mt-10 text-center font-sans text-sm text-foreground/80">
+                <p className="mt-6 text-center font-sans text-sm text-foreground/80 sm:mt-8 md:mt-10">
                   <Link
                     href="/introduce/ban-hanh-giao"
-                    className="font-semibold text-primary underline-offset-4 transition-colors hover:text-accent underline italic"
+                    className="font-semibold italic text-primary underline underline-offset-4 transition-colors hover:text-accent"
                   >
                     Xem Thêm
                   </Link>

@@ -24,12 +24,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/site/shared/ui/select/select";
-import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
 import { AdminSelect } from "@/components/admin/shared/admin-select";
-import { ImageUploader } from "@/components/admin/news/image-uploader";
+import { ImageUploader } from "@/components/admin/shared/image-uploader";
 import { AdminEventNewCategoryForm } from "@/components/admin/events/admin-event-new-category-form";
 import { getEventCategories, type ApiEventCategory } from "@/shared/services/events-api";
 import { Button } from "@/components/site/shared/ui/button/button";
+import { BlogEditor } from "../shared/blog-editor";
+
+function RequiredMark() {
+  return (
+    <span className="text-destructive" aria-hidden>
+      *
+    </span>
+  );
+}
 
 type AdminEventFormModalProps = {
   open: boolean;
@@ -117,7 +125,11 @@ export function AdminEventFormModal({
           <ControlledField
             control={form.control}
             name="name"
-            label="Tên sự kiện"
+            label={
+              <>
+                Tên sự kiện <RequiredMark />
+              </>
+            }
             rules={{ required: "Vui lòng nhập tên sự kiện." }}
           >
             {({ controlProps }) => (
@@ -131,12 +143,18 @@ export function AdminEventFormModal({
 
         <div className="grid gap-4 md:grid-cols-2">
           <FieldSet>
-            <FieldLegend variant="label">Thời gian bắt đầu</FieldLegend>
+            <FieldLegend variant="label">
+              Thời gian bắt đầu <RequiredMark />
+            </FieldLegend>
             <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3">
               <ControlledField
                 control={form.control}
                 name="startDate"
-                label="Ngày"
+                label={
+                  <>
+                    Ngày <RequiredMark />
+                  </>
+                }
                 rules={{ required: "Vui lòng chọn ngày bắt đầu." }}
               >
                 {({ controlProps }) => <AdminDateInput {...controlProps} />}
@@ -180,7 +198,11 @@ export function AdminEventFormModal({
           <ControlledField
             control={form.control}
             name="location"
-            label="Địa điểm"
+            label={
+              <>
+                Địa điểm <RequiredMark />
+              </>
+            }
             rules={{ required: "Vui lòng nhập địa điểm." }}
           >
             {({ controlProps }) => (
@@ -191,14 +213,18 @@ export function AdminEventFormModal({
           <ControlledField
             control={form.control}
             name="content"
-            label="Nội dung"
+            label={
+              <>
+                Nội dung <RequiredMark />
+              </>
+            }
             rules={{ required: "Vui lòng nhập nội dung sự kiện." }}
           >
             {({ controlProps }) => (
-              <Textarea
+              <BlogEditor
                 {...controlProps}
-                placeholder="Nhập nội dung sự kiện..."
-                className="min-h-[300px]"
+                content={controlProps.value as string}
+                className="min-h-75"
               />
             )}
           </ControlledField>
@@ -301,7 +327,7 @@ export function AdminEventFormModal({
                 min={1}
                 step={1}
                 disabled={!isFeatured}
-                placeholder="1"
+                placeholder="Nhập thứ tự"
               />
             )}
           </ControlledField>

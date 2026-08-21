@@ -252,7 +252,7 @@ export function AdminFamilyRegistryManager() {
     : families;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4 md:p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
       <div>
         <h1 className="font-display text-2xl font-bold">Sổ Gia Đình Công Giáo</h1>
         <p className="mt-1 text-sm text-muted-foreground">

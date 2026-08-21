@@ -25,6 +25,12 @@ type AdminPersonFormModalProps = {
   onSubmit: (values: PersonFormValues) => void;
 };
 
+function RequiredMark() {
+  return (
+    <span className="text-red-500">*</span>
+  );
+}
+
 export function AdminPersonFormModal({
   open,
   defaultValues,
@@ -68,7 +74,7 @@ export function AdminPersonFormModal({
           <ControlledField
             control={form.control}
             name="fullName"
-            label="Họ và tên *"
+            label={<>Họ và tên <RequiredMark /></>}
             rules={{ required: "Vui lòng nhập họ và tên" }}
           >
             {({ controlProps }) => <Input placeholder="Nguyễn Văn A" {...controlProps} />}
@@ -76,7 +82,7 @@ export function AdminPersonFormModal({
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ControlledField control={form.control} name="dateOfBirth" label="Ngày sinh *" rules={{ required: "Vui lòng nhập ngày sinh" }}>
+          <ControlledField control={form.control} name="dateOfBirth" label={<>Ngày sinh <RequiredMark /></>} rules={{ required: "Vui lòng nhập ngày sinh" }}>
             {({ controlProps }) => <AdminDateInput {...controlProps} />}
           </ControlledField>
 

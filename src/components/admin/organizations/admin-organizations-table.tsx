@@ -10,8 +10,9 @@ import {
   TableRow,
 } from "@/components/site/shared/ui/table/table";
 import { AdminPagination } from "@/components/admin/shared/admin-pagination";
-import { cn, resolveApiUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { Organization } from "@/lib/organization/types";
+import Image from "next/image";
 
 export const ORGANIZATIONS_PAGE_SIZE = 10;
 
@@ -64,8 +65,8 @@ export function AdminOrganizationsTable({
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="min-w-[250px] px-4">Tên đoàn thể</TableHead>
-            <TableHead className="px-4">Đường dẫn (Slug)</TableHead>
+            <TableHead className="px-2 text-center">STT</TableHead>
+            <TableHead className="min-w-72 px-4">Tên đoàn thể</TableHead>
             <TableHead className="px-4">Hiển thị</TableHead>
             <TableHead className="px-4 text-right">Hành động</TableHead>
           </TableRow>
@@ -78,25 +79,24 @@ export function AdminOrganizationsTable({
               </TableCell>
             </TableRow>
           ) : (
-            organizations.map((org) => (
+            organizations.map((org, index) => (
               <TableRow
                 key={org._id}
                 className={cn(editingId === org._id && "bg-accent/5 hover:bg-accent/10")}
               >
-                <TableCell className="min-w-[250px] px-4 py-3 whitespace-normal">
+                <TableCell className="px-2 py-3 text-center text-sm text-muted-foreground">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="min-w-72 px-4 py-3 whitespace-normal">
                   <div className="flex items-center gap-3">
                     {org.image && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={resolveApiUrl(org.image)} alt="" className="size-10 rounded-[8px] object-cover shrink-0" />
+                      <Image src={org.image} alt={org.name} width={60} height={50} />
                     )}
                     <div>
                       <p className="font-medium text-card-foreground">{org.name}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">{org.memberCount} thành viên</p>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-sm text-card-foreground">
-                  {org.slug}
                 </TableCell>
                 <TableCell className="px-4 py-3">
                   <button

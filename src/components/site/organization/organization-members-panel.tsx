@@ -88,7 +88,7 @@ export function OrganizationMembersPanel({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tên, chức vụ hoặc giáo họ..."
-              className="w-full rounded-[12px] border border-border bg-white py-3.5 pl-11 pr-4 font-sans text-base text-primary outline-none transition-colors placeholder:text-foreground/50 focus:border-accent"
+              className="w-full rounded-xl border border-border bg-white py-3.5 pl-11 pr-4 font-sans text-base text-primary outline-none transition-colors placeholder:text-foreground/50 focus:border-accent"
             />
           </div>
         </div>
@@ -104,7 +104,7 @@ export function OrganizationMembersPanel({
             id="org-term-filter"
             value={selectedTermId}
             onChange={(e) => setSelectedTermId(e.target.value)}
-            className="w-full cursor-pointer appearance-none rounded-[12px] border border-border bg-white px-4 py-3.5 font-sans text-base text-primary outline-none transition-colors focus:border-accent"
+            className="w-full cursor-pointer appearance-none rounded-xl border border-border bg-white px-4 py-3.5 font-sans text-base text-primary outline-none transition-colors focus:border-accent"
           >
             {sortedTerms.map((term) => {
               const termKey = getExecutiveTermKey(term);

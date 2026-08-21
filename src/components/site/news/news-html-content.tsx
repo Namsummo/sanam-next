@@ -11,9 +11,9 @@ type NewsHtmlContentProps = {
  */
 function preventDashWrapping(html: string): string {
   if (!html) return "";
-  
+
   // Cleanse invisible line-breaking characters (soft hyphens, zero-width spaces, etc.)
-  let cleansed = html
+  const cleansed = html
     .replace(/\u00AD/g, "")
     .replace(/&shy;/g, "")
     .replace(/\u200B/g, "")
@@ -37,9 +37,6 @@ export function NewsHtmlContent({ html, className }: NewsHtmlContentProps) {
   // Normalize to NFC to combine any decomposed Vietnamese characters, preventing split diacritics
   const normalizedHtml = (html || "").normalize("NFC");
   const processedHtml = preventDashWrapping(normalizedHtml);
-
-  console.log("FRONTEND [NewsHtmlContent] ORIGINAL HTML JSON:", JSON.stringify(html));
-  console.log("FRONTEND [NewsHtmlContent] PROCESSED HTML JSON:", JSON.stringify(processedHtml));
 
   return (
     <div

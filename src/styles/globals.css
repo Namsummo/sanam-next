@@ -181,6 +181,18 @@
 	content: none !important;
 }
 
+.ql-snow .ql-editor img {
+	cursor: pointer;
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+}
+
+.ql-snow .ql-editor img.ql-image-selected {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+}
+
 /* Site: text selection */
 [data-theme="site"] ::selection {
 	color: #ffffff;
