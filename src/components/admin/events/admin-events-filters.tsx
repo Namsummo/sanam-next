@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { Search, X } from "lucide-react";
+import { AdminSelect } from "@/components/admin/shared/admin-select";
 import {
   EVENT_STATUS_OPTIONS,
   getEventStatusByLabel,
@@ -44,6 +46,7 @@ type AdminEventsFiltersProps = AdminEventsFilterState & {
   onStatusFilterChange: (value: "all" | EventStatus) => void;
   onCategoryFilterChange: (value: "all" | string) => void;
   onClear: () => void;
+  onDeleteCategory?: (id: string) => void;
 };
 
 export function AdminEventsFilters({
@@ -55,11 +58,21 @@ export function AdminEventsFilters({
   onStatusFilterChange,
   onCategoryFilterChange,
   onClear,
+  onDeleteCategory,
 }: AdminEventsFiltersProps) {
   const categoryLabelById = new Map(
     categories.map((category) => [category._id, category.label]),
   );
   const showClear = hasActiveEventFilters({ searchQuery, statusFilter, categoryFilter });
+
+  const categoryOptions = useMemo(() => {
+    const opts = categories.map((cat) => ({
+      value: cat._id,
+      label: cat.label,
+      showDelete: cat.eventCount === 0,
+    }));
+    return [{ value: "all", label: ALL_FILTER_VALUE }, ...opts];
+  }, [categories]);
 
   return (
     <section className="rounded-[20px] border border-border bg-card p-4 md:p-5">
@@ -133,37 +146,16 @@ export function AdminEventsFilters({
           <span className="mb-1 block text-xs font-medium text-muted-foreground">
             Danh mục
           </span>
-          <Select
-            value={categoryFilter === "all" ? ALL_FILTER_VALUE : categoryFilter}
-            onValueChange={(value) => {
-              if (!value || value === ALL_FILTER_VALUE) {
-                onCategoryFilterChange("all");
-                return;
-              }
-
-              onCategoryFilterChange(value);
+          <AdminSelect
+            value={categoryFilter}
+            onChange={(value) => {
+              onCategoryFilterChange(value || "all");
             }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={ALL_FILTER_VALUE}>
-                {(currentValue: string | null) => {
-                  if (!currentValue || currentValue === ALL_FILTER_VALUE) {
-                    return ALL_FILTER_VALUE;
-                  }
-
-                  return categoryLabelById.get(currentValue) ?? ALL_FILTER_VALUE;
-                }}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
-              <SelectItem value={ALL_FILTER_VALUE}>{ALL_FILTER_VALUE}</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category._id} value={category._id}>
-                  {category.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={categoryOptions}
+            placeholder={ALL_FILTER_VALUE}
+            searchable={categoryOptions.length > 5}
+            onDeleteOption={onDeleteCategory}
+          />
         </div>
       </div>
     </section>

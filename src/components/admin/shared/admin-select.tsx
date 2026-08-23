@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, type ReactNode } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 export type SelectOption = {
   value: string;
   label: string;
+  showDelete?: boolean;
 };
 
 type AdminSelectProps = {
@@ -26,6 +27,7 @@ type AdminSelectProps = {
   footer?: ReactNode;
   onAdd?: () => void;
   addLabel?: string;
+  onDeleteOption?: (value: string) => void;
 };
 
 export function AdminSelect({
@@ -38,6 +40,7 @@ export function AdminSelect({
   footer,
   onAdd,
   addLabel,
+  onDeleteOption,
 }: AdminSelectProps) {
   const [searchText, setSearchText] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -130,7 +133,22 @@ export function AdminSelect({
           ) : (
             filtered.map((option) => (
               <SelectItem key={option.value} value={option.value}>
-                {option.label}
+                <div className="flex w-full items-center justify-between gap-4">
+                  <span className="truncate">{option.label}</span>
+                  {option.showDelete && onDeleteOption ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        onDeleteOption(option.value);
+                      }}
+                      className="inline-flex size-5 items-center justify-center rounded bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-colors cursor-pointer shrink-0"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  ) : null}
+                </div>
               </SelectItem>
             ))
           )}

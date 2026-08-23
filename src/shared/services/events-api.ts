@@ -18,6 +18,7 @@ export interface ApiEventCategory {
   slug: string;
   label: string;
   sortOrder: number;
+  eventCount?: number;
 }
 
 export interface ApiEventResponse {
@@ -283,3 +284,20 @@ export async function uploadEventImage(
   const data = await res.json();
   return `${API_BASE}${data.url}`;
 }
+
+export async function deleteEventCategory(
+  token: string,
+  id: string,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/admin/events/categories/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to delete category" }));
+    throw new Error(err.message);
+  }
+}
+

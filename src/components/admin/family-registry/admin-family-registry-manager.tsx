@@ -7,6 +7,18 @@ import { AdminFamilyFormModal } from "./admin-family-form-modal";
 import { AdminPersonsTable } from "./admin-persons-table";
 import { AdminFamiliesTable } from "./admin-families-table";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
+import { getAccessToken } from "@/lib/admin/auth-session";
+import {
+  getAllPersons,
+  createPerson,
+  updatePerson,
+  deletePerson,
+  getAllFamilies,
+  createFamily,
+  updateFamily,
+  deleteFamily,
+  getAllMembers,
+} from "@/shared/services/family-registry-api";
 import {
   createEmptyPersonFormValues,
   mapPersonToFormValues,
@@ -23,30 +35,6 @@ import type {
   Family,
   FamilyMember,
 } from "@/lib/family-registry/types";
-import { mockPersons } from "@/lib/family-registry/mock-persons";
-import { mockFamilies, mockFamilyMembers } from "@/lib/family-registry/mock-families";
-
-const LS_PERSONS = "fr:persons";
-const LS_FAMILIES = "fr:families";
-const LS_MEMBERS = "fr:members";
-
-function loadJSON<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function saveJSON<T>(key: string, data: T) {
-  localStorage.setItem(key, JSON.stringify(data));
-}
-
-function uuid(): string {
-  return crypto.randomUUID();
-}
 
 type Tab = "persons" | "families";
 
@@ -54,10 +42,11 @@ const tabBtn =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-sm font-medium transition-colors";
 
 export function AdminFamilyRegistryManager() {
-  const [persons, setPersons] = useState<Person[]>(mockPersons);
-  const [families, setFamilies] = useState<Family[]>(mockFamilies);
-  const [members, setMembers] = useState<FamilyMember[]>(mockFamilyMembers);
-  const persistReady = useRef(false);
+  const [persons, setPersons] = useState<Person[]>([]);
+  const [families, setFamilies] = useState<Family[]>([]);
+  const [members, setMembers] = useState<FamilyMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [tab, setTab] = useState<Tab>("families");
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,31 +65,37 @@ export function AdminFamilyRegistryManager() {
   const [deleteTarget, setDeleteTarget] = useState<{ type: "person" | "family"; id: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Hydrate from localStorage after mount (deferred — avoids sync setState in effect)
+  // Load from API on mount
   useEffect(() => {
-    startTransition(() => {
-      setPersons(loadJSON(LS_PERSONS, mockPersons));
-      setFamilies(loadJSON(LS_FAMILIES, mockFamilies));
-      setMembers(loadJSON(LS_MEMBERS, mockFamilyMembers));
-    });
-  }, []);
-
-  // Persist — skip first run so we don't overwrite storage before hydration
-  useEffect(() => {
-    if (!persistReady.current) {
-      persistReady.current = true;
+    const token = getAccessToken();
+    if (!token) {
+      setError("Bạn không có quyền truy cập trang này.");
+      setLoading(false);
       return;
     }
-    saveJSON(LS_PERSONS, persons);
-  }, [persons]);
-  useEffect(() => {
-    if (!persistReady.current) return;
-    saveJSON(LS_FAMILIES, families);
-  }, [families]);
-  useEffect(() => {
-    if (!persistReady.current) return;
-    saveJSON(LS_MEMBERS, members);
-  }, [members]);
+    const authToken = token;
+
+    async function initData() {
+      try {
+        setLoading(true);
+        const [fetchedPersons, fetchedFamilies, fetchedMembers] = await Promise.all([
+          getAllPersons(authToken),
+          getAllFamilies(authToken),
+          getAllMembers(authToken),
+        ]);
+        setPersons(fetchedPersons);
+        setFamilies(fetchedFamilies);
+        setMembers(fetchedMembers);
+      } catch (err) {
+        console.error(err);
+        setError("Không thể tải dữ liệu từ máy chủ.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initData();
+  }, []);
 
   function handleOpenNewPerson() {
     setPersonEditingId(null);
@@ -114,26 +109,26 @@ export function AdminFamilyRegistryManager() {
     setPersonFormOpen(true);
   }
 
-  function handleSubmitPerson(values: PersonFormValues) {
-    const now = new Date().toISOString();
+  async function handleSubmitPerson(values: PersonFormValues) {
+    const token = getAccessToken();
+    if (!token) return;
     const data = formValuesToPerson(values);
 
-    if (personEditingId) {
-      setPersons((prev) =>
-        prev.map((p) =>
-          p.id === personEditingId ? { ...p, ...data, updatedAt: now } : p,
-        ),
-      );
-    } else {
-      const newPerson: Person = {
-        id: uuid(),
-        ...data,
-        createdAt: now,
-        updatedAt: now,
-      };
-      setPersons((prev) => [...prev, newPerson]);
+    try {
+      if (personEditingId) {
+        const updated = await updatePerson(token, personEditingId, data);
+        setPersons((prev) =>
+          prev.map((p) => (p.id === personEditingId ? updated : p)),
+        );
+      } else {
+        const created = await createPerson(token, data);
+        setPersons((prev) => [...prev, created]);
+      }
+      setPersonFormOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi khi lưu hồ sơ cá nhân.");
     }
-    setPersonFormOpen(false);
   }
 
   function handleOpenNewFamily() {
@@ -149,93 +144,82 @@ export function AdminFamilyRegistryManager() {
     setFamilyFormOpen(true);
   }
 
-  function handleSubmitFamily(values: FamilyFormValues) {
-    const now = new Date().toISOString();
+  async function handleSubmitFamily(values: FamilyFormValues) {
+    const token = getAccessToken();
+    if (!token) return;
 
-    if (familyEditingId) {
-      // Update family
-      setFamilies((prev) =>
-        prev.map((f) =>
-          f.id === familyEditingId
-            ? { ...f, name: values.name, headPersonId: values.headPersonId, status: values.status, statusNote: values.statusNote || null, notes: values.notes || null, updatedAt: now }
-            : f,
-        ),
-      );
-
-      // Sync members: remove old, add new
-      const existingIds = new Set(values.members.filter((m) => m.existingId).map((m) => m.existingId!));
-      setMembers((prev) => {
-        const kept = prev.filter((m) => m.familyId !== familyEditingId || existingIds.has(m.id));
-        const updated = kept.map((m) => {
-          if (m.familyId !== familyEditingId) return m;
-          const entry = values.members.find((e) => e.existingId === m.id);
-          if (!entry) return m;
-          return {
-            ...m,
-            personId: entry.personId,
-            role: entry.role,
-            birthOrder: entry.role === "child" ? entry.birthOrder : null,
-            updatedAt: now,
-          };
+    try {
+      if (familyEditingId) {
+        const res = await updateFamily(token, familyEditingId, {
+          name: values.name,
+          headPersonId: values.headPersonId,
+          status: values.status,
+          statusNote: values.statusNote || null,
+          notes: values.notes || null,
+          members: values.members.map((m) => ({
+            personId: m.personId,
+            role: m.role,
+            birthOrder: m.birthOrder,
+            existingId: m.existingId,
+          })),
         });
-        const newEntries: FamilyMember[] = values.members
-          .filter((e) => !e.existingId)
-          .map((e) => ({
-            id: uuid(),
-            familyId: familyEditingId,
-            personId: e.personId,
-            role: e.role,
-            birthOrder: e.role === "child" ? e.birthOrder : null,
-            createdAt: now,
-            updatedAt: now,
-          }));
-        return [...updated, ...newEntries];
-      });
-    } else {
-      // Create family
-      const familyId = uuid();
-      const newFamily: Family = {
-        id: familyId,
-        familyCode: `GD-${String(families.length + 1).padStart(3, "0")}`,
-        name: values.name,
-        headPersonId: values.headPersonId,
-        status: values.status,
-        statusNote: values.statusNote || null,
-        notes: values.notes || null,
-        createdAt: now,
-        updatedAt: now,
-      };
-      setFamilies((prev) => [...prev, newFamily]);
 
-      const newMembers: FamilyMember[] = values.members.map((e) => ({
-        id: uuid(),
-        familyId,
-        personId: e.personId,
-        role: e.role,
-        birthOrder: e.role === "child" ? e.birthOrder : null,
-        createdAt: now,
-        updatedAt: now,
-      }));
-      setMembers((prev) => [...prev, ...newMembers]);
+        setFamilies((prev) =>
+          prev.map((f) => (f.id === familyEditingId ? res.family : f)),
+        );
+        // Refresh members list to sync with backend changes
+        const fetchedMembers = await getAllMembers(token);
+        setMembers(fetchedMembers);
+      } else {
+        const res = await createFamily(token, {
+          name: values.name,
+          headPersonId: values.headPersonId,
+          status: values.status,
+          statusNote: values.statusNote || null,
+          notes: values.notes || null,
+          members: values.members.map((m) => ({
+            personId: m.personId,
+            role: m.role,
+            birthOrder: m.birthOrder,
+          })),
+        });
+
+        setFamilies((prev) => [...prev, res.family]);
+        // Refresh members list to sync with backend changes
+        const fetchedMembers = await getAllMembers(token);
+        setMembers(fetchedMembers);
+      }
+      setFamilyFormOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi khi lưu thông tin gia đình.");
     }
-    setFamilyFormOpen(false);
   }
 
   // ── Delete ───────────────────────────────────────────────────────
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (!deleteTarget) return;
+    const token = getAccessToken();
+    if (!token) return;
     setDeleting(true);
 
-    if (deleteTarget.type === "person") {
-      setPersons((prev) => prev.filter((p) => p.id !== deleteTarget.id));
-      setMembers((prev) => prev.filter((m) => m.personId !== deleteTarget.id));
-    } else if (deleteTarget.type === "family") {
-      setFamilies((prev) => prev.filter((f) => f.id !== deleteTarget.id));
-      setMembers((prev) => prev.filter((m) => m.familyId !== deleteTarget.id));
+    try {
+      if (deleteTarget.type === "person") {
+        await deletePerson(token, deleteTarget.id);
+        setPersons((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+        setMembers((prev) => prev.filter((m) => m.personId !== deleteTarget.id));
+      } else if (deleteTarget.type === "family") {
+        await deleteFamily(token, deleteTarget.id);
+        setFamilies((prev) => prev.filter((f) => f.id !== deleteTarget.id));
+        setMembers((prev) => prev.filter((m) => m.familyId !== deleteTarget.id));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi khi thực hiện xóa.");
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
     }
-
-    setDeleting(false);
-    setDeleteTarget(null);
   }
 
   // ── Search ───────────────────────────────────────────────────────
@@ -250,6 +234,22 @@ export function AdminFamilyRegistryManager() {
   const filteredFamilies = q
     ? families.filter((f) => f.name.toLowerCase().includes(q) || f.familyCode.toLowerCase().includes(q))
     : families;
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="text-muted-foreground">Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl p-4 md:p-6 text-center text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/site/shared/ui/input/input";
@@ -18,8 +18,7 @@ import {
   resolveFamilyMembers,
   sortFamilyMembers,
 } from "@/lib/family-registry/helpers";
-import { mockPersons } from "@/lib/family-registry/mock-persons";
-import { mockFamilies, mockFamilyMembers } from "@/lib/family-registry/mock-families";
+import { getPublicFamilyRegistryData } from "@/shared/services/family-registry-api";
 
 type FamilyRegistryPageSectionProps = {
   families?: Family[];
@@ -28,12 +27,35 @@ type FamilyRegistryPageSectionProps = {
 };
 
 export function FamilyRegistryPageSection({
-  families = mockFamilies,
-  members = mockFamilyMembers,
-  persons = mockPersons,
+  families: initialFamilies,
+  members: initialMembers,
+  persons: initialPersons,
 }: FamilyRegistryPageSectionProps) {
+  const [families, setFamilies] = useState<Family[]>(initialFamilies || []);
+  const [members, setMembers] = useState<FamilyMember[]>(initialMembers || []);
+  const [persons, setPersons] = useState<Person[]>(initialPersons || []);
+  const [loading, setLoading] = useState(!initialFamilies);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialFamilies && initialMembers && initialPersons) return;
+
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const data = await getPublicFamilyRegistryData();
+        setFamilies(data.families);
+        setMembers(data.members);
+        setPersons(data.persons);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [initialFamilies, initialMembers, initialPersons]);
 
   const personMap = useMemo(() => new Map(persons.map((p) => [p.id, p])), [persons]);
 
@@ -50,6 +72,15 @@ export function FamilyRegistryPageSection({
       );
     });
   }, [families, personMap, q]);
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="text-[#6b583c] font-medium">Đang tải dữ liệu sổ gia đình...</p>
+      </div>
+    );
+  }
+
 
   return (
     <>

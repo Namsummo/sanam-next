@@ -160,7 +160,15 @@ export function AdminFamilyFormModal({
             {({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-xl py-3">
-                  <SelectValue placeholder="Chọn trạng thái" />
+                  <SelectValue placeholder="Chọn trạng thái">
+                    {(val: string | null) => {
+                      if (val === "active") return "Đang sinh hoạt";
+                      if (val === "away") return "Xa quê";
+                      if (val === "transferred") return "Chuyển xứ";
+                      if (val === "inactive") return "Không hoạt động";
+                      return val || "Chọn trạng thái";
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
                   <SelectItem value="active">Đang sinh hoạt</SelectItem>
@@ -257,7 +265,15 @@ export function AdminFamilyFormModal({
                         }}
                       >
                         <SelectTrigger className="rounded-xl py-3">
-                          <SelectValue />
+                          <SelectValue>
+                            {(val: string | null) => {
+                              if (val === "husband") return "Chồng";
+                              if (val === "wife") return "Vợ";
+                              if (val === "child") return "Con";
+                              if (val === "other") return "Khác";
+                              return val || "";
+                            }}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
                           {Object.entries(FAMILY_MEMBER_ROLE_LABELS).map(([value, label]) => (

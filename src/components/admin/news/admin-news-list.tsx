@@ -22,6 +22,7 @@ import {
   type NewsArticleResponse,
   type PaginationInfo,
   getCategories,
+  deleteCategory,
   type NewsCategoryResponse,
 } from "@/shared/services/news-api";
 import { AdminSelect } from "@/components/admin/shared/admin-select";
@@ -43,8 +44,33 @@ export function AdminNewsList() {
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<NewsArticleResponse | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState(false);
 
   const token = getAccessToken();
+
+  async function handleConfirmDeleteCategory() {
+    if (!deletingCategoryId) return;
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    setDeletingCategory(true);
+    try {
+      await deleteCategory(token, deletingCategoryId);
+      setCategories((prev) => prev.filter((c) => c._id !== deletingCategoryId));
+      if (categoryFilter === deletingCategoryId) {
+        setCategoryFilter("");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Không thể xóa danh mục.");
+    } finally {
+      setDeletingCategory(false);
+      setDeletingCategoryId(null);
+    }
+  }
 
   useEffect(() => {
     if (!token) {
@@ -175,10 +201,12 @@ export function AdminNewsList() {
             ...categories.map((cat) => ({
               value: cat._id,
               label: cat.label,
+              showDelete: cat.articleCount === 0,
             })),
           ]}
           placeholder="Danh mục"
           className="w-48"
+          onDeleteOption={(id) => setDeletingCategoryId(id)}
         />
       </div>
       {
@@ -325,6 +353,19 @@ export function AdminNewsList() {
         cancelLabel="Hủy"
         onConfirm={confirmDelete}
         loading={deleting}
+        variant="danger"
+      />
+
+      <AdminConfirmDialog
+        open={deletingCategoryId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingCategoryId(null);
+        }}
+        title="Xóa danh mục tin tức?"
+        description="Hành động này sẽ xóa vĩnh viễn danh mục này khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
+        confirmLabel="Xóa"
+        onConfirm={handleConfirmDeleteCategory}
+        loading={deletingCategory}
         variant="danger"
       />
     </div>

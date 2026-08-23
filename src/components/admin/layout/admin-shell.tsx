@@ -41,6 +41,28 @@ export function AdminShell({ children }: AdminShellProps) {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      try {
+        const response = await originalFetch(...args);
+        if (response.status === 401) {
+          const { clearSession } = await import("@/lib/admin/auth-session");
+          clearSession();
+        }
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!sessionReady) return;
     if (token !== null) return;
 

@@ -96,7 +96,14 @@ export function AdminPersonFormModal({
             {({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-xl py-3">
-                  <SelectValue placeholder="Chọn giới tính" />
+                  <SelectValue placeholder="Chọn giới tính">
+                    {(val: string | null) => {
+                      if (val === "male") return "Nam";
+                      if (val === "female") return "Nữ";
+                      if (val === "other") return "Khác";
+                      return val || "Chọn giới tính";
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
                   <SelectItem value="male">Nam</SelectItem>
@@ -111,7 +118,16 @@ export function AdminPersonFormModal({
             {({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-xl py-3">
-                  <SelectValue placeholder="Chọn trạng thái" />
+                  <SelectValue placeholder="Chọn trạng thái">
+                    {(val: string | null) => {
+                      if (val === "active") return "Đang sinh hoạt";
+                      if (val === "away") return "Xa quê";
+                      if (val === "transferred") return "Chuyển xứ";
+                      if (val === "deceased") return "Đã qua đời";
+                      if (val === "inactive") return "Không hoạt động";
+                      return val || "Chọn trạng thái";
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
                   <SelectItem value="active">Đang sinh hoạt</SelectItem>
@@ -128,7 +144,13 @@ export function AdminPersonFormModal({
             {({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-xl py-3">
-                  <SelectValue placeholder="Chọn tình trạng" />
+                  <SelectValue placeholder="Chọn tình trạng">
+                    {(val: string | null) => {
+                      if (val === "single") return "Độc thân";
+                      if (val === "married") return "Đã kết hôn";
+                      return val || "Chọn tình trạng";
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
                   <SelectItem value="single">Độc thân</SelectItem>

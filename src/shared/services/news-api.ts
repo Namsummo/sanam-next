@@ -43,6 +43,7 @@ export interface NewsCategoryResponse {
   slug: string;
   label: string;
   sortOrder: number;
+  articleCount?: number;
 }
 
 export interface CreateNewsData {
@@ -225,3 +226,20 @@ export async function uploadImage(
   const data = await res.json();
   return `${API_BASE}${data.url}`;
 }
+
+export async function deleteCategory(
+  token: string,
+  id: string,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/admin/news/categories/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to delete category" }));
+    throw new Error(err.message);
+  }
+}
+

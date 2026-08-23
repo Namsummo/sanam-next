@@ -14,11 +14,13 @@ import {
   uploadImage,
   getCategories,
   createCategory,
+  deleteCategory,
   type NewsCategoryResponse,
   type NewsArticleResponse,
 } from "@/shared/services/news-api";
 import { slugify } from "@/shared/lib/slugify";
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
+import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 
 type NewsFormProps = {
   article?: NewsArticleResponse;
@@ -63,6 +65,8 @@ export function NewsForm({ article }: NewsFormProps) {
   const [newCatSlug, setNewCatSlug] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [catError, setCatError] = useState("");
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState(false);
 
   const sessionUser = getCurrentUser();
   const isAdmin = sessionUser?.role === "admin";
@@ -72,6 +76,30 @@ export function NewsForm({ article }: NewsFormProps) {
       .then(setCategories)
       .catch(() => { });
   }, []);
+
+  async function handleConfirmDeleteCategory() {
+    if (!deletingCategoryId) return;
+    const token = getAccessToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    setDeletingCategory(true);
+    try {
+      await deleteCategory(token, deletingCategoryId);
+      setCategories((prev) => prev.filter((c) => c._id !== deletingCategoryId));
+      if (categoryId === deletingCategoryId) {
+        setCategoryId("");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Không thể xóa danh mục.");
+    } finally {
+      setDeletingCategory(false);
+      setDeletingCategoryId(null);
+    }
+  }
 
   const displayedSlug = useMemo(() => {
     if (slugManuallyEdited) return slug;
@@ -199,11 +227,13 @@ export function NewsForm({ article }: NewsFormProps) {
               options={categories.map((cat) => ({
                 value: cat._id,
                 label: cat.label,
+                showDelete: cat.articleCount === 0,
               }))}
               placeholder="Chọn danh mục"
               searchable={categories.length > 5}
               onAdd={isAdmin ? () => setShowNewCategory(true) : undefined}
               addLabel="Thêm danh mục mới"
+              onDeleteOption={(id) => setDeletingCategoryId(id)}
             />
 
             {showNewCategory ? (
@@ -413,6 +443,19 @@ export function NewsForm({ article }: NewsFormProps) {
           </Link>
         </div>
       </form>
+
+      <AdminConfirmDialog
+        open={deletingCategoryId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingCategoryId(null);
+        }}
+        title="Xóa danh mục tin tức?"
+        description="Hành động này sẽ xóa vĩnh viễn danh mục này khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
+        confirmLabel="Xóa"
+        onConfirm={handleConfirmDeleteCategory}
+        loading={deletingCategory}
+        variant="danger"
+      />
     </div>
   );
 }
