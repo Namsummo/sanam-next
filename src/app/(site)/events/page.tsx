@@ -66,6 +66,7 @@ export default async function EventsPage(props: {
           >
             <Link
               href="/events"
+              scroll={false}
               aria-current={!activeCategory ? "page" : undefined}
               className={
                 !activeCategory
@@ -81,6 +82,7 @@ export default async function EventsPage(props: {
                 <Link
                   key={item._id}
                   href={`/events?category=${encodeURIComponent(item.slug)}`}
+                  scroll={false}
                   aria-current={isActive ? "page" : undefined}
                   className={
                     isActive

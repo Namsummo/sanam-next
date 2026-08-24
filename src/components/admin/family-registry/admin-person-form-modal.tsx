@@ -164,16 +164,16 @@ export function AdminPersonFormModal({
         <FieldSeparator>Thông tin Giáo hội</FieldSeparator>
 
         <ControlledField control={form.control} name="giaoHo" label="Giáo họ">
-          {({ controlProps }) => <Input placeholder="Giáo họ Nhà Xứ" {...controlProps} />}
+          {({ controlProps }) => <Input placeholder="Giáo họ..." {...controlProps} />}
         </ControlledField>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <ControlledField control={form.control} name="giaoXu" label="Giáo xứ">
-            {({ controlProps }) => <Input placeholder="Sa Nam" {...controlProps} />}
+            {({ controlProps }) => <Input placeholder="Giáo xứ..." {...controlProps} />}
           </ControlledField>
 
           <ControlledField control={form.control} name="giaoPhan" label="Giáo phận">
-            {({ controlProps }) => <Input placeholder="Phú Thọ" {...controlProps} />}
+            {({ controlProps }) => <Input placeholder="Giáo phận..." {...controlProps} />}
           </ControlledField>
         </div>
 

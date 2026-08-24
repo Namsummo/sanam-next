@@ -77,7 +77,9 @@ export async function getPublicNews(params?: {
   return res.json();
 }
 
-export async function getPublicNewsBySlug(slug: string): Promise<NewsArticleResponse> {
+export async function getPublicNewsBySlug(
+  slug: string,
+): Promise<NewsArticleResponse> {
   const res = await fetch(`${API_BASE}/api/news/${encodeURIComponent(slug)}`);
   if (!res.ok) throw new Error("Article not found");
   return res.json();
@@ -165,10 +167,7 @@ export async function updateNews(
   return res.json();
 }
 
-export async function deleteNews(
-  token: string,
-  id: string,
-): Promise<void> {
+export async function deleteNews(token: string, id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/admin/news/${id}`, {
     method: "DELETE",
     headers: authHeaders(token),
@@ -201,16 +200,15 @@ export async function createCategory(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to create category" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to create category" }));
     throw new Error(err.message);
   }
   return res.json();
 }
 
-export async function uploadImage(
-  token: string,
-  file: File,
-): Promise<string> {
+export async function uploadImage(token: string, file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
 
@@ -227,10 +225,7 @@ export async function uploadImage(
   return `${API_BASE}${data.url}`;
 }
 
-export async function deleteCategory(
-  token: string,
-  id: string,
-): Promise<void> {
+export async function deleteCategory(token: string, id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/admin/news/categories/${id}`, {
     method: "DELETE",
     headers: authHeaders(token),
@@ -242,4 +237,3 @@ export async function deleteCategory(
     throw new Error(err.message);
   }
 }
-

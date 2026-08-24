@@ -67,6 +67,7 @@ export default async function NewsPage(props: {
           >
             <Link
               href="/news"
+              scroll={false}
               aria-current={!activeCategory ? "page" : undefined}
               className={
                 !activeCategory
@@ -82,6 +83,7 @@ export default async function NewsPage(props: {
                 <Link
                   key={item._id}
                   href={`/news?category=${encodeURIComponent(item.slug)}`}
+                  scroll={false}
                   aria-current={isActive ? "page" : undefined}
                   className={
                     isActive

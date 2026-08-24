@@ -300,4 +300,3 @@ export async function deleteEventCategory(
     throw new Error(err.message);
   }
 }
-
