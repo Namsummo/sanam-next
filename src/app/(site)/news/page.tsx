@@ -23,8 +23,7 @@ async function fetchArticles(page: number, category?: string): Promise<NewsArtic
       isVisible: a.isVisible,
     }));
   } catch {
-    const { getVisibleNews } = await import("@/lib/news/mock-news");
-    return getVisibleNews();
+    return [];
   }
 }
 

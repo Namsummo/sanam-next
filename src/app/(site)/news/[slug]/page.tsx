@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { getNewsCategoryLabel } from "@/lib/news/categories";
@@ -34,13 +34,7 @@ async function fetchArticleBySlug(slug: string): Promise<NewsArticle | undefined
       isVisible: data.isVisible,
     };
   } catch {
-    const { getNewsBySlug, getNewsById } = await import("@/lib/news/mock-news");
-    const article = getNewsBySlug(slug);
-    if (!article || !article.isVisible) {
-      const byId = getNewsById(slug);
-      return byId?.isVisible ? byId : undefined;
-    }
-    return article;
+    return undefined;
   }
 }
 
@@ -53,10 +47,7 @@ export async function generateStaticParams() {
       .filter((a) => a.isVisible && a.slug)
       .map((a) => ({ slug: a.slug }));
   } catch {
-    const { getVisibleNews } = await import("@/lib/news/mock-news");
-    return getVisibleNews()
-      .filter((a) => !!a.slug)
-      .map((a) => ({ slug: a.slug! }));
+    return [];
   }
 }
 
@@ -87,11 +78,6 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
   ]);
 
   if (!article) {
-    const { getNewsById } = await import("@/lib/news/mock-news");
-    const byId = getNewsById(decoded);
-    if (byId?.isVisible && byId.slug) {
-      redirect(`/news/${byId.slug}`);
-    }
     notFound();
   }
 

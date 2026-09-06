@@ -25,8 +25,7 @@ async function fetchFeaturedArticles(): Promise<NewsArticle[]> {
       isVisible: a.isVisible,
     }));
   } catch {
-    const { getFeaturedNews } = await import("@/lib/news/mock-news");
-    return getFeaturedNews(100);
+    return [];
   }
 }
 
