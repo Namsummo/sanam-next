@@ -151,7 +151,7 @@ export function buildEventFromForm(
     endTime: values.endTime.trim() || undefined,
     location: values.location.trim(),
     content: values.content.trim(),
-    contentFormat: existing?.contentFormat ?? "plain",
+    contentFormat: "html",
     image: values.image.trim() || undefined,
     categoryId: values.categoryId || undefined,
     isFeatured: values.isFeatured,

@@ -46,23 +46,23 @@ export function ImageUploader({
   }
 
   return (
-    <div className={cn("", className)}>
+    <div className={cn("w-full max-w-sm", className)}>
       {preview ? (
-        <div className="relative overflow-hidden rounded-[16px] border border-border">
+        <div className="relative flex max-h-44 min-h-28 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/30 p-2">
           <Image
             src={resolveApiUrl(preview)}
             alt="Cover preview"
-            className="size-full object-cover"
-            width={500}
-            height={500}
+            className="max-h-40 w-auto max-w-full object-contain"
+            width={400}
+            height={160}
           />
           <button
             type="button"
             onClick={handleRemove}
             aria-label="Remove image"
-            className="absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+            className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
           >
-            <X className="size-4" />
+            <X className="size-3.5" />
           </button>
         </div>
       ) : (
@@ -70,21 +70,21 @@ export function ImageUploader({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex aspect-2/1 w-full cursor-pointer items-center justify-center rounded-[16px] border-2 border-dashed border-border bg-card transition-colors hover:border-accent hover:bg-accent/5 disabled:opacity-50"
+          className="flex h-28 w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-border bg-card px-3 transition-colors hover:border-accent hover:bg-accent/5 disabled:opacity-50"
         >
           {uploading ? (
-            <div className="flex flex-col items-center gap-2">
-              <div className="size-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-              <span className="text-sm text-muted-foreground">Đang tải...</span>
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="size-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+              <span className="text-xs text-muted-foreground">Đang tải...</span>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              <Upload className="size-8 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Nhấp để tải ảnh bìa
-              </span>
+            <div className="flex flex-col items-center gap-1">
+              <Upload className="size-4 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
-                JPEG, PNG, WebP tối đa 5MB
+                Nhấp để tải ảnh
+              </span>
+              <span className="text-[11px] text-muted-foreground/80">
+                JPEG, PNG, WebP · tối đa 5MB
               </span>
             </div>
           )}

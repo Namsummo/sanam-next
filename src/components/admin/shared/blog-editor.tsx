@@ -30,7 +30,7 @@ type QuillStatic = {
   find: (node: Node | null, bubble?: boolean) => unknown;
 };
 
-type ImageHandlerContext = {
+type HandlerContext = {
   quill: QuillLike;
 };
 
@@ -42,7 +42,7 @@ const TOOLBAR_OPTIONS = [
   [{ list: "ordered" }, { list: "bullet" }],
   ["blockquote", "code-block"],
   [{ align: [] }],
-  ["link", "image"],
+  ["link", "image", "video"],
   ["clean"],
 ];
 
@@ -77,7 +77,43 @@ function readImageFile(file: File): Promise<string> {
   });
 }
 
-function handleImage(this: ImageHandlerContext) {
+/** Chuyển URL YouTube (watch / youtu.be / shorts / embed) → embed URL */
+function toYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url.trim());
+
+    // youtu.be/VIDEO_ID
+    if (u.hostname === "youtu.be") {
+      const id = u.pathname.slice(1).split("/")[0];
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+
+    if (u.hostname.includes("youtube.com")) {
+      // youtube.com/watch?v=VIDEO_ID
+      if (u.pathname === "/watch") {
+        const id = u.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+
+      // youtube.com/embed/VIDEO_ID (đã là embed)
+      if (u.pathname.startsWith("/embed/")) {
+        return `https://www.youtube.com/embed/${u.pathname.split("/")[2]}`;
+      }
+
+      // youtube.com/shorts/VIDEO_ID
+      if (u.pathname.startsWith("/shorts/")) {
+        const id = u.pathname.split("/")[2];
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function handleImage(this: HandlerContext) {
   void (async () => {
     const file = await pickImageFile();
     if (!file) return;
@@ -94,6 +130,18 @@ function handleImage(this: ImageHandlerContext) {
   })();
 }
 
+function handleVideo(this: HandlerContext) {
+  const url = window.prompt("Dán link YouTube (hoặc link embed):");
+  if (!url?.trim()) return;
+
+  const embedUrl = toYouTubeEmbedUrl(url) ?? url.trim();
+
+  const range = this.quill.getSelection(true);
+  const index = range?.index ?? this.quill.getLength();
+  this.quill.insertEmbed(index, "video", embedUrl, "user");
+  this.quill.setSelection(index + 1, 0, "silent");
+}
+
 export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const quillStaticRef = useRef<QuillStatic | null>(null);
@@ -104,7 +152,10 @@ export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
     () => ({
       toolbar: {
         container: TOOLBAR_OPTIONS,
-        handlers: { image: handleImage },
+        handlers: {
+          image: handleImage,
+          video: handleVideo,
+        },
       },
     }),
     [],
@@ -298,6 +349,7 @@ export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
         value={content}
         onChange={onChange}
         modules={modules}
+        useSemanticHTML={false}
         placeholder="Viết nội dung bài viết..."
         theme="snow"
         className="min-h-100"
@@ -331,8 +383,8 @@ export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
       ) : null}
 
       <p className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
-        Ảnh trong nội dung: JPG, PNG, WebP hoặc GIF, tối đa {MAX_IMAGE_SIZE_MB} MB mỗi ảnh. Click
-        vào ảnh để đổi hoặc xóa.
+        Ảnh: JPG, PNG, WebP hoặc GIF, tối đa {MAX_IMAGE_SIZE_MB} MB. Click vào ảnh để đổi/xóa.
+        Video: nút video → dán link YouTube (watch, youtu.be, shorts) để nhúng player.
       </p>
     </div>
   );

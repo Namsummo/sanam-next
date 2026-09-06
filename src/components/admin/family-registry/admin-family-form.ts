@@ -1,4 +1,9 @@
-import type { Family, FamilyMember, FamilyMemberRole, FamilyStatus } from "@/lib/family-registry/types";
+import type {
+  Family,
+  FamilyMember,
+  FamilyMemberRole,
+  FamilyStatus,
+} from "@/lib/family-registry/types";
 
 export type MemberEntry = {
   tempId: string;

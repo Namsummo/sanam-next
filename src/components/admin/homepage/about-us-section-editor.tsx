@@ -175,8 +175,8 @@ export function AboutUsSectionEditor() {
     if (!src.trim()) return null;
 
     return (
-      <div className="overflow-hidden rounded-xl border border-border bg-muted/20">
-        <img src={resolveApiUrl(src)} alt="Xem trước" className="max-h-56 w-full object-cover" />
+      <div className="overflow-hidden rounded-xl border border-border bg-muted/20 p-2">
+        <img src={resolveApiUrl(src)} alt="Xem trước" className="mx-auto max-h-40 max-w-full object-contain" />
       </div>
     );
   }

@@ -39,14 +39,14 @@ export function MemberImageUploader({
   }
 
   return (
-    <div className="relative size-12 shrink-0">
+    <div className="relative size-11 shrink-0">
       {value ? (
-        <div className="group relative size-full overflow-hidden rounded-[8px] border border-border">
+        <div className="group relative size-full overflow-hidden rounded-lg border border-border bg-muted/30">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={resolveApiUrl(value)}
             alt="Member"
-            className="size-full object-cover"
+            className="size-full object-contain"
           />
           <button
             type="button"
@@ -54,7 +54,7 @@ export function MemberImageUploader({
             title="Xóa ảnh"
             className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
           >
-            <X className="size-4 text-white" />
+            <X className="size-3.5 text-white" />
           </button>
         </div>
       ) : (
@@ -62,7 +62,7 @@ export function MemberImageUploader({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex size-full cursor-pointer items-center justify-center rounded-[8px] border border-dashed border-border bg-muted/30 transition-colors hover:border-accent hover:bg-accent/5 disabled:opacity-50"
+          className="flex size-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 transition-colors hover:border-accent hover:bg-accent/5 disabled:opacity-50"
           title="Tải ảnh lên"
         >
           {uploading ? (

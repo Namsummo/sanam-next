@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import type { PersonFormValues } from "./admin-person-form";
 import { AdminFormDialog } from "@/components/admin/shared/admin-form-dialog";
 import { AdminOutlineButton } from "@/components/admin/shared/admin-outline-button";
 import { AdminDateInput } from "@/components/admin/shared/admin-datetime-input";
-import { ControlledField, FieldGroup, FieldSeparator } from "@/components/site/shared/ui/field/field";
+import { ImageUploader } from "@/components/admin/shared/image-uploader";
+import {
+  ControlledField,
+  FieldGroup,
+  FieldSeparator,
+} from "@/components/site/shared/ui/field/field";
 import { Input } from "@/components/site/shared/ui/input/input";
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
 import {
@@ -23,12 +28,11 @@ type AdminPersonFormModalProps = {
   editingId: string | null;
   onClose: () => void;
   onSubmit: (values: PersonFormValues) => void;
+  onUploadImage?: (file: File) => Promise<string>;
 };
 
 function RequiredMark() {
-  return (
-    <span className="text-red-500">*</span>
-  );
+  return <span className="text-red-500">*</span>;
 }
 
 export function AdminPersonFormModal({
@@ -37,8 +41,13 @@ export function AdminPersonFormModal({
   editingId,
   onClose,
   onSubmit,
+  onUploadImage,
 }: AdminPersonFormModalProps) {
   const form = useForm<PersonFormValues>({ defaultValues });
+  const profileImageValue = useWatch({
+    control: form.control,
+    name: "profileImage",
+  });
 
   useEffect(() => {
     if (open) form.reset(defaultValues);
@@ -66,33 +75,76 @@ export function AdminPersonFormModal({
       }
     >
       <FieldGroup>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-card-foreground">
+            Ảnh đại diện
+          </label>
+          <input type="hidden" {...form.register("profileImage")} />
+          <ImageUploader
+            value={profileImageValue || null}
+            onChange={(url) =>
+              form.setValue("profileImage", url || null, { shouldDirty: true })
+            }
+            onUpload={onUploadImage ?? (async () => "")}
+          />
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ControlledField control={form.control} name="saintName" label="Tên thánh">
-            {({ controlProps }) => <Input placeholder="Phêrô, Maria, Gioan..." {...controlProps} />}
+          <ControlledField
+            control={form.control}
+            name="saintName"
+            label="Tên thánh"
+          >
+            {({ controlProps }) => (
+              <Input placeholder="Phêrô, Maria, Gioan..." {...controlProps} />
+            )}
           </ControlledField>
 
           <ControlledField
             control={form.control}
             name="fullName"
-            label={<>Họ và tên <RequiredMark /></>}
+            label={
+              <>
+                Họ và tên <RequiredMark />
+              </>
+            }
             rules={{ required: "Vui lòng nhập họ và tên" }}
           >
-            {({ controlProps }) => <Input placeholder="Nguyễn Văn A" {...controlProps} />}
+            {({ controlProps }) => (
+              <Input placeholder="Nguyễn Văn A" {...controlProps} />
+            )}
           </ControlledField>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ControlledField control={form.control} name="dateOfBirth" label={<>Ngày sinh <RequiredMark /></>} rules={{ required: "Vui lòng nhập ngày sinh" }}>
+          <ControlledField
+            control={form.control}
+            name="dateOfBirth"
+            label={
+              <>
+                Ngày sinh <RequiredMark />
+              </>
+            }
+            rules={{ required: "Vui lòng nhập ngày sinh" }}
+          >
             {({ controlProps }) => <AdminDateInput {...controlProps} />}
           </ControlledField>
 
-          <ControlledField control={form.control} name="dateOfDeath" label="Ngày mất">
+          <ControlledField
+            control={form.control}
+            name="dateOfDeath"
+            label="Ngày mất"
+          >
             {({ controlProps }) => <AdminDateInput {...controlProps} />}
           </ControlledField>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <ControlledField control={form.control} name="gender" label="Giới tính">
+          <ControlledField
+            control={form.control}
+            name="gender"
+            label="Giới tính"
+          >
             {({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-xl py-3">
@@ -105,7 +157,12 @@ export function AdminPersonFormModal({
                     }}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
+                <SelectContent
+                  side="bottom"
+                  align="start"
+                  sideOffset={6}
+                  alignItemWithTrigger={false}
+                >
                   <SelectItem value="male">Nam</SelectItem>
                   <SelectItem value="female">Nữ</SelectItem>
                   <SelectItem value="other">Khác</SelectItem>
@@ -114,7 +171,11 @@ export function AdminPersonFormModal({
             )}
           </ControlledField>
 
-          <ControlledField control={form.control} name="status" label="Trạng thái">
+          <ControlledField
+            control={form.control}
+            name="status"
+            label="Trạng thái"
+          >
             {({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-xl py-3">
@@ -129,7 +190,12 @@ export function AdminPersonFormModal({
                     }}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
+                <SelectContent
+                  side="bottom"
+                  align="start"
+                  sideOffset={6}
+                  alignItemWithTrigger={false}
+                >
                   <SelectItem value="active">Đang sinh hoạt</SelectItem>
                   <SelectItem value="away">Xa quê</SelectItem>
                   <SelectItem value="transferred">Chuyển xứ</SelectItem>
@@ -140,7 +206,11 @@ export function AdminPersonFormModal({
             )}
           </ControlledField>
 
-          <ControlledField control={form.control} name="maritalStatus" label="Hôn nhân">
+          <ControlledField
+            control={form.control}
+            name="maritalStatus"
+            label="Hôn nhân"
+          >
             {({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger className="rounded-xl py-3">
@@ -152,7 +222,12 @@ export function AdminPersonFormModal({
                     }}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
+                <SelectContent
+                  side="bottom"
+                  align="start"
+                  sideOffset={6}
+                  alignItemWithTrigger={false}
+                >
                   <SelectItem value="single">Độc thân</SelectItem>
                   <SelectItem value="married">Đã kết hôn</SelectItem>
                 </SelectContent>
@@ -164,37 +239,61 @@ export function AdminPersonFormModal({
         <FieldSeparator>Thông tin Giáo hội</FieldSeparator>
 
         <ControlledField control={form.control} name="giaoHo" label="Giáo họ">
-          {({ controlProps }) => <Input placeholder="Giáo họ..." {...controlProps} />}
+          {({ controlProps }) => (
+            <Input placeholder="Giáo họ..." {...controlProps} />
+          )}
         </ControlledField>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <ControlledField control={form.control} name="giaoXu" label="Giáo xứ">
-            {({ controlProps }) => <Input placeholder="Giáo xứ..." {...controlProps} />}
+            {({ controlProps }) => (
+              <Input placeholder="Giáo xứ..." {...controlProps} />
+            )}
           </ControlledField>
 
-          <ControlledField control={form.control} name="giaoPhan" label="Giáo phận">
-            {({ controlProps }) => <Input placeholder="Giáo phận..." {...controlProps} />}
+          <ControlledField
+            control={form.control}
+            name="giaoPhan"
+            label="Giáo phận"
+          >
+            {({ controlProps }) => (
+              <Input placeholder="Giáo phận..." {...controlProps} />
+            )}
           </ControlledField>
         </div>
 
         <FieldSeparator>Bí tích</FieldSeparator>
 
         <SacramentFields form={form} prefix="baptism" label="Rửa tội" />
-        <SacramentFields form={form} prefix="firstCommunion" label="Rước lễ lần đầu" />
+        <SacramentFields
+          form={form}
+          prefix="firstCommunion"
+          label="Rước lễ lần đầu"
+        />
         <SacramentFields form={form} prefix="confirmation" label="Thêm sức" />
         <SacramentFields form={form} prefix="marriage" label="Hôn phối" />
 
         <FieldSeparator />
 
         <ControlledField control={form.control} name="notes" label="Ghi chú">
-          {({ controlProps }) => <Textarea rows={3} placeholder="Ghi chú thêm về người này..." {...controlProps} />}
+          {({ controlProps }) => (
+            <Textarea
+              rows={3}
+              placeholder="Ghi chú thêm về người này..."
+              {...controlProps}
+            />
+          )}
         </ControlledField>
       </FieldGroup>
     </AdminFormDialog>
   );
 }
 
-type SacramentPrefix = "baptism" | "firstCommunion" | "confirmation" | "marriage";
+type SacramentPrefix =
+  | "baptism"
+  | "firstCommunion"
+  | "confirmation"
+  | "marriage";
 
 function SacramentFields({
   form,
@@ -205,18 +304,41 @@ function SacramentFields({
   prefix: SacramentPrefix;
   label: string;
 }) {
-  const dateField = `${prefix}Date` as keyof PersonFormValues;
-  const churchField = `${prefix}Church` as keyof PersonFormValues;
+  const dateField = `${prefix}Date` as
+    | "baptismDate"
+    | "firstCommunionDate"
+    | "confirmationDate"
+    | "marriageDate";
+  const churchField = `${prefix}Church` as
+    | "baptismChurch"
+    | "firstCommunionChurch"
+    | "confirmationChurch"
+    | "marriageChurch";
 
   return (
     <div>
       <p className="mb-2 text-sm font-medium text-card-foreground">{label}</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ControlledField control={form.control} name={dateField} label="Ngày">
-          {({ controlProps }) => <AdminDateInput {...controlProps} />}
+          {({ controlProps }) => (
+            <AdminDateInput
+              {...controlProps}
+              value={controlProps.value ?? ""}
+            />
+          )}
         </ControlledField>
-        <ControlledField control={form.control} name={churchField} label="Nhà thờ">
-          {({ controlProps }) => <Input placeholder="Nhà thờ Sa Nam" {...controlProps} />}
+        <ControlledField
+          control={form.control}
+          name={churchField}
+          label="Nhà thờ"
+        >
+          {({ controlProps }) => (
+            <Input
+              placeholder="Nhà thờ Sa Nam"
+              {...controlProps}
+              value={controlProps.value ?? ""}
+            />
+          )}
         </ControlledField>
       </div>
     </div>

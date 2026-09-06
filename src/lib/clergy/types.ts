@@ -18,11 +18,10 @@ export type ClergyMember = {
   isVisible?: boolean;
   image?: string;
   ordinationDate?: string; // Ngày thụ phong Linh mục
-  patronSaint?: string;    // Thánh bổn mạng
-  patronDate?: string;     // Ngày lễ bổn mạng
-  hometown?: string;       // Quê quán / Giáo họ
+  patronSaint?: string; // Thánh bổn mạng
+  patronDate?: string; // Ngày lễ bổn mạng
+  hometown?: string; // Quê quán / Giáo họ
   /** Ban Hành Giáo: khóa nhiệm kỳ, format YYYY-YYYY */
   termId?: string;
   showOnHomepage?: boolean;
 };
-

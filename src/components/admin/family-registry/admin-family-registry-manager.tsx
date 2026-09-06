@@ -25,16 +25,13 @@ import {
   formValuesToPerson,
   type PersonFormValues,
 } from "./admin-person-form";
+import { uploadImage } from "@/shared/services/news-api";
 import {
   createEmptyFamilyFormValues,
   mapFamilyToFormValues,
   type FamilyFormValues,
 } from "./admin-family-form";
-import type {
-  Person,
-  Family,
-  FamilyMember,
-} from "@/lib/family-registry/types";
+import type { Person, Family, FamilyMember } from "@/lib/family-registry/types";
 
 type Tab = "persons" | "families";
 
@@ -54,15 +51,20 @@ export function AdminFamilyRegistryManager() {
   // Person form
   const [personFormOpen, setPersonFormOpen] = useState(false);
   const [personEditingId, setPersonEditingId] = useState<string | null>(null);
-  const [personFormDefaults, setPersonFormDefaults] = useState<PersonFormValues>(createEmptyPersonFormValues);
+  const [personFormDefaults, setPersonFormDefaults] =
+    useState<PersonFormValues>(createEmptyPersonFormValues);
 
   // Family form
   const [familyFormOpen, setFamilyFormOpen] = useState(false);
   const [familyEditingId, setFamilyEditingId] = useState<string | null>(null);
-  const [familyFormDefaults, setFamilyFormDefaults] = useState<FamilyFormValues>(createEmptyFamilyFormValues);
+  const [familyFormDefaults, setFamilyFormDefaults] =
+    useState<FamilyFormValues>(createEmptyFamilyFormValues);
 
   // Delete confirm
-  const [deleteTarget, setDeleteTarget] = useState<{ type: "person" | "family"; id: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: "person" | "family";
+    id: string;
+  } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   // Load from API on mount
@@ -78,11 +80,12 @@ export function AdminFamilyRegistryManager() {
     async function initData() {
       try {
         setLoading(true);
-        const [fetchedPersons, fetchedFamilies, fetchedMembers] = await Promise.all([
-          getAllPersons(authToken),
-          getAllFamilies(authToken),
-          getAllMembers(authToken),
-        ]);
+        const [fetchedPersons, fetchedFamilies, fetchedMembers] =
+          await Promise.all([
+            getAllPersons(authToken),
+            getAllFamilies(authToken),
+            getAllMembers(authToken),
+          ]);
         setPersons(fetchedPersons);
         setFamilies(fetchedFamilies);
         setMembers(fetchedMembers);
@@ -107,6 +110,15 @@ export function AdminFamilyRegistryManager() {
     setPersonEditingId(person.id);
     setPersonFormDefaults(mapPersonToFormValues(person));
     setPersonFormOpen(true);
+  }
+
+  async function handleUploadPersonImage(file: File): Promise<string> {
+    const token = getAccessToken();
+    if (!token) {
+      throw new Error("Không có token truy cập");
+    }
+
+    return uploadImage(token, file);
   }
 
   async function handleSubmitPerson(values: PersonFormValues) {
@@ -207,11 +219,15 @@ export function AdminFamilyRegistryManager() {
       if (deleteTarget.type === "person") {
         await deletePerson(token, deleteTarget.id);
         setPersons((prev) => prev.filter((p) => p.id !== deleteTarget.id));
-        setMembers((prev) => prev.filter((m) => m.personId !== deleteTarget.id));
+        setMembers((prev) =>
+          prev.filter((m) => m.personId !== deleteTarget.id),
+        );
       } else if (deleteTarget.type === "family") {
         await deleteFamily(token, deleteTarget.id);
         setFamilies((prev) => prev.filter((f) => f.id !== deleteTarget.id));
-        setMembers((prev) => prev.filter((m) => m.familyId !== deleteTarget.id));
+        setMembers((prev) =>
+          prev.filter((m) => m.familyId !== deleteTarget.id),
+        );
       }
     } catch (err) {
       console.error(err);
@@ -226,13 +242,17 @@ export function AdminFamilyRegistryManager() {
   const q = searchQuery.toLowerCase();
   const filteredPersons = q
     ? persons.filter(
-      (p) =>
-        p.fullName.toLowerCase().includes(q) ||
-        (p.saintName?.toLowerCase().includes(q) ?? false),
-    )
+        (p) =>
+          p.fullName.toLowerCase().includes(q) ||
+          (p.saintName?.toLowerCase().includes(q) ?? false),
+      )
     : persons;
   const filteredFamilies = q
-    ? families.filter((f) => f.name.toLowerCase().includes(q) || f.familyCode.toLowerCase().includes(q))
+    ? families.filter(
+        (f) =>
+          f.name.toLowerCase().includes(q) ||
+          f.familyCode.toLowerCase().includes(q),
+      )
     : families;
 
   if (loading) {
@@ -254,7 +274,9 @@ export function AdminFamilyRegistryManager() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="font-display text-2xl font-bold">Sổ Gia Đình Công Giáo</h1>
+        <h1 className="font-display text-2xl font-bold">
+          Sổ Gia Đình Công Giáo
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Quản lý hồ sơ cá nhân và gia đình — Giáo xứ Sa Nam, Giáo phận Bùi Chu
         </p>
@@ -293,7 +315,9 @@ export function AdminFamilyRegistryManager() {
           <button
             type="button"
             className="inline-flex h-9 items-center gap-1.5 rounded-[10px] bg-accent px-3 text-sm font-semibold text-white transition-colors hover:bg-accent/90"
-            onClick={tab === "families" ? handleOpenNewFamily : handleOpenNewPerson}
+            onClick={
+              tab === "families" ? handleOpenNewFamily : handleOpenNewPerson
+            }
           >
             <Plus className="size-4" />
             {tab === "families" ? "Thêm gia đình" : "Thêm thành viên"}
@@ -324,6 +348,7 @@ export function AdminFamilyRegistryManager() {
         editingId={personEditingId}
         onClose={() => setPersonFormOpen(false)}
         onSubmit={handleSubmitPerson}
+        onUploadImage={handleUploadPersonImage}
       />
 
       <AdminFamilyFormModal
@@ -337,8 +362,14 @@ export function AdminFamilyRegistryManager() {
 
       <AdminConfirmDialog
         open={deleteTarget !== null}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
-        title={deleteTarget?.type === "person" ? "Xóa hồ sơ cá nhân?" : "Xóa gia đình?"}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title={
+          deleteTarget?.type === "person"
+            ? "Xóa hồ sơ cá nhân?"
+            : "Xóa gia đình?"
+        }
         description={
           deleteTarget?.type === "person"
             ? "Hồ sơ cá nhân và tất cả liên kết gia đình sẽ bị xóa. Hành động này không thể hoàn tác."
