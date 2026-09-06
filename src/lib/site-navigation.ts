@@ -43,12 +43,12 @@ export const siteMainNav: SiteNavItem[] = [
   { label: "Đoàn thể", href: "/organization" },
   { label: "Tin tức", href: "/news" },
   { label: "Sự kiện", href: "/events" },
-  // { label: "Phụng vụ", href: "/worship" },
+  { label: "Phụng vụ", href: "/worship" },
   { label: "Liên hệ", href: "/contact" },
 ];
 
 /** Header CTA — live worship stream */
 export const siteWorshipLiveCta: NavLink = {
   label: "Thánh lễ trực tuyến",
-  href: "/worship/live",
+  href: "/live",
 };

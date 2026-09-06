@@ -5,5 +5,6 @@ export {
   getEventDateTimeDisplay,
   formatIsoDateToVi,
   formatNewsDate,
+  formatWeekdayVi,
 } from "@/lib/format/date";
 export { formatLocaleNumber, formatMemberCount } from "@/lib/format/number";

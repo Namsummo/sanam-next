@@ -14,7 +14,7 @@ export interface PublicRegistryDataResponse {
   persons: Person[];
 }
 
-// ─── PUBLIC API ────────────────────────────────────────────────────────────
+// PUBLIC API
 
 export async function getPublicFamilyRegistryData(): Promise<PublicRegistryDataResponse> {
   const res = await fetch(`${API_BASE}/api/family-registry/public-data`);
@@ -22,7 +22,7 @@ export async function getPublicFamilyRegistryData(): Promise<PublicRegistryDataR
   return res.json();
 }
 
-// ─── ADMIN PERSONS API ──────────────────────────────────────────────────────
+// ADMIN PERSONS API
 
 export async function getAllPersons(token: string): Promise<Person[]> {
   const res = await fetch(`${API_BASE}/api/admin/family-registry/persons`, {
@@ -32,7 +32,10 @@ export async function getAllPersons(token: string): Promise<Person[]> {
   return res.json();
 }
 
-export async function createPerson(token: string, data: Omit<Person, "id" | "createdAt" | "updatedAt">): Promise<Person> {
+export async function createPerson(
+  token: string,
+  data: Omit<Person, "id" | "createdAt" | "updatedAt">,
+): Promise<Person> {
   const res = await fetch(`${API_BASE}/api/admin/family-registry/persons`, {
     method: "POST",
     headers: {
@@ -42,7 +45,9 @@ export async function createPerson(token: string, data: Omit<Person, "id" | "cre
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to create person" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to create person" }));
     throw new Error(err.message);
   }
   return res.json();
@@ -53,30 +58,38 @@ export async function updatePerson(
   id: string,
   data: Partial<Omit<Person, "id" | "createdAt" | "updatedAt">>,
 ): Promise<Person> {
-  const res = await fetch(`${API_BASE}/api/admin/family-registry/persons/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(token),
+  const res = await fetch(
+    `${API_BASE}/api/admin/family-registry/persons/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(token),
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+  );
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to update person" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to update person" }));
     throw new Error(err.message);
   }
   return res.json();
 }
 
 export async function deletePerson(token: string, id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/admin/family-registry/persons/${id}`, {
-    method: "DELETE",
-    headers: authHeaders(token),
-  });
+  const res = await fetch(
+    `${API_BASE}/api/admin/family-registry/persons/${id}`,
+    {
+      method: "DELETE",
+      headers: authHeaders(token),
+    },
+  );
   if (!res.ok) throw new Error("Failed to delete person");
 }
 
-// ─── ADMIN FAMILIES API ─────────────────────────────────────────────────────
+// ADMIN FAMILIES API
 
 export async function getAllFamilies(token: string): Promise<Family[]> {
   const res = await fetch(`${API_BASE}/api/admin/family-registry/families`, {
@@ -105,7 +118,10 @@ export interface FamilyCreateUpdateResponse {
   members: FamilyMember[];
 }
 
-export async function createFamily(token: string, data: CreateFamilyPayload): Promise<FamilyCreateUpdateResponse> {
+export async function createFamily(
+  token: string,
+  data: CreateFamilyPayload,
+): Promise<FamilyCreateUpdateResponse> {
   const res = await fetch(`${API_BASE}/api/admin/family-registry/families`, {
     method: "POST",
     headers: {
@@ -115,7 +131,9 @@ export async function createFamily(token: string, data: CreateFamilyPayload): Pr
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to create family" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to create family" }));
     throw new Error(err.message);
   }
   return res.json();
@@ -126,26 +144,34 @@ export async function updateFamily(
   id: string,
   data: Partial<CreateFamilyPayload>,
 ): Promise<FamilyCreateUpdateResponse> {
-  const res = await fetch(`${API_BASE}/api/admin/family-registry/families/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(token),
+  const res = await fetch(
+    `${API_BASE}/api/admin/family-registry/families/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(token),
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+  );
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to update family" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to update family" }));
     throw new Error(err.message);
   }
   return res.json();
 }
 
 export async function deleteFamily(token: string, id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/admin/family-registry/families/${id}`, {
-    method: "DELETE",
-    headers: authHeaders(token),
-  });
+  const res = await fetch(
+    `${API_BASE}/api/admin/family-registry/families/${id}`,
+    {
+      method: "DELETE",
+      headers: authHeaders(token),
+    },
+  );
   if (!res.ok) throw new Error("Failed to delete family");
 }
 

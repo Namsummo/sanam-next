@@ -75,6 +75,14 @@ export const adminModules: AdminModule[] = [
     status: "available",
   },
   {
+    id: "liturgy",
+    title: "Phụng vụ hàng ngày",
+    description: "Quản lý mùa phụng vụ, ngày lễ, lời Chúa và suy niệm.",
+    href: "/admin/liturgy",
+    icon: BookOpen,
+    status: "available",
+  },
+  {
     id: "mass-schedule",
     title: "Lịch Thánh Lễ",
     description: "Cấu hình giờ lễ theo ngày trong tuần.",

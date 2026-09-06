@@ -1,13 +1,26 @@
+import type { Metadata } from "next";
+import { LiturgyPage } from "@/components/site/liturgy/liturgy-page";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
+import {
+  getPublishedGospels,
+  getPublishedReflections,
+  getSeasonsWithFeasts,
+} from "@/shared/services/liturgy-api";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Phụng Vụ — Giáo xứ Sa Nam",
-  description: "Thông tin phụng vụ tại Giáo xứ Sa Nam.",
+  description:
+    "Mùa phụng vụ, Lời Chúa hàng ngày và suy niệm của Giáo xứ Sa Nam.",
 };
 
 export default async function WorshipPage() {
-  const bgSettings = await getBackgroundSettings().catch(() => null);
+  const [seasons, gospels, reflections, bgSettings] = await Promise.all([
+    getSeasonsWithFeasts(),
+    getPublishedGospels(),
+    getPublishedReflections(),
+    getBackgroundSettings().catch(() => null),
+  ]);
 
   return (
     <>
@@ -19,15 +32,12 @@ export default async function WorshipPage() {
         ]}
         backgroundImage={bgSettings?.worshipBg}
       />
-      <main className="min-h-screen w-full bg-background px-4 py-8 md:px-8 lg:px-12">
-        <div className="mx-auto max-w-225 py-16 text-center">
-          <p className="font-display text-xl font-semibold text-primary md:text-2xl">
-            Nội dung đang được cập nhật
-          </p>
-          <p className="mt-3 font-sans text-sm text-foreground/70 md:text-base">
-            Vui lòng quay lại sau.
-          </p>
-        </div>
+      <main className="min-h-screen w-full bg-background px-4 py-10 md:px-8 md:py-16 lg:px-12">
+        <LiturgyPage
+          seasons={seasons}
+          gospels={gospels}
+          reflections={reflections}
+        />
       </main>
     </>
   );

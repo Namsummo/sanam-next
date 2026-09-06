@@ -4,15 +4,16 @@ Tài liệu mô tả **định dạng JSON** và **endpoint gợi ý** để tea
 
 **Nguồn tham chiếu trong repo:**
 
-| Module | Types | Mock mẫu |
-|--------|-------|----------|
-| Tin tức | `src/lib/news/types.ts` | `src/lib/news/mock-news.ts` |
-| Sự kiện | `src/lib/events/types.ts` | `src/lib/events/mock-events.ts` |
-| Quý Cha / Ban Hành Giáo | `src/lib/clergy/types.ts` | `src/lib/clergy/mock-clergy.ts` |
-| Đoàn thể | `src/lib/organization/types.ts` | `src/lib/organization/mock-*.ts` |
-| Video / Live | `src/lib/videos/types.ts` | `src/lib/videos/mock-videos.ts` |
-| Lịch Thánh Lễ | `src/lib/mass/mock-mass.ts` | (cùng file) |
-| Liên hệ | `src/components/site/contact/contact-form.tsx` | `src/lib/contact/site-contact.ts` |
+| Module                  | Types                                          | Mock mẫu                          |
+| ----------------------- | ---------------------------------------------- | --------------------------------- |
+| Tin tức                 | `src/lib/news/types.ts`                        | `src/lib/news/mock-news.ts`       |
+| Sự kiện                 | `src/lib/events/types.ts`                      | `src/lib/events/mock-events.ts`   |
+| Quý Cha / Ban Hành Giáo | `src/lib/clergy/types.ts`                      | `src/lib/clergy/mock-clergy.ts`   |
+| Đoàn thể                | `src/lib/organization/types.ts`                | `src/lib/organization/mock-*.ts`  |
+| Video / Live            | `src/lib/videos/types.ts`                      | `src/lib/videos/mock-videos.ts`   |
+| Lịch Thánh Lễ           | `src/lib/mass/mock-mass.ts`                    | (cùng file)                       |
+| Phụng vụ hàng ngày      | `src/lib/liturgy/types.ts`                     | `src/lib/liturgy/mock-seed.ts`    |
+| Liên hệ                 | `src/components/site/contact/contact-form.tsx` | `src/lib/contact/site-contact.ts` |
 
 **Trạng thái FE hiện tại:** dùng mock/localStorage, chưa gọi API thật. Khi BE sẵn sàng, FE thay mock bằng `fetch` tới `NEXT_PUBLIC_API_URL`.
 
@@ -32,7 +33,9 @@ Tài liệu mô tả **định dạng JSON** và **endpoint gợi ý** để tea
 
 ```json
 {
-  "data": [ /* ... */ ],
+  "data": [
+    /* ... */
+  ],
   "meta": {
     "page": 1,
     "pageSize": 20,
@@ -45,7 +48,9 @@ Tài liệu mô tả **định dạng JSON** và **endpoint gợi ý** để tea
 
 ```json
 {
-  "data": { /* object */ }
+  "data": {
+    /* object */
+  }
 }
 ```
 
@@ -56,21 +61,19 @@ Tài liệu mô tả **định dạng JSON** và **endpoint gợi ý** để tea
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "Mô tả lỗi cho người dùng hoặc dev",
-    "details": [
-      { "field": "email", "message": "Email không hợp lệ" }
-    ]
+    "details": [{ "field": "email", "message": "Email không hợp lệ" }]
   }
 }
 ```
 
 ### 1.3 Ngày giờ
 
-| Kiểu | Format | Ví dụ |
-|------|--------|-------|
-| Ngày đăng / sự kiện | ISO 8601 (có timezone) hoặc `YYYY-MM-DD` | `2026-05-20T08:00:00+07:00` |
-| Ngày sinh, ngày thụ phong | `YYYY-MM-DD` | `1970-06-29` |
-| Giờ lễ (lịch) | `HH:mm` (24h) | `05:30` |
-| Lễ bổn mạng (hiển thị) | Chuỗi tự do | `29/06` |
+| Kiểu                      | Format                                   | Ví dụ                       |
+| ------------------------- | ---------------------------------------- | --------------------------- |
+| Ngày đăng / sự kiện       | ISO 8601 (có timezone) hoặc `YYYY-MM-DD` | `2026-05-20T08:00:00+07:00` |
+| Ngày sinh, ngày thụ phong | `YYYY-MM-DD`                             | `1970-06-29`                |
+| Giờ lễ (lịch)             | `HH:mm` (24h)                            | `05:30`                     |
+| Lễ bổn mạng (hiển thị)    | Chuỗi tự do                              | `29/06`                     |
 
 ### 1.4 Ảnh & media
 
@@ -78,12 +81,12 @@ Tài liệu mô tả **định dạng JSON** và **endpoint gợi ý** để tea
 - FE có ảnh mặc định khi thiếu: `/images/default-cover.jpg`.
 - **Đề xuất bổ sung** các field sau (FE chưa có trong type nhưng cần từ BE):
 
-| Entity | Field đề xuất |
-|--------|----------------|
-| `NewsArticle` | `coverImage?: string` |
-| `ClergyMember` | `imageUrl?: string` |
+| Entity         | Field đề xuất         |
+| -------------- | --------------------- |
+| `NewsArticle`  | `coverImage?: string` |
+| `ClergyMember` | `imageUrl?: string`   |
 | `Organization` | `coverImage?: string` |
-| `MemberPerson` | `avatarUrl?: string` |
+| `MemberPerson` | `avatarUrl?: string`  |
 
 ### 1.5 Slug
 
@@ -93,10 +96,10 @@ Tài liệu mô tả **định dạng JSON** và **endpoint gợi ý** để tea
 
 ### 1.6 API công khai vs Admin
 
-| Loại | Quy tắc |
-|------|---------|
-| **Public API** (website) | Chỉ trả bản ghi `isVisible: true`; tin/sự kiện đã publish |
-| **Admin API** (CMS) | CRUD đầy đủ, có auth; có thể trả `draft`, `isVisible: false` |
+| Loại                     | Quy tắc                                                      |
+| ------------------------ | ------------------------------------------------------------ |
+| **Public API** (website) | Chỉ trả bản ghi `isVisible: true`; tin/sự kiện đã publish    |
+| **Admin API** (CMS)      | CRUD đầy đủ, có auth; có thể trả `draft`, `isVisible: false` |
 
 ---
 
@@ -106,14 +109,14 @@ Tài liệu mô tả **định dạng JSON** và **endpoint gợi ý** để tea
 
 Nguồn: `src/lib/news/categories.ts`
 
-| `id` | `label` |
-|------|---------|
+| `id`        | `label`   |
+| ----------- | --------- |
 | `thong-bao` | Thông báo |
-| `su-kien` | Sự kiện |
-| `le-kinh` | Lễ kính |
+| `su-kien`   | Sự kiện   |
+| `le-kinh`   | Lễ kính   |
 | `hoat-dong` | Hoạt động |
-| `bai-viet` | Bài viết |
-| `cao-pho` | Cáo phó |
+| `bai-viet`  | Bài viết  |
+| `cao-pho`   | Cáo phó   |
 
 ```json
 {
@@ -128,14 +131,14 @@ Nguồn: `src/lib/news/categories.ts`
 
 Nguồn: `src/lib/events/categories.ts`
 
-| `id` | `label` |
-|------|---------|
-| `le-kinh` | Lễ kính |
-| `ruoc-kieu` | Rước kiệu |
-| `hoi-cho` | Hội chợ |
-| `giuong-trai` | Giữ chân |
-| `gioi-tre` | Giới trẻ |
-| `bac-ai` | Bác ái |
+| `id`          | `label`   |
+| ------------- | --------- |
+| `le-kinh`     | Lễ kính   |
+| `ruoc-kieu`   | Rước kiệu |
+| `hoi-cho`     | Hội chợ   |
+| `giuong-trai` | Giữ chân  |
+| `gioi-tre`    | Giới trẻ  |
+| `bac-ai`      | Bác ái    |
 
 ---
 
@@ -143,29 +146,29 @@ Nguồn: `src/lib/events/categories.ts`
 
 ### 3.1 Schema — `NewsArticle`
 
-| Field | Type | Bắt buộc | Mô tả |
-|-------|------|----------|-------|
-| `id` | string | ✓ | ID nội bộ |
-| `slug` | string | | URL-friendly, unique |
-| `title` | string | ✓ | Tiêu đề |
-| `excerpt` | string | ✓ | Đoạn trích (danh sách) |
-| `content` | string | ✓ | Nội dung đầy đủ |
-| `contentFormat` | `"plain"` \| `"html"` | ✓ | FE render HTML khi `html` |
-| `categoryId` | string | | Tham chiếu danh mục §2.1 |
-| `coverImage` | string | | URL ảnh bìa (**đề xuất thêm**) |
-| `publishedAt` | string | ✓ | ISO 8601 |
-| `isFeatured` | boolean | ✓ | Hiện block Trang chủ (tối đa 3) |
-| `isVisible` | boolean | ✓ | Bật/tắt hiển thị web |
+| Field           | Type                  | Bắt buộc | Mô tả                           |
+| --------------- | --------------------- | -------- | ------------------------------- |
+| `id`            | string                | ✓        | ID nội bộ                       |
+| `slug`          | string                |          | URL-friendly, unique            |
+| `title`         | string                | ✓        | Tiêu đề                         |
+| `excerpt`       | string                | ✓        | Đoạn trích (danh sách)          |
+| `content`       | string                | ✓        | Nội dung đầy đủ                 |
+| `contentFormat` | `"plain"` \| `"html"` | ✓        | FE render HTML khi `html`       |
+| `categoryId`    | string                |          | Tham chiếu danh mục §2.1        |
+| `coverImage`    | string                |          | URL ảnh bìa (**đề xuất thêm**)  |
+| `publishedAt`   | string                | ✓        | ISO 8601                        |
+| `isFeatured`    | boolean               | ✓        | Hiện block Trang chủ (tối đa 3) |
+| `isVisible`     | boolean               | ✓        | Bật/tắt hiển thị web            |
 
 ### 3.2 Endpoints
 
-| Method | Path | Mô tả |
-|--------|------|-------|
-| GET | `/api/news` | Danh sách, mới nhất trước |
-| GET | `/api/news?featured=true&limit=3` | Tin nổi bật Trang chủ |
-| GET | `/api/news?categoryId=le-kinh` | Lọc danh mục |
-| GET | `/api/news/{slug}` | Chi tiết |
-| GET | `/api/news/categories` | Danh mục + có thể kèm `count` |
+| Method | Path                              | Mô tả                         |
+| ------ | --------------------------------- | ----------------------------- |
+| GET    | `/api/news`                       | Danh sách, mới nhất trước     |
+| GET    | `/api/news?featured=true&limit=3` | Tin nổi bật Trang chủ         |
+| GET    | `/api/news?categoryId=le-kinh`    | Lọc danh mục                  |
+| GET    | `/api/news/{slug}`                | Chi tiết                      |
+| GET    | `/api/news/categories`            | Danh mục + có thể kèm `count` |
 
 **Quy tắc FE (public):**
 
@@ -202,44 +205,44 @@ Nguồn: `src/lib/events/categories.ts`
 
 ### 4.1 Schema — `ParishEvent`
 
-| Field | Type | Bắt buộc | Mô tả |
-|-------|------|----------|-------|
-| `id` | string | ✓ | |
-| `slug` | string | | |
-| `name` | string | ✓ | Tên sự kiện |
-| `startDate` | string | ✓ | `YYYY-MM-DD` |
-| `startTime` | string | | `HH:mm` |
-| `endDate` | string | | Mặc định = `startDate` nếu thiếu |
-| `endTime` | string | | |
-| `allDay` | boolean | | |
-| `location` | string | ✓ | |
-| `content` | string | ✓ | |
-| `contentFormat` | `"plain"` \| `"html"` | ✓ | |
-| `image` | string | | URL ảnh |
-| `categoryId` | string | | §2.2 |
-| `isFeatured` | boolean | ✓ | Block Trang chủ (tối đa 2) |
-| `featuredOrder` | number | | Thứ tự nổi bật (nhỏ trước) |
-| `status` | enum | ✓ | Xem bảng dưới |
-| `isVisible` | boolean | ✓ | |
+| Field           | Type                  | Bắt buộc | Mô tả                            |
+| --------------- | --------------------- | -------- | -------------------------------- |
+| `id`            | string                | ✓        |                                  |
+| `slug`          | string                |          |                                  |
+| `name`          | string                | ✓        | Tên sự kiện                      |
+| `startDate`     | string                | ✓        | `YYYY-MM-DD`                     |
+| `startTime`     | string                |          | `HH:mm`                          |
+| `endDate`       | string                |          | Mặc định = `startDate` nếu thiếu |
+| `endTime`       | string                |          |                                  |
+| `allDay`        | boolean               |          |                                  |
+| `location`      | string                | ✓        |                                  |
+| `content`       | string                | ✓        |                                  |
+| `contentFormat` | `"plain"` \| `"html"` | ✓        |                                  |
+| `image`         | string                |          | URL ảnh                          |
+| `categoryId`    | string                |          | §2.2                             |
+| `isFeatured`    | boolean               | ✓        | Block Trang chủ (tối đa 2)       |
+| `featuredOrder` | number                |          | Thứ tự nổi bật (nhỏ trước)       |
+| `status`        | enum                  | ✓        | Xem bảng dưới                    |
+| `isVisible`     | boolean               | ✓        |                                  |
 
 **`status`:**
 
-| Giá trị | Ý nghĩa |
-|---------|---------|
-| `draft` | Nháp — không hiện web |
-| `published` | Đã công bố |
-| `cancelled` | Đã hủy |
-| `postponed` | Hoãn |
+| Giá trị     | Ý nghĩa               |
+| ----------- | --------------------- |
+| `draft`     | Nháp — không hiện web |
+| `published` | Đã công bố            |
+| `cancelled` | Đã hủy                |
+| `postponed` | Hoãn                  |
 
 ### 4.2 Endpoints
 
-| Method | Path | Mô tả |
-|--------|------|-------|
-| GET | `/api/events` | Sự kiện còn diễn ra |
-| GET | `/api/events?featured=true&limit=2` | Nổi bật Trang chủ |
-| GET | `/api/events?thisWeek=true` | Sự kiện trong tuần (theo `anchor` hoặc server date) |
-| GET | `/api/events/{slug}` | Chi tiết |
-| GET | `/api/events/categories` | Danh mục |
+| Method | Path                                | Mô tả                                               |
+| ------ | ----------------------------------- | --------------------------------------------------- |
+| GET    | `/api/events`                       | Sự kiện còn diễn ra                                 |
+| GET    | `/api/events?featured=true&limit=2` | Nổi bật Trang chủ                                   |
+| GET    | `/api/events?thisWeek=true`         | Sự kiện trong tuần (theo `anchor` hoặc server date) |
+| GET    | `/api/events/{slug}`                | Chi tiết                                            |
+| GET    | `/api/events/categories`            | Danh mục                                            |
 
 **Quy tắc FE (public) — BE nên implement tương đương:**
 
@@ -280,31 +283,31 @@ Nguồn: `src/lib/events/categories.ts`
 
 ### 5.1 Schema — `ClergyMember`
 
-| Field | Type | Bắt buộc | Mô tả |
-|-------|------|----------|-------|
-| `id` | number | ✓ | |
-| `type` | `1` \| `2` | ✓ | `1` = Quý Cha (linh mục), `2` = Ban Hành Giáo |
-| `fullName` | string | ✓ | |
-| `position` | string | ✓ | Chức vụ |
-| `motto` | string | | Khẩu hiệu |
-| `description` | string | | Mô tả ngắn (thẻ) |
-| `birthday` | string | | `YYYY-MM-DD` |
-| `ordinationDate` | string | | Chỉ type `1` — ngày thụ phong |
-| `patronSaint` | string | | Thánh bổn mạng |
-| `patronDate` | string | | Lễ bổn mạng |
-| `hometown` | string | | Quê quán / Giáo họ |
-| `imageUrl` | string | | (**đề xuất thêm**) |
-| `sortOrder` | number | | Thứ tự hiển thị |
-| `isVisible` | boolean | | Mặc định `true` |
+| Field            | Type       | Bắt buộc | Mô tả                                         |
+| ---------------- | ---------- | -------- | --------------------------------------------- |
+| `id`             | number     | ✓        |                                               |
+| `type`           | `1` \| `2` | ✓        | `1` = Quý Cha (linh mục), `2` = Ban Hành Giáo |
+| `fullName`       | string     | ✓        |                                               |
+| `position`       | string     | ✓        | Chức vụ                                       |
+| `motto`          | string     |          | Khẩu hiệu                                     |
+| `description`    | string     |          | Mô tả ngắn (thẻ)                              |
+| `birthday`       | string     |          | `YYYY-MM-DD`                                  |
+| `ordinationDate` | string     |          | Chỉ type `1` — ngày thụ phong                 |
+| `patronSaint`    | string     |          | Thánh bổn mạng                                |
+| `patronDate`     | string     |          | Lễ bổn mạng                                   |
+| `hometown`       | string     |          | Quê quán / Giáo họ                            |
+| `imageUrl`       | string     |          | (**đề xuất thêm**)                            |
+| `sortOrder`      | number     |          | Thứ tự hiển thị                               |
+| `isVisible`      | boolean    |          | Mặc định `true`                               |
 
 ### 5.2 Endpoints
 
-| Method | Path | Mô tả |
-|--------|------|-------|
-| GET | `/api/clergy` | Tất cả (visible) |
-| GET | `/api/clergy?type=1` | Quý Cha |
-| GET | `/api/clergy?type=2` | Ban Hành Giáo |
-| GET | `/api/clergy/{id}` | Chi tiết (popup) |
+| Method | Path                 | Mô tả            |
+| ------ | -------------------- | ---------------- |
+| GET    | `/api/clergy`        | Tất cả (visible) |
+| GET    | `/api/clergy?type=1` | Quý Cha          |
+| GET    | `/api/clergy?type=2` | Ban Hành Giáo    |
+| GET    | `/api/clergy/{id}`   | Chi tiết (popup) |
 
 **Quy tắc FE:** `isVisible !== false`, sort `sortOrder` ASC.
 
@@ -341,66 +344,66 @@ Mô hình **quan hệ** — BE có thể trả nested hoặc tách endpoint.
 
 ### 6.1 `Organization`
 
-| Field | Type | Bắt buộc | Mô tả |
-|-------|------|----------|-------|
-| `id` | string | ✓ | |
-| `slug` | string | ✓ | URL: `/organization/{slug}` |
-| `name` | string | ✓ | Tên hội đoàn |
-| `memberCount` | number | ✓ | Số thành viên (hiển thị) |
-| `description` | string | ✓ | |
-| `coverImage` | string | | (**đề xuất thêm**) |
-| `isVisible` | boolean | ✓ | |
+| Field         | Type    | Bắt buộc | Mô tả                       |
+| ------------- | ------- | -------- | --------------------------- |
+| `id`          | string  | ✓        |                             |
+| `slug`        | string  | ✓        | URL: `/organization/{slug}` |
+| `name`        | string  | ✓        | Tên hội đoàn                |
+| `memberCount` | number  | ✓        | Số thành viên (hiển thị)    |
+| `description` | string  | ✓        |                             |
+| `coverImage`  | string  |          | (**đề xuất thêm**)          |
+| `isVisible`   | boolean | ✓        |                             |
 
 ### 6.2 `OrganizationTerm`
 
-| Field | Type | Mô tả |
-|-------|------|-------|
-| `id` | string | Format FE đang dùng: `"2024-2026"` = khóa 2024–2026 |
-| `startYear` | number | |
-| `endYear` | number | |
+| Field       | Type   | Mô tả                                               |
+| ----------- | ------ | --------------------------------------------------- |
+| `id`        | string | Format FE đang dùng: `"2024-2026"` = khóa 2024–2026 |
+| `startYear` | number |                                                     |
+| `endYear`   | number |                                                     |
 
 ### 6.3 `MemberPerson`
 
-| Field | Type | Mô tả |
-|-------|------|-------|
-| `id` | string | |
-| `saintName` | string | Tên thánh |
-| `realName` | string | Tên thật |
-| `dateOfBirth` | string | `YYYY-MM-DD` |
-| `address` | string | |
-| `avatarUrl` | string | (**đề xuất thêm**) |
+| Field         | Type   | Mô tả              |
+| ------------- | ------ | ------------------ |
+| `id`          | string |                    |
+| `saintName`   | string | Tên thánh          |
+| `realName`    | string | Tên thật           |
+| `dateOfBirth` | string | `YYYY-MM-DD`       |
+| `address`     | string |                    |
+| `avatarUrl`   | string | (**đề xuất thêm**) |
 
 ### 6.4 `OrganizationMember`
 
-| Field | Type | Mô tả |
-|-------|------|-------|
-| `id` | string | |
-| `personId` | string | → `MemberPerson.id` |
-| `organizationSlug` | string | |
-| `termId` | string | → `OrganizationTerm.id` |
-| `position` | string | Chức vụ trong khóa |
-| `isExecutive` | boolean | `true` = Ban điều hành |
-| `sortOrder` | number | |
+| Field              | Type    | Mô tả                   |
+| ------------------ | ------- | ----------------------- |
+| `id`               | string  |                         |
+| `personId`         | string  | → `MemberPerson.id`     |
+| `organizationSlug` | string  |                         |
+| `termId`           | string  | → `OrganizationTerm.id` |
+| `position`         | string  | Chức vụ trong khóa      |
+| `isExecutive`      | boolean | `true` = Ban điều hành  |
+| `sortOrder`        | number  |                         |
 
 ### 6.5 `MemberServiceRecord` (lịch sử phục vụ)
 
-| Field | Type | Mô tả |
-|-------|------|-------|
-| `id` | string | |
-| `personId` | string | |
-| `organizationSlug` | string | |
-| `termId` | string | |
-| `position` | string | |
-| `status` | `"active"` \| `"retired"` \| `"inactive"` | |
+| Field              | Type                                      | Mô tả |
+| ------------------ | ----------------------------------------- | ----- |
+| `id`               | string                                    |       |
+| `personId`         | string                                    |       |
+| `organizationSlug` | string                                    |       |
+| `termId`           | string                                    |       |
+| `position`         | string                                    |       |
+| `status`           | `"active"` \| `"retired"` \| `"inactive"` |       |
 
 ### 6.6 Endpoints
 
-| Method | Path | Mô tả |
-|--------|------|-------|
-| GET | `/api/organizations` | Danh sách hội (visible) |
-| GET | `/api/organizations/{slug}` | Chi tiết + members theo `termId` |
-| GET | `/api/organizations/{slug}?termId=2024-2026` | Lọc khóa |
-| GET | `/api/members/{personId}` | Hồ sơ + `serviceHistory` |
+| Method | Path                                         | Mô tả                            |
+| ------ | -------------------------------------------- | -------------------------------- |
+| GET    | `/api/organizations`                         | Danh sách hội (visible)          |
+| GET    | `/api/organizations/{slug}`                  | Chi tiết + members theo `termId` |
+| GET    | `/api/organizations/{slug}?termId=2024-2026` | Lọc khóa                         |
+| GET    | `/api/members/{personId}`                    | Hồ sơ + `serviceHistory`         |
 
 **Response chi tiết hội (gợi ý nested):**
 
@@ -414,9 +417,7 @@ Mô hình **quan hệ** — BE có thể trả nested hoặc tách endpoint.
     "description": "Ca đoàn phục vụ trong các Thánh lễ...",
     "coverImage": "https://cdn.example.com/orgs/ca-doan.jpg",
     "isVisible": true,
-    "terms": [
-      { "id": "2024-2026", "startYear": 2024, "endYear": 2026 }
-    ],
+    "terms": [{ "id": "2024-2026", "startYear": 2024, "endYear": 2026 }],
     "members": [
       {
         "id": "mem-001",
@@ -478,17 +479,17 @@ Mô hình **quan hệ** — BE có thể trả nested hoặc tách endpoint.
 
 **Dữ liệu mặc định hiện tại (có thể CMS hóa):**
 
-| `id` | `label` | Giờ |
-|------|---------|-----|
-| `weekday` | Ngày thường | 05:30 |
-| `saturday` | Thứ Bảy | 05:30, 18:00, 19:00 (Giới trẻ) |
-| `sunday` | Chủ Nhật | 04:30, 06:00, 08:00 (Thiếu nhi), 19:00 (Giới trẻ) |
+| `id`       | `label`     | Giờ                                               |
+| ---------- | ----------- | ------------------------------------------------- |
+| `weekday`  | Ngày thường | 05:30                                             |
+| `saturday` | Thứ Bảy     | 05:30, 18:00, 19:00 (Giới trẻ)                    |
+| `sunday`   | Chủ Nhật    | 04:30, 06:00, 08:00 (Thiếu nhi), 19:00 (Giới trẻ) |
 
 ### 7.2 Endpoint
 
-| Method | Path | Mô tả |
-|--------|------|-------|
-| GET | `/api/mass-schedule` | Trả 3 nhóm; FE tự đưa nhóm “hôm nay” lên đầu |
+| Method | Path                 | Mô tả                                        |
+| ------ | -------------------- | -------------------------------------------- |
+| GET    | `/api/mass-schedule` | Trả 3 nhóm; FE tự đưa nhóm “hôm nay” lên đầu |
 
 **Tùy chọn:** query `?anchor=2026-06-01` để BE sắp xếp nhóm “hôm nay” trước (nếu muốn logic ở server).
 
@@ -522,39 +523,39 @@ Mô hình **quan hệ** — BE có thể trả nested hoặc tách endpoint.
 
 ### 8.1 Schema — `Video`
 
-| Field | Type | Mô tả |
-|-------|------|-------|
-| `id` | string | |
-| `title` | string | |
-| `youtubeId` | string | 11 ký tự |
-| `youtubeUrl` | string | |
-| `publishedAt` | string | Ngày đăng |
-| `duration` | string | VD: `"1:05:12"` |
-| `thumbnail` | string | URL (có thể derive từ YouTube) |
-| `category` | `"mass-event"` \| `"hymn"` | Thánh lễ & sự kiện / Thánh ca |
-| `description` | string | |
-| `views` | number | |
-| `speaker` | string | Cha / ca sĩ |
+| Field         | Type                       | Mô tả                          |
+| ------------- | -------------------------- | ------------------------------ |
+| `id`          | string                     |                                |
+| `title`       | string                     |                                |
+| `youtubeId`   | string                     | 11 ký tự                       |
+| `youtubeUrl`  | string                     |                                |
+| `publishedAt` | string                     | Ngày đăng                      |
+| `duration`    | string                     | VD: `"1:05:12"`                |
+| `thumbnail`   | string                     | URL (có thể derive từ YouTube) |
+| `category`    | `"mass-event"` \| `"hymn"` | Thánh lễ & sự kiện / Thánh ca  |
+| `description` | string                     |                                |
+| `views`       | number                     |                                |
+| `speaker`     | string                     | Cha / ca sĩ                    |
 
 ### 8.2 Schema — `LiveSettings`
 
-| Field | Type | Mô tả |
-|-------|------|-------|
-| `isLive` | boolean | |
-| `youtubeId` | string | |
-| `youtubeUrl` | string | |
-| `title` | string | |
-| `description` | string | |
-| `startedAt` | string | ISO 8601 |
+| Field         | Type    | Mô tả    |
+| ------------- | ------- | -------- |
+| `isLive`      | boolean |          |
+| `youtubeId`   | string  |          |
+| `youtubeUrl`  | string  |          |
+| `title`       | string  |          |
+| `description` | string  |          |
+| `startedAt`   | string  | ISO 8601 |
 
 **Lưu ý:** FE có thể gọi `GET /api/youtube/metadata?videoId=...` (route Next.js nội bộ) để bổ sung title/thumbnail từ YouTube oEmbed.
 
 ### 8.3 Endpoints
 
-| Method | Path | Mô tả |
-|--------|------|-------|
-| GET | `/api/videos` | Thư viện; query `?category=mass-event` |
-| GET | `/api/live` | Trạng thái live hiện tại |
+| Method | Path          | Mô tả                                  |
+| ------ | ------------- | -------------------------------------- |
+| GET    | `/api/videos` | Thư viện; query `?category=mass-event` |
+| GET    | `/api/live`   | Trạng thái live hiện tại               |
 
 ### 8.4 Ví dụ JSON
 
@@ -599,13 +600,13 @@ Mô hình **quan hệ** — BE có thể trả nested hoặc tách endpoint.
 
 **Body (khớp form FE):**
 
-| Field | Type | Bắt buộc |
-|-------|------|----------|
-| `firstName` | string | ✓ |
-| `lastName` | string | ✓ |
-| `phone` | string | ✓ |
-| `email` | string | ✓ |
-| `message` | string | |
+| Field       | Type   | Bắt buộc |
+| ----------- | ------ | -------- |
+| `firstName` | string | ✓        |
+| `lastName`  | string | ✓        |
+| `phone`     | string | ✓        |
+| `email`     | string | ✓        |
+| `message`   | string |          |
 
 ```json
 {
@@ -662,6 +663,7 @@ Nguồn: `src/lib/contact/site-contact.ts`
 Nguồn: `src/lib/contact/site-donations.ts`
 
 Một website chỉ có **2 Destination** (nơi nhận quyên góp):
+
 - `giao-xu` — Giáo xứ Sa Nam
 - `ban-truyen-thong` — Ban Truyền Thông
 
@@ -724,20 +726,172 @@ Khi nhúng trong `ContactSettings` (admin/public contact API), field tương ứ
 }
 ```
 
-| Field | Ghi chú |
-|-------|---------|
-| `destinations` | Tối đa **2** Destination: `giao-xu`, `ban-truyen-thong` |
-| `destinations[].id` | Chỉ nhận `"giao-xu"` \| `"ban-truyen-thong"` |
-| `destinations[].accounts` | Mảng tài khoản ngân hàng (1 Destination → N accounts) |
-| `accounts[].id` | ID ổn định của tài khoản |
-| `accounts[].isDefault` | Tài khoản hiển thị mặc định khi Destination có nhiều tài khoản |
-| `status` | `"available"` \| `"updating"` |
+| Field                     | Ghi chú                                                        |
+| ------------------------- | -------------------------------------------------------------- |
+| `destinations`            | Tối đa **2** Destination: `giao-xu`, `ban-truyen-thong`        |
+| `destinations[].id`       | Chỉ nhận `"giao-xu"` \| `"ban-truyen-thong"`                   |
+| `destinations[].accounts` | Mảng tài khoản ngân hàng (1 Destination → N accounts)          |
+| `accounts[].id`           | ID ổn định của tài khoản                                       |
+| `accounts[].isDefault`    | Tài khoản hiển thị mặc định khi Destination có nhiều tài khoản |
+| `status`                  | `"available"` \| `"updating"`                                  |
 
 **Backward compatibility (FE):** nếu backend vẫn trả `donationOptions` / `account` (số ít), FE normalize thành `donationDestinations` / `accounts: [account]`.
 
 ---
 
-## 10. Tích hợp phía Frontend (tham khảo)
+## 10. Phụng vụ hàng ngày (Lời Chúa, Suy niệm, Bài giảng)
+
+Module **độc lập** với Video & Livestream (mục 8). Ngày dùng `YYYY-MM-DD`. “Hôm nay” theo `Asia/Ho_Chi_Minh`. Tuần FE: **Thứ 2 → Chúa Nhật**. Public chỉ trả `status: "published"`.
+
+**Lưu ý schema (2026-08):** Season / Feast **không có** field `color`. Feast dùng `rankId` (FK tới feast-ranks), không dùng enum `rank` cố định.
+
+### 10.1 Schema
+
+**Season** — `src/lib/liturgy/types.ts` → `LiturgySeason`
+
+| Field | Type | Bắt buộc | Mô tả |
+|-------|------|----------|-------|
+| `id` / `_id` | string | ✓ | |
+| `name` | string | ✓ | VD `"Mùa Thường Niên"` |
+| `slug` | string | ✓ | Unique |
+| `startDate` / `endDate` | `YYYY-MM-DD` | ✓ | Không chồng lấn mùa khác |
+| `yearLabel` | string | ✓ | VD `"2026"` — hiển thị `"Mùa Thường Niên 2026"` |
+
+**Không có** `color`.
+
+**FeastRank** — cấp độ ngày lễ (CRUD admin)
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `id` | string | |
+| `slug` | string | Unique |
+| `label` | string | VD `"Lễ trọng"`, `"Lễ kính"`, `"Lễ nhớ"` |
+| `sortOrder` | number | Thứ tự hiển thị |
+
+**Feast** — FK `seasonId`, `rankId`
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `date` | `YYYY-MM-DD` | |
+| `name` | string | |
+| `rankId` | string | FK feast-rank (`id` hoặc `slug`) |
+| `rankLabel` | string? | Denormalized / join từ feast-rank |
+| `seasonId` | string | |
+
+**Không có** `color` / enum `rank`.
+
+**Gospel** — **1 bản ghi / ngày** (`date` unique).
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `date` | `YYYY-MM-DD` | Unique |
+| `liturgicalDayName` | string? | VD `"Thứ Hai tuần Thường Niên"` |
+| `firstReadingTitle` / `firstReadingContent` | string | Bài đọc I |
+| `secondReadingTitle` / `secondReadingContent` | string? | Bài đọc II — tuỳ chọn |
+| `gospelTitle` / `gospelContent` | string | Phúc Âm — public không truncate |
+| `seasonId` | string? | BE nên tự gán theo khoảng mùa |
+| `status` | `"draft"` \| `"published"` | |
+
+**Reflection** — chỉ Chúa Nhật, độc lập homily.
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `date` | `YYYY-MM-DD` | Unique; `422` nếu không phải CN |
+| `title`, `content` | string | `content` HTML |
+| `author`, `theme` | string? | |
+| `keyPoints` | string[]? | |
+| `status` | `"draft"` \| `"published"` | |
+
+**Homily** — nhiều bài / ngày.
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `date` | `YYYY-MM-DD` | |
+| `title`, `preacher` | string | |
+| `audioUrl`, `videoUrl` | string? | MP3/M4A hoặc YouTube/MP4 |
+| `duration` | string? | VD `"12:30"` |
+| `transcript` | string? | HTML |
+| `status` | `"draft"` \| `"published"` | Published nên có ít nhất một media |
+
+Upload media: `POST /api/admin/upload` (hoặc `/api/admin/liturgy/upload`) nhận audio/video.
+
+### 10.2 Public endpoints (chỉ published)
+
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | `/api/liturgy/seasons/current` | Mùa chứa hôm nay + feasts trong mùa |
+| GET | `/api/liturgy/week?date=&focus=` | Composite 7 ngày + payload đầy đủ ngày focus |
+| GET | `/api/liturgy/days/:date` | Chi tiết 1 ngày |
+| GET | `/api/liturgy/homilies?from=&to=` | Danh sách bài giảng |
+
+**Week composite** (`LiturgyWeekView`)
+
+```json
+{
+  "weekStart": "2026-08-24",
+  "weekEnd": "2026-08-30",
+  "today": "2026-08-24",
+  "focusDate": "2026-08-24",
+  "season": {
+    "id": "season-ordinary",
+    "name": "Mùa Thường Niên",
+    "slug": "mua-thuong-nien-2026",
+    "startDate": "2026-01-13",
+    "endDate": "2026-12-31",
+    "yearLabel": "2026"
+  },
+  "days": [
+    {
+      "date": "2026-08-24",
+      "weekdayLabel": "Thứ Hai",
+      "gospelTitle": "Lc 1, 26-38",
+      "hasGospel": true,
+      "hasReflection": false,
+      "homilyCount": 0,
+      "isToday": true,
+      "isFocus": true
+    }
+  ],
+  "focus": {
+    "date": "2026-08-24",
+    "weekdayLabel": "Thứ Hai",
+    "season": {},
+    "feasts": [],
+    "gospel": {},
+    "reflection": null,
+    "homilies": []
+  }
+}
+```
+
+`focus`: nếu `today` nằm trong tuần thì dùng hôm nay; tuần khác mặc định Thứ 2, hoặc `?focus=YYYY-MM-DD`.
+
+Ngày chưa có gospel published → `gospel: null` (FE hiện **"Chưa cập nhật"**).
+
+### 10.3 Admin endpoints
+
+CRUD:
+
+| Resource | Base path |
+|----------|-----------|
+| Seasons | `/api/admin/liturgy/seasons` |
+| Feasts | `/api/admin/liturgy/feasts` |
+| Feast ranks | `/api/admin/liturgy/feast-ranks` |
+| Gospels | `/api/admin/liturgy/gospels` |
+| Reflections | `/api/admin/liturgy/reflections` |
+| Homilies | `/api/admin/liturgy/homilies` |
+
+List query: `page`, `limit`, `search`, `status`, `from`, `to`, `seasonId`.
+
+GET one / POST / PATCH / DELETE theo `/:id`.
+
+**Feast ranks:** không xóa cấp độ đang được feast dùng.
+
+FE client (mock hiện tại): `src/shared/services/liturgy-api.ts`.
+
+---
+
+## 11. Tích hợp phía Frontend (tham khảo)
 
 ```env
 # .env.local
@@ -746,10 +900,13 @@ NEXT_PUBLIC_API_URL=https://api.sanam.org
 
 ```typescript
 // Ví dụ sau khi BE có API
-const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/news?featured=true&limit=3`, {
-  headers: { Accept: "application/json" },
-  next: { revalidate: 60 },
-});
+const res = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/api/news?featured=true&limit=3`,
+  {
+    headers: { Accept: "application/json" },
+    next: { revalidate: 60 },
+  },
+);
 const { data } = await res.json();
 ```
 
@@ -757,21 +914,23 @@ Thay các hàm trong `mock-*.ts` bằng client gọi API; giữ nguyên TypeScri
 
 ---
 
-## 11. Admin API (gợi ý — ngoài phạm vi website public)
+## 12. Admin API (gợi ý — ngoài phạm vi website public)
 
-| Resource | CRUD |
-|----------|------|
-| News, Events, Clergy, Organizations, Members, Videos, Live | POST, PATCH, DELETE |
-| Upload ảnh | `POST /api/admin/uploads` → trả URL |
-| Auth | JWT / session cookie; role `editor`, `admin` |
+| Resource                                                   | CRUD                                         |
+| ---------------------------------------------------------- | -------------------------------------------- |
+| News, Events, Clergy, Organizations, Members, Videos, Live | POST, PATCH, DELETE                          |
+| Upload ảnh                                                 | `POST /api/admin/uploads` → trả URL          |
+| Auth                                                       | JWT / session cookie; role `editor`, `admin` |
 
 ---
 
-## 12. Changelog tài liệu
+## 13. Changelog tài liệu
 
-| Ngày | Ghi chú |
-|------|---------|
-| 2026-06-01 | Tạo bản đầu từ types + mock + `TINH-NANG-WEB.md` |
+| Ngày       | Ghi chú                                                                 |
+| ---------- | ----------------------------------------------------------------------- |
+| 2026-08-27 | Mục 10 — Phụng vụ hàng ngày: seasons **không color**; feast `rankId` + feast-ranks CRUD |
+| 2026-08-24 | Thêm mục Phụng vụ hàng ngày (mùa, lễ, gospel, reflection, homily)        |
+| 2026-06-01 | Tạo bản đầu từ types + mock + `TINH-NANG-WEB.md`                        |
 
 ---
 

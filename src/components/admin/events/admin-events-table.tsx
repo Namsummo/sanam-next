@@ -20,7 +20,7 @@ import type { ApiEventCategory } from "@/shared/services/events-api";
 import { cn } from "@/lib/utils";
 
 export const actionButtonClassName =
-  "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer";
 
 export const EVENTS_PAGE_SIZE = 10;
 

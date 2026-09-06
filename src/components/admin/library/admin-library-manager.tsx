@@ -12,7 +12,7 @@ const routesConfig = [
   { key: "organizationBg", title: "Đoàn thể", path: "/organization" },
   { key: "eventsBg", title: "Sự kiện", path: "/events" },
   { key: "newsBg", title: "Tin tức", path: "/news" },
-  { key: "worshipBg", title: "Video & Livestream", path: "/worship/live" },
+  { key: "worshipBg", title: "Video & Livestream", path: "/live" },
   { key: "contactBg", title: "Liên hệ", path: "/contact" },
 ] as const;
 

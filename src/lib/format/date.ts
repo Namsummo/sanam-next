@@ -14,6 +14,24 @@ export function formatIsoDateToVi(isoDate?: string): string {
   return trimmed;
 }
 
+const WEEKDAY_LABELS = [
+  "Chủ Nhật",
+  "Thứ Hai",
+  "Thứ Ba",
+  "Thứ Tư",
+  "Thứ Năm",
+  "Thứ Sáu",
+  "Thứ Bảy",
+];
+
+/** ISO date → nhãn thứ trong tuần (UTC) */
+export function formatWeekdayVi(isoDate: string): string {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  if (!y || !m || !d) return "";
+  const day = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return WEEKDAY_LABELS[day] ?? "";
+}
+
 /** ISO 8601 datetime → ngày tháng tiếng Việt (vd. 20 thg 5, 2026) */
 export function formatNewsDate(iso: string): string {
   return new Intl.DateTimeFormat("vi-VN", {
