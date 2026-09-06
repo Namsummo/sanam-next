@@ -4,6 +4,7 @@ export type PersonFormValues = {
   id: string;
   saintName: string;
   fullName: string;
+  profileImage: string | null;
   dateOfBirth: string;
   dateOfDeath: string;
   gender: string;
@@ -29,6 +30,7 @@ export function createEmptyPersonFormValues(): PersonFormValues {
     id: "",
     saintName: "",
     fullName: "",
+    profileImage: null,
     dateOfBirth: "",
     dateOfDeath: "",
     gender: "male",
@@ -54,6 +56,7 @@ export function mapPersonToFormValues(person: Person): PersonFormValues {
     id: person.id,
     saintName: person.saintName ?? "",
     fullName: person.fullName,
+    profileImage: person.profileImage,
     dateOfBirth: person.dateOfBirth,
     dateOfDeath: person.dateOfDeath ?? "",
     gender: person.gender ?? "male",
@@ -74,9 +77,11 @@ export function mapPersonToFormValues(person: Person): PersonFormValues {
   };
 }
 
-export function formValuesToPerson(values: PersonFormValues): Omit<Person, "id" | "createdAt" | "updatedAt"> {
+export function formValuesToPerson(
+  values: PersonFormValues,
+): Omit<Person, "id" | "createdAt" | "updatedAt"> {
   const status = values.dateOfDeath
-    ? "deceased" as const
+    ? ("deceased" as const)
     : (values.status as Person["status"]);
 
   return {
@@ -84,7 +89,7 @@ export function formValuesToPerson(values: PersonFormValues): Omit<Person, "id" 
     fullName: values.fullName.trim(),
     dateOfBirth: values.dateOfBirth,
     dateOfDeath: values.dateOfDeath || null,
-    profileImage: null,
+    profileImage: values.profileImage,
     gender: (values.gender as Person["gender"]) || null,
     status,
     maritalStatus: values.maritalStatus as Person["maritalStatus"],
@@ -94,19 +99,31 @@ export function formValuesToPerson(values: PersonFormValues): Omit<Person, "id" 
     sacraments: {
       baptism:
         values.baptismDate || values.baptismChurch
-          ? { date: values.baptismDate || null, church: values.baptismChurch || null }
+          ? {
+              date: values.baptismDate || null,
+              church: values.baptismChurch || null,
+            }
           : null,
       firstCommunion:
         values.firstCommunionDate || values.firstCommunionChurch
-          ? { date: values.firstCommunionDate || null, church: values.firstCommunionChurch || null }
+          ? {
+              date: values.firstCommunionDate || null,
+              church: values.firstCommunionChurch || null,
+            }
           : null,
       confirmation:
         values.confirmationDate || values.confirmationChurch
-          ? { date: values.confirmationDate || null, church: values.confirmationChurch || null }
+          ? {
+              date: values.confirmationDate || null,
+              church: values.confirmationChurch || null,
+            }
           : null,
       marriage:
         values.marriageDate || values.marriageChurch
-          ? { date: values.marriageDate || null, church: values.marriageChurch || null }
+          ? {
+              date: values.marriageDate || null,
+              church: values.marriageChurch || null,
+            }
           : null,
     },
     notes: values.notes.trim() || null,

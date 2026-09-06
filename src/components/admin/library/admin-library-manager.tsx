@@ -98,7 +98,7 @@ export function AdminLibraryManager() {
               value={data[route.key as keyof BackgroundSettingsPayload]}
               onChange={(url) => handleChange(route.key as keyof BackgroundSettingsPayload, url)}
               onUpload={handleImageUpload}
-              className="aspect-video w-full"
+              className="max-w-sm"
             />
           </div>
         ))}

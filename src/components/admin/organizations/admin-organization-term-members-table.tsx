@@ -149,7 +149,7 @@ export function AdminOrganizationTermMembersTable({
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-12 shrink-0 px-2 text-center">STT</TableHead>
-            <TableHead className="w-16 shrink-0 px-2 text-center">Ảnh</TableHead>
+            <TableHead className="w-14 shrink-0 px-2 text-center">Ảnh</TableHead>
             <TableHead className="min-w-[140px] px-2">Tên thánh</TableHead>
             <TableHead className="min-w-[220px] px-2">Họ và tên</TableHead>
             <TableHead className="min-w-[180px] px-2">Ngày sinh</TableHead>

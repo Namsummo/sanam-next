@@ -181,16 +181,36 @@
 	content: none !important;
 }
 
+/* ===== Ảnh trong editor ===== */
 .ql-snow .ql-editor img {
 	cursor: pointer;
-	max-width: 100%;
+	display: block;
+	margin: 1rem auto;
+	max-width: min(100%, 28rem);
+	max-height: 22rem;
+	width: auto;
 	height: auto;
-	border-radius: 8px;
+	object-fit: contain;
+	border-radius: 0.5rem;
 }
 
 .ql-snow .ql-editor img.ql-image-selected {
-	outline: 2px solid var(--accent);
+	outline: 2px solid hsl(var(--primary));
 	outline-offset: 3px;
+}
+
+/* ===== Video YouTube ===== */
+.ql-snow .ql-editor .ql-video {
+	display: block;
+	margin: 1.25rem auto;
+	width: 100%;
+	max-width: min(100%, 36rem);
+	/* gọn, không full rộng */
+	aspect-ratio: 16 / 9;
+	height: auto;
+	border: none;
+	border-radius: 0.5rem;
+	background: #000;
 }
 
 /* Site: text selection */

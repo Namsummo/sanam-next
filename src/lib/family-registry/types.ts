@@ -41,7 +41,6 @@ export type PersonStatus =
 
 export type Person = {
   id: string;
-
   saintName: string | null;
   fullName: string;
   dateOfBirth: string;

@@ -42,7 +42,7 @@ export async function generateMetadata({
     const event = toParishEvent(data);
 
     return {
-      title: event.name,
+      title: 'Sự kiện',
       description: `${formatEventDateTime(event)} — ${event.location}`,
     };
   } catch {
@@ -78,16 +78,15 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         breadcrumbs={[
           { label: "Trang chủ", href: "/" },
           { label: "Sự kiện", href: "/events" },
-          { label: event.name },
         ]}
         meta={
           <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 font-sans text-lg text-white">
             <li className="flex items-center gap-1.5">
-              <Clock className="size-[18px] shrink-0" aria-hidden />
+              <Clock className="size-4 shrink-0" aria-hidden />
               <span>{formatEventDateTime(event)}</span>
             </li>
             <li className="flex items-center gap-1.5">
-              <MapPin className="size-[18px] shrink-0" aria-hidden />
+              <MapPin className="size-4 shrink-0" aria-hidden />
               <span>{event.location}</span>
             </li>
           </ul>
@@ -150,6 +149,10 @@ function stripHtmlTags(value: string): string {
     .trim();
 }
 
+function looksLikeHtml(value: string): boolean {
+  return /<\/?[a-z][\s\S]*>/i.test(value);
+}
+
 /** Bỏ tiêu đề trùng ở đầu content nếu admin copy-paste tên vào nội dung. */
 function getEventBody(event: ParishEvent): string {
   const content = event.content.trim();
@@ -158,7 +161,9 @@ function getEventBody(event: ParishEvent): string {
     return content;
   }
 
-  if (event.contentFormat === "html") {
+  const treatAsHtml = event.contentFormat === "html"
+
+  if (treatAsHtml) {
     const headingMatch = content.match(/^<h([12])[^>]*>([\s\S]*?)<\/h\1>\s*/i);
     if (headingMatch && stripHtmlTags(headingMatch[2]) === name) {
       return content.slice(headingMatch[0].length).trim();

@@ -152,7 +152,9 @@ export async function createClergy(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to create clergy member" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to create clergy member" }));
     throw new Error(err.message);
   }
   return res.json();
@@ -172,16 +174,15 @@ export async function updateClergy(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to update clergy member" }));
+    const err = await res
+      .json()
+      .catch(() => ({ message: "Failed to update clergy member" }));
     throw new Error(err.message);
   }
   return res.json();
 }
 
-export async function deleteClergy(
-  token: string,
-  id: string,
-): Promise<void> {
+export async function deleteClergy(token: string, id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/admin/clergy/${id}`, {
     method: "DELETE",
     headers: authHeaders(token),
@@ -205,10 +206,13 @@ export async function toggleClergyHomepageVisibility(
   token: string,
   id: string,
 ): Promise<{ showOnHomepage: boolean }> {
-  const res = await fetch(`${API_BASE}/api/admin/clergy/${id}/homepage-visibility`, {
-    method: "PATCH",
-    headers: authHeaders(token),
-  });
+  const res = await fetch(
+    `${API_BASE}/api/admin/clergy/${id}/homepage-visibility`,
+    {
+      method: "PATCH",
+      headers: authHeaders(token),
+    },
+  );
   if (!res.ok) throw new Error("Failed to toggle homepage visibility");
   return res.json();
 }

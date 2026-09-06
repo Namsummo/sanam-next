@@ -75,7 +75,7 @@ function GospelSection({ gospels }: { gospels: LiturgyGospel[] }) {
       <SectionTitle eyebrow="Lời Chúa" title="Lời Chúa hàng ngày" />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(260px,0.85fr)]">
         <Link
-          href={`/worship/${featured.id}`}
+          href={`/worship/loi-chua/${featured.id}`}
           className="group overflow-hidden rounded-[20px] border border-border bg-card transition-colors hover:border-accent/40"
         >
           <CoverImage
@@ -118,7 +118,7 @@ function GospelSection({ gospels }: { gospels: LiturgyGospel[] }) {
           {others.map((item) => (
             <li key={item.id}>
               <Link
-                href={`/worship/${item.id}`}
+                href={`/worship/loi-chua/${item.id}`}
                 className={cn(
                   "flex gap-3 overflow-hidden rounded-2xl border border-border bg-card p-3 transition-colors hover:border-accent/40",
                   item.today && "border-accent/50",

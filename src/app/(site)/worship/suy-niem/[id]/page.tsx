@@ -20,9 +20,8 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${reflection.title} — Suy niệm`,
-    description:
-      reflection.keyPoint || `Suy niệm Lời Chúa: ${reflection.title}.`,
+    title: 'Suy niệm',
+    description: 'Suy niệm Lời Chúa.',
   };
 }
 
