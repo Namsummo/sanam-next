@@ -1,12 +1,17 @@
 export type ExecutiveMember = {
   _id?: string;
-  fullName: string;
+  personId?: string;
+  person?: any;
+  position?: string;
+  sortOrder?: number;
+  note?: string;
+  // Compatibility fields for display
+  fullName?: string;
   birthday?: string;
   patronSaint?: string;
-  position?: string;
+  saintName?: string;
   parish?: string;
   image?: string;
-  sortOrder?: number;
 };
 
 export type ExecutiveTerm = {

@@ -10,6 +10,8 @@ function authHeaders(token: string): HeadersInit {
 
 export interface ApiVocationFruitResponse {
   _id: string;
+  personId: string;
+  person?: any;
   fullName: string;
   vocationType: VocationType;
   religiousOrder?: string | null;
@@ -36,11 +38,14 @@ export interface PaginatedVocationFruitsResponse {
 export function toVocationFruit(data: ApiVocationFruitResponse): VocationFruit {
   return {
     id: data._id,
+    personId: data.personId,
+    person: data.person || undefined,
     fullName: data.fullName,
     vocationType: data.vocationType,
     religiousOrder: data.religiousOrder || undefined,
     currentAssignment: data.currentAssignment || undefined,
     hometown: data.hometown || undefined,
+    saintName: data.patronSaint || undefined,
     patronSaint: data.patronSaint || undefined,
     vocationYear: data.vocationYear ?? undefined,
     image: data.image || undefined,
@@ -48,14 +53,11 @@ export function toVocationFruit(data: ApiVocationFruitResponse): VocationFruit {
 }
 
 export interface CreateVocationFruitData {
-  fullName: string;
+  personId: string;
   vocationType: VocationType;
   religiousOrder?: string;
   currentAssignment?: string;
-  hometown?: string;
-  patronSaint?: string;
   vocationYear?: number;
-  image?: string;
   isVisible?: boolean;
 }
 

@@ -3,12 +3,13 @@ import Link from "next/link";
 import { NewsCard } from "@/components/site/news/news-card";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
+import { SiteSearchInput } from "@/components/site/shared/components/site-search-input";
 import { getCategories, getPublicNews } from "@/shared/services/news-api";
 import type { NewsArticle } from "@/lib/news/types";
 
-async function fetchArticles(page: number, category?: string): Promise<NewsArticle[]> {
+async function fetchArticles(page: number, category?: string, search?: string): Promise<NewsArticle[]> {
   try {
-    const data = await getPublicNews({ page, limit: 12, categoryId: category });
+    const data = await getPublicNews({ page, limit: 12, categoryId: category, search });
     return data.articles.map((a) => ({
       id: a._id,
       slug: a.slug,
@@ -40,13 +41,23 @@ export default async function NewsPage(props: {
   const page = typeof pageStr === "string" ? parseInt(pageStr, 10) : 1;
   const categoryStr = searchParams.category;
   const category = typeof categoryStr === "string" ? categoryStr : undefined;
+  const searchStr = searchParams.search;
+  const search = typeof searchStr === "string" ? searchStr.trim() : undefined;
 
   const [bgSettings, categories] = await Promise.all([
     getBackgroundSettings().catch(() => null),
     getCategories().catch(() => []),
   ]);
   const activeCategory = categories.find((item) => item.slug === category);
-  const articles = await fetchArticles(page, activeCategory?._id);
+  const articles = await fetchArticles(page, activeCategory?._id, search);
+
+  const buildCategoryHref = (slug?: string) => {
+    const params = new URLSearchParams();
+    if (slug) params.set("category", slug);
+    if (search) params.set("search", search);
+    const qs = params.toString();
+    return `/news${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <>
@@ -58,19 +69,26 @@ export default async function NewsPage(props: {
         ]}
         backgroundImage={bgSettings?.newsBg ?? undefined}
       />
-      <section className="px-4 py-12 md:px-6 md:py-30">
+      <section className="px-4 py-12 md:px-6 md:py-20">
         <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex justify-center">
+            <SiteSearchInput
+              placeholder="Tìm kiếm bài viết, tin tức, thông báo…"
+              className="max-w-lg"
+            />
+          </div>
+
           <nav
             aria-label="Danh mục tin tức"
             className="mb-10 flex flex-wrap justify-center gap-3 md:mb-12"
           >
             <Link
-              href="/news"
+              href={buildCategoryHref(undefined)}
               scroll={false}
               aria-current={!activeCategory ? "page" : undefined}
               className={
                 !activeCategory
-                  ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white"
+                  ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white shadow-xs"
                   : "rounded-full border border-border bg-card px-5 py-2.5 font-sans text-sm font-semibold text-primary transition-colors hover:border-accent hover:text-accent"
               }
             >
@@ -81,12 +99,12 @@ export default async function NewsPage(props: {
               return (
                 <Link
                   key={item._id}
-                  href={`/news?category=${encodeURIComponent(item.slug)}`}
+                  href={buildCategoryHref(item.slug)}
                   scroll={false}
                   aria-current={isActive ? "page" : undefined}
                   className={
                     isActive
-                      ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white"
+                      ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white shadow-xs"
                       : "rounded-full border border-border bg-card px-5 py-2.5 font-sans text-sm font-semibold text-primary transition-colors hover:border-accent hover:text-accent"
                   }
                 >
@@ -97,9 +115,22 @@ export default async function NewsPage(props: {
           </nav>
 
           {articles.length === 0 ? (
-            <p className="text-center font-sans text-lg text-foreground">
-              Chưa có tin tức nào được đăng.
-            </p>
+            <div className="py-12 text-center">
+              <p className="font-sans text-lg text-foreground">
+                {search
+                  ? `Không tìm thấy tin tức nào phù hợp với từ khóa “${search}”.`
+                  : "Chưa có tin tức nào được đăng."}
+              </p>
+              {search ? (
+                <Link
+                  href={category ? `/news?category=${encodeURIComponent(category)}` : "/news"}
+                  scroll={false}
+                  className="mt-4 inline-block font-sans text-sm font-semibold text-accent hover:underline"
+                >
+                  Xóa từ khóa tìm kiếm
+                </Link>
+              ) : null}
+            </div>
           ) : (
             <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 md:gap-x-8 md:gap-y-10 xl:grid-cols-3">
               {articles.map((article) => (

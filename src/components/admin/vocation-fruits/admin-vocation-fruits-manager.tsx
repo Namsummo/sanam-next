@@ -22,7 +22,6 @@ import {
   deleteVocationFruit,
   toVocationFruit,
 } from "@/shared/services/vocation-api";
-import { uploadEventImage } from "@/shared/services/events-api";
 
 const SEARCH_DEBOUNCE_MS = 1000;
 const PAGE_SIZE = 11;
@@ -140,14 +139,11 @@ export function AdminVocationFruitsManager() {
 
     try {
       const data = {
-        fullName: values.fullName.trim(),
+        personId: values.personId,
         vocationType: values.vocationType,
         religiousOrder: values.religiousOrder.trim() || undefined,
         currentAssignment: values.currentAssignment.trim() || undefined,
-        hometown: values.hometown.trim() || undefined,
-        patronSaint: values.patronSaint.trim() || undefined,
         vocationYear: values.vocationYear ? Number(values.vocationYear) : undefined,
-        image: values.image.trim() || undefined,
       };
 
       if (editingId) {
@@ -161,12 +157,6 @@ export function AdminVocationFruitsManager() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save vocation fruit");
     }
-  }
-
-  async function handleUploadImage(file: File): Promise<string> {
-    const token = getAccessToken();
-    if (!token) throw new Error("Not authenticated");
-    return uploadEventImage(token, file);
   }
 
   if (loading) {
@@ -243,7 +233,6 @@ export function AdminVocationFruitsManager() {
         editingId={editingId}
         onClose={closeForm}
         onSubmit={handleFormSubmit}
-        onUploadImage={handleUploadImage}
       />
 
       <AdminConfirmDialog

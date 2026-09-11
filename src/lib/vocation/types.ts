@@ -1,3 +1,5 @@
+import type { Person } from "@/lib/family-registry/types";
+
 export const VOCATION_TYPE_PRIEST = "priest" as const;
 export const VOCATION_TYPE_BROTHER = "brother" as const;
 export const VOCATION_TYPE_SISTER = "sister" as const;
@@ -9,6 +11,8 @@ export type VocationType =
 
 export type VocationFruit = {
   id: string;
+  personId?: string;
+  person?: Person | null;
   fullName: string;
   vocationType: VocationType;
   /** Dòng tu / tổ chức */
@@ -17,6 +21,7 @@ export type VocationFruit = {
   currentAssignment?: string;
   /** Giáo họ / quê hương tại giáo xứ */
   hometown?: string;
+  saintName?: string;
   patronSaint?: string;
   /** Năm thụ phong / tuyên khấn */
   vocationYear?: number;

@@ -10,6 +10,8 @@ function authHeaders(token: string): HeadersInit {
 
 export interface ApiClergyResponse {
   _id: string;
+  personId: string;
+  person?: any;
   type: 1 | 2;
   fullName: string;
   position: string;
@@ -42,6 +44,8 @@ export interface PaginatedClergyResponse {
 export function toClergyMember(data: ApiClergyResponse): ClergyMember {
   return {
     id: data._id,
+    personId: data.personId,
+    person: data.person || undefined,
     type: data.type,
     fullName: data.fullName,
     position: data.position,
@@ -53,6 +57,7 @@ export function toClergyMember(data: ApiClergyResponse): ClergyMember {
     showOnHomepage: data.showOnHomepage ?? false,
     image: data.image || undefined,
     ordinationDate: data.ordinationDate || undefined,
+    saintName: data.patronSaint || undefined,
     patronSaint: data.patronSaint || undefined,
     patronDate: data.patronDate || undefined,
     hometown: data.hometown || undefined,
@@ -61,20 +66,15 @@ export function toClergyMember(data: ApiClergyResponse): ClergyMember {
 }
 
 export interface CreateClergyData {
+  personId: string;
   type: 1 | 2;
-  fullName: string;
   position: string;
   motto?: string;
   description?: string;
-  birthday?: string;
   sortOrder?: number;
   isVisible?: boolean;
   showOnHomepage?: boolean;
-  image?: string;
   ordinationDate?: string;
-  patronSaint?: string;
-  patronDate?: string;
-  hometown?: string;
   termId?: string;
 }
 

@@ -11,14 +11,8 @@ import { AdminOutlineButton } from "@/components/admin/shared/admin-outline-butt
 import { AdminSelect } from "@/components/admin/shared/admin-select";
 import { ControlledField, FieldGroup } from "@/components/site/shared/ui/field/field";
 import { Input } from "@/components/site/shared/ui/input/input";
-import { ImageUploader } from "@/components/admin/shared/image-uploader";
+import { AdminPersonSelector } from "@/components/admin/shared/admin-person-selector";
 import type { VocationType } from "@/lib/vocation/types";
-
-function RequiredMark() {
-  return (
-    <span className="text-red-500">*</span>
-  );
-}
 
 type AdminVocationFruitFormModalProps = {
   open: boolean;
@@ -26,7 +20,6 @@ type AdminVocationFruitFormModalProps = {
   editingId: string | null;
   onClose: () => void;
   onSubmit: (values: VocationFruitFormValues) => void;
-  onUploadImage: (file: File) => Promise<string>;
 };
 
 export function AdminVocationFruitFormModal({
@@ -35,10 +28,9 @@ export function AdminVocationFruitFormModal({
   editingId,
   onClose,
   onSubmit,
-  onUploadImage,
 }: AdminVocationFruitFormModalProps) {
   const form = useForm<VocationFruitFormValues>({ defaultValues });
-  const imageValue = useWatch({ control: form.control, name: "image" });
+  const personIdValue = useWatch({ control: form.control, name: "personId" });
 
   useEffect(() => {
     if (open) {
@@ -76,28 +68,21 @@ export function AdminVocationFruitFormModal({
         noValidate
       >
         <FieldGroup>
-          <ControlledField
-            control={form.control}
-            name="fullName"
-            label={<>
-              Họ tên <RequiredMark />
-            </>}
-            rules={{ required: "Vui lòng nhập họ tên" }}
-          >
-            {({ field, fieldState, id }) => (
-              <Input
-                {...field}
-                id={id}
-                aria-invalid={fieldState.invalid}
-                placeholder="Ví dụ: Linh mục Phaolô Nguyễn Văn Hữu"
-              />
-            )}
-          </ControlledField>
+          {/* Central Person Selector */}
+          <AdminPersonSelector
+            value={personIdValue}
+            onChange={(pId) =>
+              form.setValue("personId", pId, { shouldValidate: true, shouldDirty: true })
+            }
+            label="Chọn hồ sơ giáo dân / tu sĩ"
+            required
+            error={form.formState.errors.personId?.message}
+          />
 
           <ControlledField
             control={form.control}
             name="vocationType"
-            label="Nhóm"
+            label="Nhóm ơn gọi"
             rules={{ required: "Vui lòng chọn nhóm" }}
           >
             {({ field }) => (
@@ -118,51 +103,26 @@ export function AdminVocationFruitFormModal({
               <Input
                 {...field}
                 id={id}
-                placeholder="Ví dụ: Hàng linh mục Giáo phận Vinh"
+                placeholder="Ví dụ: Hàng linh mục Giáo phận Vinh, Dòng Tên, Dòng Mến Thánh Giá..."
               />
             )}
           </ControlledField>
 
-          <ControlledField control={form.control} name="currentAssignment" label="Nơi phục vụ">
+          <ControlledField control={form.control} name="currentAssignment" label="Nơi phục vụ hiện tại">
             {({ field, id }) => (
               <Input
                 {...field}
                 id={id}
-                placeholder="Ví dụ: Cha Chánh Xứ Sa Nam"
+                placeholder="Ví dụ: Cha Chánh Xứ Sa Nam, Giáo xứ Chính Tòa..."
               />
             )}
           </ControlledField>
 
-          <ControlledField control={form.control} name="hometown" label="Quê hương / Giáo họ">
+          <ControlledField control={form.control} name="vocationYear" label="Năm thụ phong / tuyên khấn">
             {({ field, id }) => (
-              <Input {...field} id={id} placeholder="Ví dụ: Giáo họ Trị Tin" />
+              <Input {...field} id={id} type="number" min={1900} max={2100} placeholder="2000" />
             )}
           </ControlledField>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <ControlledField control={form.control} name="patronSaint" label="Thánh bổn mạng">
-              {({ field, id }) => (
-                <Input {...field} id={id} placeholder="Ví dụ: Thánh Phaolô Tông Đồ" />
-              )}
-            </ControlledField>
-
-            <ControlledField control={form.control} name="vocationYear" label="Năm thụ phong / tuyên khấn">
-              {({ field, id }) => (
-                <Input {...field} id={id} type="number" min={1900} max={2100} placeholder="2000" />
-              )}
-            </ControlledField>
-          </div>
-
-          <div>
-            <span className="mb-2 block text-sm font-medium text-card-foreground">
-              Ảnh chân dung
-            </span>
-            <ImageUploader
-              value={imageValue}
-              onChange={(url) => form.setValue("image", url ?? "")}
-              onUpload={onUploadImage}
-            />
-          </div>
         </FieldGroup>
       </form>
     </AdminFormDialog>

@@ -1,32 +1,53 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Tag, X } from "lucide-react";
+import { Loader2, Tag, X } from "lucide-react";
 import { AdminOutlineButton } from "@/components/admin/shared/admin-outline-button";
 import { Button } from "@/components/site/shared/ui/button/button";
 import { Input } from "@/components/site/shared/ui/input/input";
-import type { LiturgyFeastRank } from "@/lib/liturgy/types";
+import type { FeastRankPayload, LiturgyFeastRank } from "@/lib/liturgy/types";
 import { slugify } from "@/shared/lib/slugify";
 
 type AdminFeastRankFormProps = {
   editing?: LiturgyFeastRank | null;
   onClose: () => void;
+  onSave: (payload: FeastRankPayload) => Promise<void>;
 };
 
 export function AdminFeastRankForm({
   editing = null,
   onClose,
+  onSave,
 }: AdminFeastRankFormProps) {
   const isEdit = Boolean(editing);
   const [label, setLabel] = useState(editing?.label ?? "");
   const [slug, setSlug] = useState(editing?.slug ?? "");
   const [slugManual, setSlugManual] = useState(isEdit);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const autoSlug = useMemo(() => slugify(label), [label]);
 
-  function handleSave() {
-    // Mock UI: đóng form, không lưu dữ liệu. Ghép API sau.
-    onClose();
+  async function handleSave() {
+    if (!label.trim()) {
+      setError("Vui lòng nhập tên cấp độ");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      await onSave({
+        label: label.trim(),
+        slug: slug.trim() || autoSlug,
+        sortOrder: editing?.sortOrder ?? 0,
+      });
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Không thể lưu cấp độ lễ");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -48,6 +69,12 @@ export function AdminFeastRankForm({
       </div>
 
       <div className="p-4">
+        {error ? (
+          <div className="mb-3 rounded-lg border border-destructive/20 bg-destructive/10 p-2.5 text-xs text-destructive">
+            {error}
+          </div>
+        ) : null}
+
         <div className="mb-3">
           <label className="mb-1 block text-xs font-medium text-muted-foreground">
             Tên cấp độ
@@ -91,11 +118,21 @@ export function AdminFeastRankForm({
           <AdminOutlineButton
             type="button"
             onClick={handleSave}
+            disabled={submitting}
             className="rounded-[8px] bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90"
           >
-            {isEdit ? "Cập nhật" : "Tạo cấp độ"}
+            {submitting ? (
+              <>
+                <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                Đang lưu…
+              </>
+            ) : isEdit ? (
+              "Cập nhật"
+            ) : (
+              "Tạo cấp độ"
+            )}
           </AdminOutlineButton>
-          <AdminOutlineButton type="button" onClick={onClose}>
+          <AdminOutlineButton type="button" onClick={onClose} disabled={submitting}>
             Hủy
           </AdminOutlineButton>
         </div>

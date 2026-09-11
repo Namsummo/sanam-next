@@ -3,6 +3,7 @@ import Link from "next/link";
 import { EventCard } from "@/components/site/events/event-card";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
+import { SiteSearchInput } from "@/components/site/shared/components/site-search-input";
 import {
   getEventCategories,
   getPublicEvents,
@@ -19,11 +20,12 @@ function eventSortKey(event: { startDate: string; startTime?: string }): string 
   return `${event.startDate}T${event.startTime ?? "00:00"}`;
 }
 
-async function fetchEvents(categoryId?: string): Promise<ParishEvent[]> {
+async function fetchEvents(categoryId?: string, search?: string): Promise<ParishEvent[]> {
   try {
     const res = await getPublicEvents({
       limit: 100,
       categoryId,
+      search,
     });
     return res.events
       .map(toParishEvent)
@@ -39,6 +41,8 @@ export default async function EventsPage(props: {
   const searchParams = await props.searchParams;
   const categoryStr = searchParams.category;
   const category = typeof categoryStr === "string" ? categoryStr : undefined;
+  const searchStr = searchParams.search;
+  const search = typeof searchStr === "string" ? searchStr.trim() : undefined;
 
   const [bgSettings, categories] = await Promise.all([
     getBackgroundSettings().catch(() => null),
@@ -46,7 +50,15 @@ export default async function EventsPage(props: {
   ]);
 
   const activeCategory = categories.find((item) => item.slug === category);
-  const events = await fetchEvents(activeCategory?._id);
+  const events = await fetchEvents(activeCategory?._id, search);
+
+  const buildCategoryHref = (slug?: string) => {
+    const params = new URLSearchParams();
+    if (slug) params.set("category", slug);
+    if (search) params.set("search", search);
+    const qs = params.toString();
+    return `/events${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <>
@@ -58,19 +70,26 @@ export default async function EventsPage(props: {
         ]}
         backgroundImage={bgSettings?.eventsBg}
       />
-      <section className="px-4 py-12 md:px-6 md:py-30">
+      <section className="px-4 py-12 md:px-6 md:py-20">
         <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex justify-center">
+            <SiteSearchInput
+              placeholder="Tìm kiếm sự kiện theo tên, địa điểm, nội dung…"
+              className="max-w-lg"
+            />
+          </div>
+
           <nav
             aria-label="Danh mục sự kiện"
             className="mb-10 flex flex-wrap justify-center gap-3 md:mb-12"
           >
             <Link
-              href="/events"
+              href={buildCategoryHref(undefined)}
               scroll={false}
               aria-current={!activeCategory ? "page" : undefined}
               className={
                 !activeCategory
-                  ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white"
+                  ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white shadow-xs"
                   : "rounded-full border border-border bg-card px-5 py-2.5 font-sans text-sm font-semibold text-primary transition-colors hover:border-accent hover:text-accent"
               }
             >
@@ -81,12 +100,12 @@ export default async function EventsPage(props: {
               return (
                 <Link
                   key={item._id}
-                  href={`/events?category=${encodeURIComponent(item.slug)}`}
+                  href={buildCategoryHref(item.slug)}
                   scroll={false}
                   aria-current={isActive ? "page" : undefined}
                   className={
                     isActive
-                      ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white"
+                      ? "rounded-full bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-white shadow-xs"
                       : "rounded-full border border-border bg-card px-5 py-2.5 font-sans text-sm font-semibold text-primary transition-colors hover:border-accent hover:text-accent"
                   }
                 >
@@ -97,9 +116,22 @@ export default async function EventsPage(props: {
           </nav>
 
           {events.length === 0 ? (
-            <p className="text-center font-sans text-lg text-foreground">
-              Hiện chưa có sự kiện nào được đăng.
-            </p>
+            <div className="py-12 text-center">
+              <p className="font-sans text-lg text-foreground">
+                {search
+                  ? `Không tìm thấy sự kiện nào phù hợp với từ khóa “${search}”.`
+                  : "Hiện chưa có sự kiện nào được đăng."}
+              </p>
+              {search ? (
+                <Link
+                  href={category ? `/events?category=${encodeURIComponent(category)}` : "/events"}
+                  scroll={false}
+                  className="mt-4 inline-block font-sans text-sm font-semibold text-accent hover:underline"
+                >
+                  Xóa từ khóa tìm kiếm
+                </Link>
+              ) : null}
+            </div>
           ) : (
             <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 md:gap-x-8 md:gap-y-10 xl:grid-cols-3">
               {events.map((event) => (
