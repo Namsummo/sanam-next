@@ -10,32 +10,22 @@ import {
   getExecutiveTermKey,
   sortExecutiveTermsNewestFirst,
 } from "@/lib/organization/executive-terms";
-import { cn } from "@/lib/utils";
+import { cn, matchesVietnamese } from "@/lib/utils";
 
 type OrganizationMembersPanelProps = {
   terms: ExecutiveTerm[];
   className?: string;
 };
 
-function normalizeSearchText(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
 function memberMatchesSearch(member: ExecutiveMember, query: string): boolean {
   if (!query) {
     return true;
   }
 
-  const haystack = normalizeSearchText(
-    [member.fullName, member.position, member.patronSaint, member.parish]
-      .filter(Boolean)
-      .join(" "),
-  );
-  return haystack.includes(query);
+  const haystack = [member.fullName, member.position, member.patronSaint, member.parish]
+    .filter(Boolean)
+    .join(" ");
+  return matchesVietnamese(haystack, query);
 }
 
 export function OrganizationMembersPanel({
@@ -54,14 +44,13 @@ export function OrganizationMembersPanel({
   const [searchQuery, setSearchQuery] = useState("");
 
   const activeTerm = sortedTerms.find((t) => getExecutiveTermKey(t) === selectedTermId);
-  const normalizedQuery = normalizeSearchText(searchQuery);
 
   const filteredMembers = useMemo(() => {
     if (!activeTerm) return [];
     return sortMembersByOrder(activeTerm.members).filter((m) =>
-      memberMatchesSearch(m, normalizedQuery),
+      memberMatchesSearch(m, searchQuery),
     );
-  }, [activeTerm, normalizedQuery]);
+  }, [activeTerm, searchQuery]);
 
   if (terms.length === 0) {
     return null;
@@ -127,7 +116,7 @@ export function OrganizationMembersPanel({
           {activeTerm ? (
             <p className="mt-2 font-sans text-sm text-foreground/80">
               {formatExecutiveTermDisplay(activeTerm)}
-              {normalizedQuery ? "" : ` · ${filteredMembers.length} thành viên`}
+              {searchQuery ? "" : ` · ${filteredMembers.length} thành viên`}
             </p>
           ) : null}
         </div>

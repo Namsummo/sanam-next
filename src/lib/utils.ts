@@ -47,3 +47,27 @@ export function resolveApiUrl(url: string | null | undefined): string {
   return url;
 }
 
+/**
+ * Chuẩn hóa chuỗi tiếng Việt: loại bỏ dấu thanh, dấu mũ/móc và chuyển đ/Đ thành d để tìm kiếm không dấu.
+ */
+export function normalizeVietnamese(value: string | null | undefined): string {
+  if (!value) return "";
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[đĐ]/g, "d")
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Kiểm tra xem chuỗi haystack có chứa chuỗi query không (không phân biệt dấu tiếng Việt và chữ hoa/thường).
+ */
+export function matchesVietnamese(haystack: string | null | undefined, query: string | null | undefined): boolean {
+  if (!query) return true;
+  const normQuery = normalizeVietnamese(query);
+  if (!normQuery) return true;
+  return normalizeVietnamese(haystack).includes(normQuery);
+}
+
+

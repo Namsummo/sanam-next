@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
+import { getIntroduceSettings } from "@/shared/services/introduce-settings-api";
+import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 
 export const metadata: Metadata = {
   title: "Giới thiệu",
@@ -30,7 +32,13 @@ const introduceLinks = [
 ] as const;
 
 export default async function IntroducePage() {
-  const bgSettings = await getBackgroundSettings().catch(() => null);
+  const [bgSettings, introduceSettings] = await Promise.all([
+    getBackgroundSettings().catch(() => null),
+    getIntroduceSettings().catch(() => null),
+  ]);
+
+  const title = introduceSettings?.title || "Kinh ông thánh Quan Thầy Venceslao";
+  const content = introduceSettings?.content || "";
 
   return (
     <>
@@ -44,30 +52,22 @@ export default async function IntroducePage() {
       />
 
       <article className="px-6 py-16 md:py-30">
-        <div className="mx-auto max-w-7xl space-y-10">
-          {/* Kinh Quan Thầy */}
-          <section className="mx-auto max-w-5xl space-y-4 text-left">
-            <h1 className="text-center text-3xl font-bold">
-              Kinh ông thánh Quan Thầy Venceslao
-            </h1>
+        <div className="mx-auto max-w-7xl space-y-12">
+          {/* Nội dung giới thiệu */}
+          <section className="mx-auto max-w-5xl space-y-6">
+            {title ? (
+              <h1 className="text-center font-display text-3xl md:text-4xl font-bold text-primary">
+                {title}
+              </h1>
+            ) : null}
 
-            <p className="text-lg leading-8 text-foreground/90">
-              Lạy ơn ông Thánh Venceslao vua, xưa đã đánh giặc xác thịt thế
-              gian, ma quỷ là ba thù mạnh, cho hết lòng hết sức, vì có lòng kính
-              mến trông cậy Đức Chúa Trời cho vững, chúng con xin ông Thánh
-              Venceslao cầu cho chúng con đáng chịu lấy những sự Chúa Kitô đã
-              hứa, Lạy ơn Đức Chúa Trời có phép vô cùng đã ban nhân đức khiêm
-              nhường nhịn nhục cho ông Thánh Venceslao hạ mình xuống, vì đã được
-              lên cao trọng làm vua thế gian mà càng lên trọng thì nên hưởng
-              phúc Thiên đàng, chúng con xin Người cầu cho chúng con được lòng
-              kính mến bắt chước Người, vì Đức khiêm nhường, nhịn nhục ở đời
-              này cho ngày sau được hưởng phúc trọng cùng Người trên nước Thiên
-              đàng, vì Đức Chúa Giêsu Kitô là Chúa chúng con. Amen
-            </p>
+            {content ? (
+              <NewsHtmlContent html={content} className="border-none pb-0 text-foreground/90 leading-8" />
+            ) : null}
           </section>
 
           {/* Các mục giới thiệu */}
-          <div className="flex flex-wrap justify-center gap-6">
+          <div className="flex flex-wrap justify-center gap-6 pt-6">
             {introduceLinks.map((item) => (
               <Link
                 key={item.href}

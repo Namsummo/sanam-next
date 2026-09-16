@@ -7,62 +7,47 @@ export const CLERGY_TYPE_OPTIONS = [
 
 export type ClergyFormValues = {
   id: string;
+  personId: string;
   type: 1 | 2;
-  fullName: string;
   position: string;
   motto: string;
   description: string;
-  birthday: string;
+  ordinationDate: string;
+  termId: string;
   sortOrder: string;
   isVisible: boolean;
   showOnHomepage: boolean;
-  image: string;
-  ordinationDate: string;
-  patronSaint: string;
-  patronDate: string;
-  hometown: string;
-  termId: string;
 };
 
 export function createEmptyClergyFormValues(): ClergyFormValues {
   return {
     id: "",
+    personId: "",
     type: 1,
-    fullName: "",
     position: "",
     motto: "",
     description: "",
-    birthday: "",
+    ordinationDate: "",
+    termId: "",
     sortOrder: "",
     isVisible: true,
     showOnHomepage: false,
-    image: "",
-    ordinationDate: "",
-    patronSaint: "",
-    patronDate: "",
-    hometown: "",
-    termId: "",
   };
 }
 
 export function mapClergyToFormValues(member: ClergyMember): ClergyFormValues {
   return {
     id: String(member.id),
+    personId: member.personId ?? "",
     type: member.type,
-    fullName: member.fullName,
     position: member.position,
     motto: member.motto ?? "",
     description: member.description ?? "",
-    birthday: member.birthday ?? "",
+    ordinationDate: member.ordinationDate ?? "",
+    termId: member.termId ?? "",
     sortOrder: member.sortOrder ? String(member.sortOrder) : "",
     isVisible: member.isVisible ?? true,
     showOnHomepage: member.showOnHomepage ?? false,
-    image: member.image ?? "",
-    ordinationDate: member.ordinationDate ?? "",
-    patronSaint: member.patronSaint ?? "",
-    patronDate: member.patronDate ?? "",
-    hometown: member.hometown ?? "",
-    termId: member.termId ?? "",
   };
 }
 

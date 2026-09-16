@@ -14,26 +14,22 @@ export const VOCATION_TYPE_OPTIONS = [
 ] as const;
 
 export type VocationFruitFormValues = {
-  fullName: string;
+  id?: string;
+  personId: string;
   vocationType: VocationType;
   religiousOrder: string;
   currentAssignment: string;
-  hometown: string;
-  patronSaint: string;
   vocationYear: string;
-  image: string;
 };
 
 export function createEmptyVocationFruitFormValues(): VocationFruitFormValues {
   return {
-    fullName: "",
+    id: "",
+    personId: "",
     vocationType: VOCATION_TYPE_PRIEST,
     religiousOrder: "",
     currentAssignment: "",
-    hometown: "",
-    patronSaint: "",
     vocationYear: "",
-    image: "",
   };
 }
 
@@ -41,13 +37,11 @@ export function mapVocationFruitToFormValues(
   fruit: VocationFruit,
 ): VocationFruitFormValues {
   return {
-    fullName: fruit.fullName,
+    id: fruit.id,
+    personId: fruit.personId ?? "",
     vocationType: fruit.vocationType,
     religiousOrder: fruit.religiousOrder ?? "",
     currentAssignment: fruit.currentAssignment ?? "",
-    hometown: fruit.hometown ?? "",
-    patronSaint: fruit.patronSaint ?? "",
     vocationYear: fruit.vocationYear ? String(fruit.vocationYear) : "",
-    image: fruit.image ?? "",
   };
 }

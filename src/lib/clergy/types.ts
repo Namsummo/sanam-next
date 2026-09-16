@@ -1,3 +1,5 @@
+import type { Person } from "@/lib/family-registry/types";
+
 export const CLERGY_TYPE_PRIEST = 1 as const;
 export const CLERGY_TYPE_COUNCIL = 2 as const;
 
@@ -7,6 +9,8 @@ export type ClergyMemberType =
 
 export type ClergyMember = {
   id: number | string;
+  personId?: string;
+  person?: Person | null;
   type: ClergyMemberType;
   fullName: string;
   position: string;
@@ -18,6 +22,7 @@ export type ClergyMember = {
   isVisible?: boolean;
   image?: string;
   ordinationDate?: string; // Ngày thụ phong Linh mục
+  saintName?: string; // Tên thánh
   patronSaint?: string; // Thánh bổn mạng
   patronDate?: string; // Ngày lễ bổn mạng
   hometown?: string; // Quê quán / Giáo họ
@@ -25,3 +30,4 @@ export type ClergyMember = {
   termId?: string;
   showOnHomepage?: boolean;
 };
+

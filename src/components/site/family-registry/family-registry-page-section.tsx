@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/site/shared/ui/input/input";
-import { cn } from "@/lib/utils";
+import { cn, matchesVietnamese } from "@/lib/utils";
 import type { Family, FamilyMember, Person } from "@/lib/family-registry/types";
 import {
   FAMILY_MEMBER_ROLE_LABELS,
@@ -59,19 +59,18 @@ export function FamilyRegistryPageSection({
 
   const personMap = useMemo(() => new Map(persons.map((p) => [p.id, p])), [persons]);
 
-  const q = searchQuery.toLowerCase().trim();
   const filteredFamilies = useMemo(() => {
-    if (!q) return families;
+    if (!searchQuery.trim()) return families;
     return families.filter((family) => {
       const head = personMap.get(family.headPersonId);
-      const headName = head ? formatPersonDisplayName(head).toLowerCase() : "";
+      const headName = head ? formatPersonDisplayName(head) : "";
       return (
-        family.name.toLowerCase().includes(q) ||
-        family.familyCode.toLowerCase().includes(q) ||
-        headName.includes(q)
+        matchesVietnamese(family.name, searchQuery) ||
+        matchesVietnamese(family.familyCode, searchQuery) ||
+        matchesVietnamese(headName, searchQuery)
       );
     });
-  }, [families, personMap, q]);
+  }, [families, personMap, searchQuery]);
 
   if (loading) {
     return (

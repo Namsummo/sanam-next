@@ -9,7 +9,7 @@ import {
   getTermsFromCouncilMembers,
 } from "@/lib/clergy/council-terms";
 import type { ClergyMember } from "@/lib/clergy/types";
-import { cn } from "@/lib/utils";
+import { cn, matchesVietnamese } from "@/lib/utils";
 import { Input } from "@/components/site/shared/ui/input/input";
 import {
   Select,
@@ -25,25 +25,15 @@ type CouncilMembersPanelProps = {
   className?: string;
 };
 
-function normalizeSearchText(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
 function memberMatchesSearch(member: ClergyMember, query: string): boolean {
   if (!query) {
     return true;
   }
 
-  const haystack = normalizeSearchText(
-    [member.fullName, member.position, member.patronSaint, member.hometown]
-      .filter(Boolean)
-      .join(" "),
-  );
-  return haystack.includes(query);
+  const haystack = [member.fullName, member.position, member.patronSaint, member.hometown]
+    .filter(Boolean)
+    .join(" ");
+  return matchesVietnamese(haystack, query);
 }
 
 export function CouncilMembersPanel({
@@ -58,13 +48,12 @@ export function CouncilMembersPanel({
   const [searchQuery, setSearchQuery] = useState("");
 
   const activeTermId = selectedTermId || defaultTermId || "";
-  const normalizedQuery = normalizeSearchText(searchQuery);
 
   const filteredMembers = useMemo(() => {
     return members
       .filter((m) => m.termId === activeTermId)
-      .filter((m) => memberMatchesSearch(m, normalizedQuery));
-  }, [members, activeTermId, normalizedQuery]);
+      .filter((m) => memberMatchesSearch(m, searchQuery));
+  }, [members, activeTermId, searchQuery]);
 
 
   if (terms.length === 0) {

@@ -233,20 +233,15 @@ export function AdminClergyManager() {
 
     try {
       const data = {
+        personId: values.personId,
         type: values.type,
-        fullName: values.fullName.trim(),
         position: values.position.trim(),
         motto: values.motto.trim() || undefined,
         description: values.description.trim() || undefined,
-        birthday: values.birthday.trim() || undefined,
         sortOrder: values.sortOrder ? Number(values.sortOrder) : undefined,
         isVisible: values.isVisible,
         showOnHomepage: values.showOnHomepage,
-        image: values.image.trim() || undefined,
         ordinationDate: values.ordinationDate.trim() || undefined,
-        patronSaint: values.patronSaint.trim() || undefined,
-        patronDate: values.patronDate.trim() || undefined,
-        hometown: values.hometown.trim() || undefined,
         // Linh mục: nhập tay (linh động). Ban Hành Giáo: chọn theo khóa (YYYY-YYYY).
         termId: values.termId.trim() || undefined,
       };

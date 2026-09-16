@@ -15,7 +15,7 @@ import {
   type VocationFruit,
   type VocationType,
 } from "@/lib/vocation/types";
-import { cn } from "@/lib/utils";
+import { cn, matchesVietnamese } from "@/lib/utils";
 
 type VocationFruitPanelProps = {
   fruits: VocationFruit[];
@@ -28,43 +28,31 @@ const sectionOrder: VocationType[] = [
   VOCATION_TYPE_SISTER,
 ];
 
-function normalizeSearchText(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
 function fruitMatchesSearch(fruit: VocationFruit, query: string): boolean {
   if (!query) {
     return true;
   }
 
-  const haystack = normalizeSearchText(
-    [
-      fruit.fullName,
-      fruit.religiousOrder,
-      fruit.currentAssignment,
-      fruit.hometown,
-      fruit.patronSaint,
-    ]
-      .filter(Boolean)
-      .join(" "),
-  );
+  const haystack = [
+    fruit.fullName,
+    fruit.religiousOrder,
+    fruit.currentAssignment,
+    fruit.hometown,
+    fruit.patronSaint,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-  return haystack.includes(query);
+  return matchesVietnamese(haystack, query);
 }
 
 export function VocationFruitPanel({ fruits, className }: VocationFruitPanelProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<VocationFilterId>("all");
 
-  const normalizedQuery = normalizeSearchText(searchQuery);
-
   const filteredFruits = useMemo(
-    () => fruits.filter((fruit) => fruitMatchesSearch(fruit, normalizedQuery)),
-    [fruits, normalizedQuery],
+    () => fruits.filter((fruit) => fruitMatchesSearch(fruit, searchQuery)),
+    [fruits, searchQuery],
   );
 
   const sections = useMemo(() => {

@@ -64,12 +64,14 @@ export async function getPublicNews(params?: {
   limit?: number;
   featured?: boolean;
   categoryId?: string;
+  search?: string;
 }): Promise<PaginatedResponse> {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.set("page", String(params.page));
   if (params?.limit) searchParams.set("limit", String(params.limit));
   if (params?.featured) searchParams.set("featured", "true");
   if (params?.categoryId) searchParams.set("categoryId", params.categoryId);
+  if (params?.search) searchParams.set("search", params.search);
 
   const query = searchParams.toString();
   const res = await fetch(`${API_BASE}/api/news${query ? `?${query}` : ""}`);

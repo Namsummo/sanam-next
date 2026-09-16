@@ -37,13 +37,11 @@ export function normalizeExecutiveTerms(
 
 export function createEmptyExecutiveMember(sortOrder: number): ExecutiveMember {
   return {
-    fullName: "",
-    birthday: "",
-    patronSaint: "",
+    personId: "",
     position: "Thành viên",
-    parish: "",
-    image: "",
     sortOrder,
+    note: "",
+    fullName: "",
   };
 }
 
@@ -71,8 +69,18 @@ export function memberMatchesSearch(
     return true;
   }
 
+  const person = member.person;
   const haystack = normalizeSearchText(
-    [member.fullName, member.patronSaint, member.position, member.parish]
+    [
+      member.fullName,
+      member.patronSaint,
+      member.saintName,
+      member.position,
+      member.parish,
+      person?.fullName,
+      person?.saintName,
+      person?.giaoHo,
+    ]
       .filter(Boolean)
       .join(" "),
   );

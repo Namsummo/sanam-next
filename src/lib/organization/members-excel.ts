@@ -109,7 +109,7 @@ function memberToRow(member: ExecutiveMember): string[] {
   return [
     String(member.sortOrder ?? ""),
     member.patronSaint ?? "",
-    member.fullName,
+    member.fullName ?? "",
     member.birthday ?? "",
     member.position ?? "",
     member.parish ?? "",
