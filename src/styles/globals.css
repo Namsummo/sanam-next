@@ -653,9 +653,11 @@ header.main-header .header-sticky.active {
 .main-menu ul li {
 	margin: 0 10px;
 	position: relative;
+	flex-shrink: 0;
 }
 
-.main-menu ul li a {
+.main-menu ul li a,
+.main-menu ul li .nav-link {
 	font-size: 16px;
 	font-weight: 500;
 	line-height: 1em;
@@ -663,6 +665,7 @@ header.main-header .header-sticky.active {
 	background: transparent;
 	border-radius: 0px;
 	text-transform: capitalize;
+	white-space: nowrap;
 	transition: all 0.3s ease-in-out;
 }
 

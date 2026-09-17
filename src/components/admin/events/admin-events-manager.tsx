@@ -21,10 +21,10 @@ import {
   deleteEvent,
   getAllEvents,
   getEventCategories,
+  ensureEventSections,
   toParishEvent,
   updateEvent,
   uploadEventImage,
-  deleteEventCategory,
   type ApiEventCategory,
 } from "@/shared/services/events-api";
 import { slugify } from "@/shared/lib/slugify";
@@ -51,8 +51,6 @@ export function AdminEventsManager() {
   const [formOpen, setFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ParishEvent | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -93,16 +91,21 @@ export function AdminEventsManager() {
   }, [categoryFilter, debouncedSearch, page, router, statusFilter]);
 
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) {
-      router.push("/admin/login");
-      return;
+    if (!formOpen) return;
+
+    async function loadCategories() {
+      try {
+        const existing = await getEventCategories();
+        const token = getAccessToken();
+        setCategories(token ? await ensureEventSections(token, existing) : existing);
+      } catch {
+        setCategories([]);
+      }
     }
 
-    getEventCategories()
-      .then(setCategories)
-      .catch(() => { });
-  }, [router]);
+    loadCategories();
+  }, [formOpen]);
+
 
   useEffect(() => {
     fetchEvents();
@@ -160,30 +163,6 @@ export function AdminEventsManager() {
       setError(err instanceof Error ? err.message : "Failed to delete event");
     } finally {
       setDeleting(false);
-    }
-  }
-
-  async function handleConfirmDeleteCategory() {
-    if (!deletingCategoryId) return;
-    const token = getAccessToken();
-    if (!token) {
-      router.push("/admin/login");
-      return;
-    }
-
-    setDeletingCategory(true);
-    try {
-      await deleteEventCategory(token, deletingCategoryId);
-      setCategories((prev) => prev.filter((c) => c._id !== deletingCategoryId));
-      if (categoryFilter === deletingCategoryId) {
-        setCategoryFilter("all");
-      }
-    } catch (err) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : "Không thể xóa danh mục.");
-    } finally {
-      setDeletingCategory(false);
-      setDeletingCategoryId(null);
     }
   }
 
@@ -298,7 +277,6 @@ export function AdminEventsManager() {
           setPage(1);
         }}
         onClear={handleClearFilters}
-        onDeleteCategory={(id) => setDeletingCategoryId(id)}
       />
 
       <AdminEventsTable
@@ -334,19 +312,6 @@ export function AdminEventsManager() {
         cancelLabel="Hủy"
         onConfirm={confirmDelete}
         loading={deleting}
-        variant="danger"
-      />
-
-      <AdminConfirmDialog
-        open={deletingCategoryId !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeletingCategoryId(null);
-        }}
-        title="Xóa danh mục sự kiện?"
-        description="Hành động này sẽ xóa vĩnh viễn danh mục này khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
-        confirmLabel="Xóa"
-        onConfirm={handleConfirmDeleteCategory}
-        loading={deletingCategory}
         variant="danger"
       />
     </div>

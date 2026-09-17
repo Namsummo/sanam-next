@@ -42,6 +42,7 @@ export function AdminOrganizationForm({ organization }: AdminOrganizationFormPro
     defaultValues: organization
       ? mapOrganizationToFormValues(organization)
       : createEmptyOrganizationFormValues(),
+    shouldUnregister: false,
   });
 
   const nameValue = useWatch({ control: form.control, name: "name" });
@@ -106,11 +107,18 @@ export function AdminOrganizationForm({ organization }: AdminOrganizationFormPro
         isEdit,
         slugManuallyEdited,
         existingSlug: organization?.slug,
-      });
+      }).trim();
+      const name = values.name.trim();
+
+      if (!name || !slug) {
+        setError("Vui lòng nhập tên đoàn thể (slug sẽ được tạo tự động).");
+        setActiveTab("info");
+        return;
+      }
 
       const data = {
-        name: values.name.trim(),
-        slug: slug || undefined,
+        name,
+        slug,
         image: values.image || undefined,
         history: values.history,
         terms: normalizeExecutiveTerms(terms),
@@ -189,7 +197,7 @@ export function AdminOrganizationForm({ organization }: AdminOrganizationFormPro
           ))}
         </div>
 
-        {activeTab === "info" ? (
+        <div className={cn(activeTab !== "info" && "hidden")}>
           <AdminOrganizationInfoTab
             control={form.control}
             setValue={form.setValue}
@@ -198,9 +206,9 @@ export function AdminOrganizationForm({ organization }: AdminOrganizationFormPro
             onSlugManuallyEdited={() => setSlugManuallyEdited(true)}
             onUploadImage={handleImageUpload}
           />
-        ) : null}
+        </div>
 
-        {activeTab === "members" ? (
+        <div className={cn(activeTab !== "members" && "hidden")}>
           <AdminOrganizationMembersTab
             terms={terms}
             onTermsChange={setTerms}
@@ -208,7 +216,7 @@ export function AdminOrganizationForm({ organization }: AdminOrganizationFormPro
             onImportMessage={setImportMessage}
             onUploadImage={handleImageUpload}
           />
-        ) : null}
+        </div>
 
         <div className="flex items-center justify-end gap-4 border-t border-border pt-6">
           <AdminOutlineButton

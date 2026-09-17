@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { X, Calendar, Award, Heart, BookOpen, MapPin } from "lucide-react";
-import { formatIsoDateToVi } from "@/lib/format";
+import { X, Calendar, Award, Home, Church, Landmark } from "lucide-react";
+import { formatDate } from "@/lib/format";
 import { DEFAULT_COVER } from "@/lib/image-constants";
 import type { ClergyMember } from "@/lib/clergy/types";
 import { CLERGY_TYPE_PRIEST } from "@/lib/clergy/types";
@@ -43,6 +43,9 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
 
   const isPriest = member.type === CLERGY_TYPE_PRIEST;
   const imageSrc = resolveApiUrl(member.image) || DEFAULT_COVER;
+  const giaoHo = member.person?.giaoHo?.trim();
+  const giaoXu = member.person?.giaoXu?.trim();
+  const giaoPhan = member.person?.giaoPhan?.trim();
 
   return createPortal(
     <div
@@ -84,6 +87,9 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
           <p className="mt-0.5 font-sans text-xs font-semibold text-accent md:mt-1 md:text-sm up">
             {member.position}
           </p>
+          <h3 className="font-display text-base font-bold leading-tight text-accent! md:text-lg">
+            {member.saintName}
+          </h3>
           <h3 className="font-display text-base font-bold leading-tight text-primary md:text-lg">
             {member.fullName}
           </h3>
@@ -108,7 +114,7 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
                   </div>
                   <div>
                     <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Ngày sinh</p>
-                    <p className="text-xs font-semibold text-primary md:text-sm">{formatIsoDateToVi(member.birthday)}</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{formatDate(member.birthday)}</p>
                   </div>
                 </div>
               ) : null}
@@ -120,48 +126,51 @@ export function ClergyDetailModal({ member, onClose }: ClergyDetailModalProps) {
                   </div>
                   <div>
                     <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Thụ phong Linh mục</p>
-                    <p className="text-xs font-semibold text-primary md:text-sm">{formatIsoDateToVi(member.ordinationDate)}</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{formatDate(member.ordinationDate)}</p>
                   </div>
                 </div>
               ) : null}
 
-              {member.patronSaint ? (
+              {giaoHo ? (
                 <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-2xl md:p-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
-                    <Heart className="size-4 md:size-5" />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Thánh bổn mạng</p>
-                    <p className="text-xs font-semibold text-primary md:text-sm">{member.patronSaint}</p>
-                  </div>
-                </div>
-              ) : null}
-
-              {member.patronDate ? (
-                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-2xl md:p-3">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
-                    <BookOpen className="size-4 md:size-5" />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Lễ bổn mạng</p>
-                    <p className="text-xs font-semibold text-primary md:text-sm">{member.patronDate}</p>
-                  </div>
-                </div>
-              ) : null}
-
-              {member.hometown ? (
-                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 sm:col-span-2 md:gap-3 md:rounded-2xl md:p-3">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
-                    <MapPin className="size-4 md:size-5" />
+                    <Home className="size-4 md:size-5" />
                   </div>
                   <div>
                     <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">
-                      {isPriest ? "Quê quán" : "Giáo họ thuộc giáo xứ"}
+                      {isPriest ? "Quê quán" : "Giáo khu"}
                     </p>
-                    <p className="text-xs font-semibold text-primary md:text-sm">{member.hometown}</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{member.person?.giaoHo}</p>
                   </div>
                 </div>
               ) : null}
+
+
+              {giaoXu ? (
+                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-2xl md:p-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
+                    <Church className="size-4 md:size-5" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Giáo xứ</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{giaoXu}</p>
+                  </div>
+                </div>
+              ) : null}
+
+              {giaoPhan ? (
+                <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-white/50 p-2.5 md:gap-3 md:rounded-2xl md:p-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/5 text-accent md:size-10 md:rounded-xl">
+                    <Landmark className="size-4 md:size-5" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold tracking-wider text-foreground/50 uppercase md:text-[10px]">Giáo phận</p>
+                    <p className="text-xs font-semibold text-primary md:text-sm">{giaoPhan}</p>
+                  </div>
+                </div>
+              ) : null}
+
+
             </div>
           </div>
         </div>

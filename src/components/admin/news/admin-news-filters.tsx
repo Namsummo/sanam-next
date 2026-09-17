@@ -6,7 +6,7 @@ import { AdminOutlineButton } from "@/components/admin/shared/admin-outline-butt
 import { Input } from "@/components/site/shared/ui/input/input";
 import type { NewsCategoryResponse } from "@/shared/services/news-api";
 
-export type NewsVisibilityFilter = "" | "visible" | "hidden";
+export type NewsVisibilityFilter = "all" | "visible" | "hidden";
 
 export type AdminNewsFilterState = {
   searchDraft: string;
@@ -19,7 +19,7 @@ export function hasActiveNewsFilters({
   visibility,
   categoryFilter,
 }: AdminNewsFilterState): boolean {
-  return searchDraft.trim() !== "" || visibility !== "" || categoryFilter !== "";
+  return searchDraft.trim() !== "" || visibility !== "all" || categoryFilter !== "all";
 }
 
 type AdminNewsFiltersProps = AdminNewsFilterState & {
@@ -100,13 +100,13 @@ export function AdminNewsFilters({
           </span>
           <AdminSelect
             value={visibility}
-            onChange={(value) => onVisibilityChange(value as NewsVisibilityFilter)}
+            onChange={(value) => onVisibilityChange((value || "all") as NewsVisibilityFilter)}
             options={[
-              { value: "", label: "Tất cả" },
+              { value: "all", label: "Tất cả" },
               { value: "visible", label: "Đang hiển thị" },
               { value: "hidden", label: "Đã ẩn" },
             ]}
-            placeholder="Trạng thái"
+            placeholder="Tất cả"
           />
         </div>
 
@@ -116,16 +116,16 @@ export function AdminNewsFilters({
           </span>
           <AdminSelect
             value={categoryFilter}
-            onChange={onCategoryFilterChange}
+            onChange={(value) => onCategoryFilterChange(value || "all")}
             options={[
-              { value: "", label: "Tất cả danh mục" },
+              { value: "all", label: "Tất cả" },
               ...categories.map((category) => ({
                 value: category._id,
                 label: category.label,
                 showDelete: category.articleCount === 0,
               })),
             ]}
-            placeholder="Danh mục"
+            placeholder="Tất cả"
             searchable={categories.length > 5}
             onDeleteOption={onDeleteCategory}
           />

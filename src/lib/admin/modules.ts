@@ -43,6 +43,14 @@ export const adminModules: AdminModule[] = [
     status: "available",
   },
   {
+    id: "family-registry",
+    title: "Sổ Gia Đình",
+    description: "Quản lý hồ sơ cá nhân và gia đình Công giáo.",
+    href: "/admin/family-registry",
+    icon: BookOpen,
+    status: "available",
+  },
+  {
     id: "clergy",
     title: "Quý Cha & Ban Hành Giáo",
     description: "Cập nhật hồ sơ linh mục và ban hành giáo.",
@@ -112,14 +120,6 @@ export const adminModules: AdminModule[] = [
     description: "Quản lý hình ảnh nền của các trang.",
     href: "/admin/library",
     icon: ImageIcon,
-    status: "available",
-  },
-  {
-    id: "family-registry",
-    title: "Sổ Gia Đình",
-    description: "Quản lý hồ sơ cá nhân và gia đình Công giáo.",
-    href: "/admin/family-registry",
-    icon: BookOpen,
     status: "available",
   },
   {

@@ -2,6 +2,12 @@ export type EventContentFormat = "plain" | "html";
 
 export type EventStatus = "draft" | "published";
 
+export type EventCategory = {
+  id: string;
+  label: string;
+  sortOrder?: number;
+};
+
 export type ParishEvent = {
   id: string;
   slug?: string;
@@ -16,6 +22,7 @@ export type ParishEvent = {
   contentFormat: EventContentFormat;
   image?: string;
   categoryId?: string;
+  categorySlug?: string;
   categoryLabel?: string;
   isFeatured: boolean;
   featuredOrder?: number;

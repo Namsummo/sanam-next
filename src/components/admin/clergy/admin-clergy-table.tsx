@@ -18,6 +18,13 @@ import { cn } from "@/lib/utils";
 import type { ClergyMember } from "@/lib/clergy/types";
 import Image from "next/image";
 
+const getInitials = (fullName: string) =>
+  fullName
+    .trim()
+    .split(/\s+/)
+    .map((name) => name.charAt(0).toUpperCase())
+    .join('');
+
 const actionButtonClassName =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -95,8 +102,15 @@ export function AdminClergyTable({
                   {index + 1}
                 </TableCell>
                 <TableCell className="min-w-72 px-4 py-3 whitespace-normal flex items-center gap-2">
-                  <Image src={member.image || ""} alt={member.fullName} width={50} height={50} />
-                  <div className="flex flex-col">                      <p className="font-medium text-card-foreground">{member.fullName}</p>
+                  {member.image ? (
+                    <Image src={member.image} alt={member.fullName} width={50} height={50} />
+                  ) : (
+                    <div className="size-13 flex shrink-0 items-center justify-center border border-gray-300 bg-gray-200 font-medium">
+                      {getInitials(member.fullName)}
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <p className="font-medium text-card-foreground">{member.fullName}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">{member.position}</p>
                     {member.hometown ? (
                       <p className="mt-0.5 text-xs text-muted-foreground">{member.hometown}</p>

@@ -16,7 +16,7 @@ import type {
   LiturgyFeastRank,
   LiturgySeason,
 } from "@/lib/liturgy/types";
-import { formatIsoDateToVi } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type AdminLiturgyFeastsTableProps = {
@@ -70,7 +70,7 @@ export function AdminLiturgyFeastsTable({
             <TableRow key={feast.id}>
               <TableCell className="px-4 py-3 font-medium">{feast.name}</TableCell>
               <TableCell className="px-4 py-3">
-                {formatIsoDateToVi(feast.date)}
+                {formatDate(feast.date)}
               </TableCell>
               {showSeasonColumn ? (
                 <TableCell className="px-4 py-3">

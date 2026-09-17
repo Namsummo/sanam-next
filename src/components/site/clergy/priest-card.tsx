@@ -37,7 +37,7 @@ export function PriestCard({ member, className, onClick }: PriestCardProps) {
         </span>
 
         <h3 className="mt-1 font-display text-xl md:text-2xl font-semibold tracking-tight text-primary">
-          {member.fullName}
+          {member.saintName} {member.fullName}
         </h3>
 
         {member.motto ? (

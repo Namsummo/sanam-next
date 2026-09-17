@@ -11,6 +11,11 @@ import {
   toParishEvent,
 } from "@/shared/services/events-api";
 import { formatEventDateTime } from "@/lib/format";
+import {
+  getEventCategoryLabel,
+  getEventSectionBySlug,
+  getEventSectionHref,
+} from "@/lib/events/categories";
 import { DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import type { ParishEvent } from "@/lib/events/types";
 import { NewsHtmlContent } from "@/components/site/news/news-html-content";
@@ -69,6 +74,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   }
 
   const body = getEventBody(event);
+  const categoryLabel = getEventCategoryLabel(event.categorySlug) ?? event.categoryLabel;
+  const categoryHref = getEventSectionBySlug(event.categorySlug)
+    ? getEventSectionHref(event.categorySlug!)
+    : "/events";
 
   return (
     <>
@@ -78,6 +87,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         breadcrumbs={[
           { label: "Trang chủ", href: "/" },
           { label: "Sự kiện", href: "/events" },
+          ...(categoryLabel
+            ? [{ label: categoryLabel, href: categoryHref }]
+            : []),
+          { label: "Chi tiết" },
         ]}
         meta={
           <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 font-sans text-lg text-white">
@@ -96,15 +109,15 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       <article className="px-6 py-16 md:py-[120px]">
         <div className="mx-auto max-w-[1100px]">
           {event.image ? (
-            <figure className="mb-8 overflow-hidden rounded-2xl">
+            <figure className="mb-8 overflow-hidden rounded-2xl bg-muted/30">
               <Image
                 src={event.image}
                 alt={event.name || DEFAULT_COVER_ALT}
                 width={1100}
-                height={688}
+                height={619}
                 unoptimized
                 priority
-                className="aspect-16/10 w-full object-cover"
+                className="h-auto w-full object-contain"
               />
             </figure>
           ) : null}
@@ -113,6 +126,14 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             <h2 className="mb-6 font-display text-3xl font-bold leading-tight text-primary md:mb-8 md:text-4xl">
               {event.name}
             </h2>
+
+            {categoryLabel ? (
+              <div className="mb-8">
+                <span className="rounded-[10px] bg-accent px-3 py-1.5 font-sans text-sm font-medium text-white">
+                  {categoryLabel}
+                </span>
+              </div>
+            ) : null}
 
             {body ? (
               event.contentFormat === "html" ? (
@@ -127,7 +148,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
           <div className="mt-10 border-border pt-8">
             <Link
-              href="/events"
+              href={categoryHref}
               className="font-display text-base font-semibold uppercase text-primary transition-colors hover:text-accent"
             >
               ← Quay lại sự kiện

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LiturgyDayPanel } from "@/components/site/liturgy/liturgy-day-panel";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
-import { formatIsoDateToVi } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
 import { getGospelById } from "@/shared/services/liturgy-api";
 
@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   return {
     title: `${gospel.liturgicalDayName} — Phụng Vụ`,
-    description: `Lời Chúa ngày ${formatIsoDateToVi(gospel.date)}.`,
+    description: `Lời Chúa ngày ${formatDate(gospel.date)}.`,
   };
 }
 
@@ -39,7 +39,7 @@ export default async function WorshipDayPage({ params }: WorshipDayPageProps) {
   return (
     <>
       <PageHeader
-        title={`Lời Chúa Ngày ${formatIsoDateToVi(gospel.date)}`}
+        title={`Lời Chúa Ngày ${formatDate(gospel.date)}`}
         breadcrumbs={[
           { label: "Trang chủ", href: "/" },
           { label: "Phụng vụ", href: "/worship" },

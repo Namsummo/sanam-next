@@ -4,10 +4,8 @@ import { useState, useEffect } from "react";
 import { Radio, Tv, Calendar, User, Eye, RefreshCw } from "lucide-react";
 import { Video, LiveSettings } from "@/lib/videos/types";
 import type { YoutubeMetadata } from "@/lib/videos/youtube-metadata";
-import {
-  formatVideoDate,
-  formatViewCount,
-} from "@/lib/videos/video-utils";
+import { formatViewCount } from "@/lib/videos/video-utils";
+import { formatDate } from "@/lib/format";
 import { VideoCard } from "./video-card";
 import { LiveChat } from "./live-chat";
 import { VideoPlayerModal } from "./video-player-modal";
@@ -116,8 +114,8 @@ export function WorshipPlatform() {
 
   const liveTitle = activeLiveMetadata?.title ?? "Đang phát trực tiếp";
   const liveDate = activeLiveMetadata?.publishedAt
-    ? formatVideoDate(activeLiveMetadata.publishedAt)
-    : formatVideoDate(new Date().toISOString().split("T")[0]);
+    ? formatDate(activeLiveMetadata.publishedAt)
+    : formatDate(new Date().toISOString().split("T")[0]);
 
   return (
     <div className="w-full py-8 md:py-12">

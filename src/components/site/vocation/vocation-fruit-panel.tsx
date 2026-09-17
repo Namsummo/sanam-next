@@ -16,6 +16,7 @@ import {
   type VocationType,
 } from "@/lib/vocation/types";
 import { cn, matchesVietnamese } from "@/lib/utils";
+import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "../shared/ui/select/select";
 
 type VocationFruitPanelProps = {
   fruits: VocationFruit[];
@@ -109,18 +110,30 @@ export function VocationFruitPanel({ fruits, className }: VocationFruitPanelProp
           >
             Nhóm
           </label>
-          <select
-            id="vocation-fruit-filter"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as VocationFilterId)}
-            className="w-full cursor-pointer appearance-none rounded-xl border border-border bg-white px-4 py-3.5 font-sans text-base text-primary outline-none transition-colors focus:border-accent"
+          <Select
+            value={
+              vocationFilterOptions.find((option) => option.id === filter)?.label ??
+              "Tất cả"
+            }
+            onValueChange={(value) => {
+              if (!value) return;
+              const option = vocationFilterOptions.find((item) => item.label === value);
+              if (option) {
+                setFilter(option.id);
+              }
+            }}
           >
-            {vocationFilterOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="vocation-fruit-filter" className="w-full">
+              <SelectValue placeholder="Chọn nhóm" />
+            </SelectTrigger>
+            <SelectContent side="bottom" align="start" sideOffset={6} alignItemWithTrigger={false}>
+              {vocationFilterOptions.map((option) => (
+                <SelectItem key={option.id} value={option.label}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { DEFAULT_COVER } from "@/lib/image-constants";
-import type { VocationFruit } from "@/lib/vocation/types";
+import type { VocationFruit, VocationType } from "@/lib/vocation/types";
 import { cn, resolveApiUrl } from "@/lib/utils";
 
 type VocationFruitCardProps = {
@@ -8,6 +8,16 @@ type VocationFruitCardProps = {
   className?: string;
 };
 
+function getVocationTitle(vocationType: VocationType) {
+  switch (vocationType) {
+    case "brother":
+      return "Thầy";
+    case "sister":
+      return "Dì";
+    case "priest":
+      return "Cha";
+  }
+}
 export function VocationFruitCard({ fruit, className }: VocationFruitCardProps) {
   return (
     <article
@@ -25,25 +35,29 @@ export function VocationFruitCard({ fruit, className }: VocationFruitCardProps) 
         />
       </figure>
 
-      <h3 className="font-display text-base font-bold leading-snug text-primary md:text-lg">
-        {fruit.fullName}
+      <h3 className="font-display text-lg font-bold leading-snug text-primary md:text-xl">
+        {getVocationTitle(fruit.vocationType)} {fruit.fullName}
       </h3>
 
       {fruit.religiousOrder ? (
-        <p className="mt-2 font-sans text-sm text-foreground/80">
+        <p className="mt-2 font-sans text-base  text-foreground/80">
           {fruit.religiousOrder}
         </p>
       ) : null}
 
       {fruit.currentAssignment ? (
-        <p className="mt-1 font-sans text-sm font-medium text-foreground">
+        <p className="mt-1 font-sans text-base text-foreground/80">
           {fruit.currentAssignment}
         </p>
       ) : null}
-
-      {fruit.hometown ? (
+      {fruit.person?.giaoXu ? (
+        <p className="mt-1 font-sans text-sm text-foreground/80">
+          Quê hương: {fruit.person.giaoXu}
+        </p>
+      ) : null}
+      {fruit.person?.giaoHo ? (
         <p className="mt-2 font-sans text-xs text-foreground/70">
-          Quê hương: {fruit.hometown}
+          Giáo khu: {fruit.person.giaoHo}
         </p>
       ) : null}
     </article>

@@ -1,4 +1,6 @@
+import type { Person } from "@/lib/family-registry/types";
 import type { VocationFruit, VocationType } from "@/lib/vocation/types";
+import { getPublicFamilyRegistryData } from "@/shared/services/family-registry-api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -11,7 +13,7 @@ function authHeaders(token: string): HeadersInit {
 export interface ApiVocationFruitResponse {
   _id: string;
   personId: string;
-  person?: any;
+  person?: Person;
   fullName: string;
   vocationType: VocationType;
   religiousOrder?: string | null;
@@ -23,6 +25,20 @@ export interface ApiVocationFruitResponse {
   isVisible: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+async function getPublicPersonMap(): Promise<Map<string, Person>> {
+  try {
+    const { persons } = await getPublicFamilyRegistryData();
+    return new Map(
+      persons.flatMap((person) => {
+        const id = person.id || (person as Person & { _id?: string })._id;
+        return id ? [[id, person] as const] : [];
+      }),
+    );
+  } catch {
+    return new Map();
+  }
 }
 
 export interface PaginatedVocationFruitsResponse {
@@ -55,9 +71,9 @@ export function toVocationFruit(data: ApiVocationFruitResponse): VocationFruit {
 export interface CreateVocationFruitData {
   personId: string;
   vocationType: VocationType;
-  religiousOrder?: string;
-  currentAssignment?: string;
-  vocationYear?: number;
+  religiousOrder?: string | null;
+  currentAssignment?: string | null;
+  vocationYear?: number | null;
   isVisible?: boolean;
 }
 
@@ -72,7 +88,17 @@ export async function getPublicVocationFruits(params?: {
     cache: "no-store", // Ensure server components get fresh data
   });
   if (!res.ok) throw new Error("Failed to fetch vocation fruits");
-  return res.json();
+
+  const data = (await res.json()) as { fruits: ApiVocationFruitResponse[] };
+
+  // Public vocation fruits do not populate `person` like /api/admin/vocation-fruits.
+  const personsById = await getPublicPersonMap();
+  return {
+    fruits: data.fruits.map((fruit) => ({
+      ...fruit,
+      person: fruit.person ?? personsById.get(fruit.personId),
+    })),
+  };
 }
 
 export async function getAllVocationFruits(

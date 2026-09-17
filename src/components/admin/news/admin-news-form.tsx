@@ -2,17 +2,20 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Eye, EyeOff, Star, X, Tag } from "lucide-react";
-import Link from "next/link";
+import { Eye, EyeOff, Star, X, Tag } from "lucide-react";
 import { BlogEditor } from "@/components/admin/shared/blog-editor";
 import { ImageUploader } from "@/components/admin/shared/image-uploader";
 import { AdminSelect } from "@/components/admin/shared/admin-select";
+import { AdminFormDialog } from "@/components/admin/shared/admin-form-dialog";
+import { AdminOutlineButton } from "@/components/admin/shared/admin-outline-button";
+import { Button } from "@/components/site/shared/ui/button/button";
 import { getAccessToken, getCurrentUser } from "@/lib/admin/auth-session";
 import {
   createNews,
   updateNews,
   uploadImage,
   getCategories,
+  ensureNewsSections,
   createCategory,
   deleteCategory,
   type NewsCategoryResponse,
@@ -20,10 +23,15 @@ import {
 } from "@/shared/services/news-api";
 import { slugify } from "@/shared/lib/slugify";
 import { Textarea } from "@/components/site/shared/ui/textarea/textarea";
+import { Input } from "@/components/site/shared/ui/input/input";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
+import { AdminDateInput } from "../shared/admin-datetime-input";
 
-type NewsFormProps = {
-  article?: NewsArticleResponse;
+type AdminNewsFormModalProps = {
+  open: boolean;
+  article?: NewsArticleResponse | null;
+  onClose: () => void;
+  onSaved: () => void;
 };
 
 function RequiredMark() {
@@ -34,26 +42,62 @@ function RequiredMark() {
   );
 }
 
-export function NewsForm({ article }: NewsFormProps) {
+function FieldLabel({
+  children,
+  htmlFor,
+}: {
+  children: React.ReactNode;
+  htmlFor?: string;
+}) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      className="mb-1.5 block text-sm font-medium text-card-foreground"
+    >
+      {children}
+    </label>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      {children}
+    </h3>
+  );
+}
+
+function pad(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function toDateInputValue(value?: string) {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function toPublishedAtIso(date: string) {
+  return new Date(`${date}T00:00:00`).toISOString();
+}
+
+export function AdminNewsFormModal({
+  open,
+  article,
+  onClose,
+  onSaved,
+}: AdminNewsFormModalProps) {
   const router = useRouter();
-  const isEdit = !!article;
+  const isEdit = Boolean(article);
 
   const [title, setTitle] = useState(article?.title ?? "");
   const [slug, setSlug] = useState(article?.slug ?? "");
   const [excerpt, setExcerpt] = useState(article?.excerpt ?? "");
   const [content, setContent] = useState(article?.content ?? "");
   const contentFormat = "html" as const;
-  const [categoryId, setCategoryId] = useState<string>(
-    article?.categoryId?._id ?? "",
-  );
-  const [coverImage, setCoverImage] = useState<string | null>(
-    article?.coverImage ?? null,
-  );
-  const [publishedAt, setPublishedAt] = useState(
-    article?.publishedAt
-      ? new Date(article.publishedAt).toISOString().slice(0, 16)
-      : new Date().toISOString().slice(0, 16),
-  );
+  const [categoryId, setCategoryId] = useState(article?.categoryId?._id ?? "");
+  const [coverImage, setCoverImage] = useState<string | null>(article?.coverImage ?? null);
+  const [publishedDate, setPublishedDate] = useState(toDateInputValue(article?.publishedAt));
   const [isFeatured, setIsFeatured] = useState(article?.isFeatured ?? false);
   const [isVisible, setIsVisible] = useState(article?.isVisible ?? true);
   const [categories, setCategories] = useState<NewsCategoryResponse[]>([]);
@@ -72,10 +116,20 @@ export function NewsForm({ article }: NewsFormProps) {
   const isAdmin = sessionUser?.role === "admin";
 
   useEffect(() => {
-    getCategories()
-      .then(setCategories)
-      .catch(() => { });
-  }, []);
+    if (!open) return;
+
+    async function loadCategories() {
+      try {
+        const existing = await getCategories();
+        const token = getAccessToken();
+        setCategories(token ? await ensureNewsSections(token, existing) : existing);
+      } catch {
+        setCategories([]);
+      }
+    }
+
+    loadCategories();
+  }, [open]);
 
   async function handleConfirmDeleteCategory() {
     if (!deletingCategoryId) return;
@@ -88,7 +142,7 @@ export function NewsForm({ article }: NewsFormProps) {
     setDeletingCategory(true);
     try {
       await deleteCategory(token, deletingCategoryId);
-      setCategories((prev) => prev.filter((c) => c._id !== deletingCategoryId));
+      setCategories((prev) => prev.filter((item) => item._id !== deletingCategoryId));
       if (categoryId === deletingCategoryId) {
         setCategoryId("");
       }
@@ -150,7 +204,7 @@ export function NewsForm({ article }: NewsFormProps) {
         contentFormat,
         categoryId: categoryId || null,
         coverImage,
-        publishedAt: new Date(publishedAt).toISOString(),
+        publishedAt: toPublishedAtIso(publishedDate),
         isFeatured,
         isVisible,
       };
@@ -161,7 +215,8 @@ export function NewsForm({ article }: NewsFormProps) {
         await createNews(token, data);
       }
 
-      router.push("/admin/news");
+      onSaved();
+      onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Đã xảy ra lỗi");
     } finally {
@@ -170,132 +225,140 @@ export function NewsForm({ article }: NewsFormProps) {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <Link
-        href="/admin/news"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-card-foreground"
+    <>
+      <AdminFormDialog
+        open={open}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) onClose();
+        }}
+        title={isEdit ? "Chỉnh sửa bài viết" : "Thêm bài viết mới"}
+        className="sm:max-w-4xl"
+        footer={
+          <div className="flex items-center justify-end gap-3">
+            <AdminOutlineButton onClick={onClose} className="h-11 font-bold uppercase">
+              Hủy
+            </AdminOutlineButton>
+            <Button
+              variant="primary"
+              type="submit"
+              form="admin-news-form"
+              showIcon={false}
+              disabled={saving}
+              className="h-11"
+            >
+              {saving ? "Đang lưu..." : isEdit ? "Cập nhật" : "Đăng bài"}
+            </Button>
+          </div>
+        }
       >
-        <ArrowLeft className="size-4" aria-hidden />
-        Về danh sách tin tức
-      </Link>
+        <form id="admin-news-form" onSubmit={handleSubmit} className="space-y-6" noValidate>
+          {error ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          ) : null}
 
-      <h1 className="mt-4 font-display text-2xl font-semibold text-card-foreground">
-        {isEdit ? "Chỉnh sửa bài viết" : "Thêm bài viết mới"}
-      </h1>
+          {/* Thông tin cơ bản */}
+          <section>
+            <SectionTitle>Thông tin cơ bản</SectionTitle>
+            <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
+              <div>
+                <FieldLabel>
+                  Tiêu đề <RequiredMark />
+                </FieldLabel>
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Nhập tiêu đề bài viết"
+                />
+              </div>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-        {error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Tiêu đề <RequiredMark />
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Nhập tiêu đề bài viết"
-              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Đường dẫn
-            </label>
-            <input
-              type="text"
-              value={displayedSlug}
-              onChange={(e) => handleSlugChange(e.target.value)}
-              placeholder="tu-dong-tao-tu-tieu-de"
-              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Danh mục
-            </label>
-            <AdminSelect
-              value={categoryId}
-              onChange={setCategoryId}
-              options={categories.map((cat) => ({
-                value: cat._id,
-                label: cat.label,
-                showDelete: cat.articleCount === 0,
-              }))}
-              placeholder="Chọn danh mục"
-              searchable={categories.length > 5}
-              onAdd={isAdmin ? () => setShowNewCategory(true) : undefined}
-              addLabel="Thêm danh mục mới"
-              onDeleteOption={(id) => setDeletingCategoryId(id)}
-            />
-
-            {showNewCategory ? (
-              <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                  <span className="flex items-center gap-2 text-sm font-medium text-card-foreground">
-                    <Tag className="size-4 text-accent" />
-                    Danh mục mới
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowNewCategory(false);
-                      setNewCatLabel("");
-                      setNewCatSlug("");
-                      setCatError("");
-                    }}
-                    className="text-muted-foreground transition-colors hover:text-card-foreground"
-                  >
-                    <X className="size-4" />
-                  </button>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <FieldLabel>Đường dẫn</FieldLabel>
+                  <Input
+                    value={displayedSlug}
+                    onChange={(e) => handleSlugChange(e.target.value)}
+                    placeholder="tu-dong-tao-tu-tieu-de"
+                  />
                 </div>
 
-                {catError ? (
-                  <div className="mx-4 mt-3 rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                    {catError}
-                  </div>
-                ) : null}
+                <div>
+                  <FieldLabel>Danh mục</FieldLabel>
+                  <AdminSelect
+                    value={categoryId}
+                    onChange={setCategoryId}
+                    options={categories.map((cat) => ({
+                      value: cat._id,
+                      label: cat.label,
+                      showDelete: cat.articleCount === 0,
+                    }))}
+                    placeholder="Chọn danh mục"
+                    searchable={categories.length > 5}
+                    onAdd={isAdmin ? () => setShowNewCategory(true) : undefined}
+                    addLabel="Thêm danh mục mới"
+                    onDeleteOption={(id) => setDeletingCategoryId(id)}
+                  />
+                </div>
+              </div>
 
-                <div className="p-4">
-                  <div className="mb-3">
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Tên danh mục
-                    </label>
-                    <input
-                      type="text"
-                      value={newCatLabel}
-                      onChange={(e) => setNewCatLabel(e.target.value)}
-                      placeholder="VD: Mục vụ"
-                      className="w-full rounded-[8px] border border-border bg-background px-3 py-2 text-sm text-card-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
-                    />
+              {showNewCategory ? (
+                <div className="overflow-hidden rounded-xl border border-border bg-card">
+                  <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+                    <span className="flex items-center gap-2 text-sm font-medium text-card-foreground">
+                      <Tag className="size-4 text-accent" />
+                      Danh mục mới
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewCategory(false);
+                        setNewCatLabel("");
+                        setNewCatSlug("");
+                        setCatError("");
+                      }}
+                      className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-card-foreground"
+                    >
+                      <X className="size-4" />
+                    </button>
                   </div>
 
-                  <div className="mb-4">
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Slug
-                    </label>
-                    <input
-                      type="text"
-                      value={newCatSlug}
-                      onChange={(e) => setNewCatSlug(e.target.value)}
-                      placeholder={newCatAutoSlug || "tu-dong-theo-ten"}
-                      className="w-full rounded-[8px] border border-border bg-background px-3 py-2 text-sm text-card-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
-                    />
-                    {!newCatSlug && newCatAutoSlug ? (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Slug tự động: <span className="font-mono text-accent">{newCatAutoSlug}</span>
-                      </p>
-                    ) : null}
+                  {catError ? (
+                    <div className="mx-4 mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                      {catError}
+                    </div>
+                  ) : null}
+
+                  <div className="grid gap-3 p-4 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                        Tên danh mục
+                      </label>
+                      <Input
+                        value={newCatLabel}
+                        onChange={(e) => setNewCatLabel(e.target.value)}
+                        placeholder="VD: Mục vụ"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                        Slug
+                      </label>
+                      <Input
+                        value={newCatSlug}
+                        onChange={(e) => setNewCatSlug(e.target.value)}
+                        placeholder={newCatAutoSlug || "tu-dong-theo-ten"}
+                      />
+                      {!newCatSlug && newCatAutoSlug ? (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Tự động:{" "}
+                          <span className="font-mono text-accent">{newCatAutoSlug}</span>
+                        </p>
+                      ) : null}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 border-t border-border px-4 py-3">
                     <button
                       type="button"
                       disabled={creatingCategory}
@@ -303,8 +366,8 @@ export function NewsForm({ article }: NewsFormProps) {
                         const token = getAccessToken();
                         if (!token) return;
 
-                        const slug = newCatSlug.trim() || newCatAutoSlug;
-                        if (!newCatLabel.trim() || !slug) {
+                        const nextSlug = newCatSlug.trim() || newCatAutoSlug;
+                        if (!newCatLabel.trim() || !nextSlug) {
                           setCatError("Vui lòng nhập tên danh mục");
                           return;
                         }
@@ -314,7 +377,7 @@ export function NewsForm({ article }: NewsFormProps) {
 
                         try {
                           const cat = await createCategory(token, {
-                            slug,
+                            slug: nextSlug,
                             label: newCatLabel.trim(),
                           });
                           setCategories((prev) => [...prev, cat]);
@@ -330,7 +393,7 @@ export function NewsForm({ article }: NewsFormProps) {
                           setCreatingCategory(false);
                         }
                       }}
-                      className="rounded-[8px] bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
+                      className="rounded-lg bg-accent px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
                     >
                       {creatingCategory ? "Đang tạo..." : "Tạo danh mục"}
                     </button>
@@ -342,112 +405,100 @@ export function NewsForm({ article }: NewsFormProps) {
                         setNewCatSlug("");
                         setCatError("");
                       }}
-                      className="text-sm text-muted-foreground transition-colors hover:text-card-foreground"
+                      className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-card-foreground"
                     >
                       Hủy
                     </button>
                   </div>
                 </div>
+              ) : null}
+
+              <div>
+                <FieldLabel>Mô tả ngắn</FieldLabel>
+                <Textarea
+                  value={excerpt}
+                  onChange={(e) => setExcerpt(e.target.value)}
+                  placeholder="Mô tả ngắn hiển thị trên danh sách tin..."
+                  rows={3}
+                />
               </div>
-            ) : null}
-          </div>
+            </div>
+          </section>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Ngày đăng
-            </label>
-            <input
-              type="datetime-local"
-              value={publishedAt}
-              onChange={(e) => setPublishedAt(e.target.value)}
-              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground focus:border-accent focus:outline-none"
-            />
-          </div>
+          {/* Xuất bản */}
+          <section>
+            <SectionTitle>Xuất bản</SectionTitle>
+            <div className="rounded-xl border border-border bg-muted/20 p-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <FieldLabel>Ngày đăng</FieldLabel>
+                  <AdminDateInput
+                    value={publishedDate}
+                    onChange={(e) => setPublishedDate(e.target.value)}
+                  />
+                </div>
 
-          <div className="flex items-end gap-4">
-            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground transition-colors hover:border-accent">
-              <input
-                type="checkbox"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="size-4 accent-accent"
-              />
-              <Star className="size-4 text-accent" />
-              <span>Bài nổi bật</span>
-            </label>
+                <label className="flex cursor-pointer items-end">
+                  <span className="flex w-full items-center gap-2.5 rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground transition-colors hover:border-accent">
+                    <input
+                      type="checkbox"
+                      checked={isFeatured}
+                      onChange={(e) => setIsFeatured(e.target.checked)}
+                      className="size-4 accent-accent"
+                    />
+                    <Star className="size-4 shrink-0 text-accent" />
+                    <span>Bài nổi bật</span>
+                  </span>
+                </label>
 
-            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground transition-colors hover:border-accent">
-              <input
-                type="checkbox"
-                checked={isVisible}
-                onChange={(e) => setIsVisible(e.target.checked)}
-                className="size-4 accent-accent"
-              />
-              {isVisible ? (
-                <Eye className="size-4 text-green-600" />
-              ) : (
-                <EyeOff className="size-4 text-muted-foreground" />
-              )}
-              <span>Hiển thị</span>
-            </label>
-          </div>
+                <label className="flex cursor-pointer items-end">
+                  <span className="flex w-full items-center gap-2.5 rounded-xl border border-border bg-card px-4 py-3 text-sm text-card-foreground transition-colors hover:border-accent">
+                    <input
+                      type="checkbox"
+                      checked={isVisible}
+                      onChange={(e) => setIsVisible(e.target.checked)}
+                      className="size-4 accent-accent"
+                    />
+                    {isVisible ? (
+                      <Eye className="size-4 shrink-0 text-green-600" />
+                    ) : (
+                      <EyeOff className="size-4 shrink-0 text-muted-foreground" />
+                    )}
+                    <span>Hiển thị</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </section>
 
-          <div className="md:col-span-2">
-            <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Mô tả ngắn
-            </label>
-            <Textarea
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Mô tả ngắn cho bài viết..."
-            />
-          </div>
+          {/* Media & nội dung */}
+          <section>
+            <SectionTitle>Ảnh bìa & nội dung</SectionTitle>
+            <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
+              <div>
+                <FieldLabel>Ảnh bìa</FieldLabel>
+                <ImageUploader
+                  value={coverImage}
+                  onChange={setCoverImage}
+                  onUpload={handleImageUpload}
+                />
+              </div>
 
-          <div className="md:col-span-2">
-            <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Ảnh bìa
-            </label>
-            <ImageUploader
-              value={coverImage}
-              onChange={setCoverImage}
-              onUpload={handleImageUpload}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="mb-1.5 block text-sm font-medium text-card-foreground">
-              Nội dung <RequiredMark />
-            </label>
-            <BlogEditor
-              content={content}
-              onChange={setContent}
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 border-t border-border pt-6">
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-[10px] bg-accent px-6 py-3 font-display text-sm font-semibold uppercase text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
-          >
-            <Save className="size-4" />
-            {saving ? "Đang lưu..." : isEdit ? "Cập nhật" : "Đăng bài"}
-          </button>
-
-          <Link
-            href="/admin/news"
-            className="text-sm text-muted-foreground transition-colors hover:text-card-foreground"
-          >
-            Hủy
-          </Link>
-        </div>
-      </form>
+              <div>
+                <FieldLabel>
+                  Nội dung <RequiredMark />
+                </FieldLabel>
+                <BlogEditor content={content} onChange={setContent} />
+              </div>
+            </div>
+          </section>
+        </form>
+      </AdminFormDialog>
 
       <AdminConfirmDialog
         open={deletingCategoryId !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeletingCategoryId(null);
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setDeletingCategoryId(null);
         }}
         title="Xóa danh mục tin tức?"
         description="Hành động này sẽ xóa vĩnh viễn danh mục này khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
@@ -456,6 +507,6 @@ export function NewsForm({ article }: NewsFormProps) {
         loading={deletingCategory}
         variant="danger"
       />
-    </div>
+    </>
   );
 }

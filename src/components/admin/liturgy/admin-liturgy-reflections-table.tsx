@@ -12,7 +12,7 @@ import {
 } from "@/components/site/shared/ui/table/table";
 import { STATUS_LABELS } from "@/lib/liturgy/helpers";
 import type { LiturgyReflection } from "@/lib/liturgy/types";
-import { formatIsoDateToVi } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type AdminLiturgyReflectionsTableProps = {
@@ -50,7 +50,7 @@ export function AdminLiturgyReflectionsTable({
           reflections.map((item) => (
             <TableRow key={item.id}>
               <TableCell className="px-4 py-3">
-                {formatIsoDateToVi(item.date)}
+                {formatDate(item.date)}
               </TableCell>
               <TableCell className="px-4 py-3 font-medium">{item.title}</TableCell>
               <TableCell className="px-4 py-3">

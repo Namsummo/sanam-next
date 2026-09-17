@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import {
+  isNavGroupActive,
   isSiteNavActive,
   siteMainNav,
   siteWorshipLiveCta,
@@ -104,7 +105,7 @@ export function SiteHeader() {
                             href={item.href}
                             aria-current={active ? "page" : undefined}
                             className={cn(
-                              "nav-link block py-3 px-2.5 font-sans text-base font-semibold transition-colors hover:text-accent",
+                              "nav-link block whitespace-nowrap py-3 px-2.5 font-sans text-base font-semibold transition-colors hover:text-accent",
                               active ? "text-accent" : "text-white"
                             )}
                           >
@@ -114,21 +115,19 @@ export function SiteHeader() {
                       );
                     }
 
-                    const active = item.children.some((child) =>
-                      isSiteNavActive(pathname, child.href, { exact: true })
-                    );
+                    const active = isNavGroupActive(pathname, item);
                     return (
                       <li key={item.label} className="nav-item submenu group relative">
                         <span
                           className={cn(
-                            "nav-link flex cursor-pointer items-center gap-1 py-3 px-2.5 font-sans text-base font-semibold transition-colors hover:text-accent",
+                            "nav-link flex cursor-pointer items-center gap-1 whitespace-nowrap py-3 px-2.5 font-sans text-base font-semibold transition-colors hover:text-accent",
                             active ? "text-accent" : "text-white"
                           )}
                         >
                           {item.label}
                           <ChevronDown className="size-4 opacity-80" />
                         </span>
-                        <ul className="absolute left-0 top-full bg-accent rounded-lg py-2 shadow-lg w-[235px] list-none z-50">
+                        <ul className="absolute left-0 top-full z-50 w-65 list-none rounded-lg bg-accent py-2 shadow-lg">
                           {item.children.map((child) => (
                             <li key={child.href} className="w-full">
                               <Link

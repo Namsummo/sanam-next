@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/site/shared/ui/table/table";
 import type { LiturgySeason } from "@/lib/liturgy/types";
-import { formatIsoDateToVi } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type AdminLiturgySeasonsTableProps = {
@@ -50,8 +50,8 @@ export function AdminLiturgySeasonsTable({
             <TableRow key={season.id}>
               <TableCell className="px-4 py-3 font-medium">{season.name}</TableCell>
               <TableCell className="px-4 py-3">
-                {formatIsoDateToVi(season.startDate)} –{" "}
-                {formatIsoDateToVi(season.endDate)}
+                {formatDate(season.startDate)} –{" "}
+                {formatDate(season.endDate)}
               </TableCell>
               <TableCell className="px-4 py-3">
                 {season.isCurrentSeason ? "Có" : "Không"}

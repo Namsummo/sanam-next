@@ -44,7 +44,15 @@ type AdminSeasonFormDialogProps = {
   onSubmit: (payload: SeasonPayload) => Promise<void>;
 };
 
-export function AdminSeasonFormDialog({
+export function AdminSeasonFormDialog(props: AdminSeasonFormDialogProps) {
+  const instanceKey = props.open
+    ? (props.editingSeason?.id ?? "create")
+    : "closed";
+
+  return <SeasonFormDialogInner key={instanceKey} {...props} />;
+}
+
+function SeasonFormDialogInner({
   open,
   onOpenChange,
   editingSeason = null,
@@ -57,16 +65,6 @@ export function AdminSeasonFormDialog({
   const [slugManual, setSlugManual] = useState(Boolean(editingSeason));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Reset form when dialog opens or editingSeason changes
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      setForm(editingSeason ? seasonToFormState(editingSeason) : emptySeason());
-      setSlugManual(Boolean(editingSeason));
-      setError(null);
-    }
-    onOpenChange(nextOpen);
-  };
 
   async function handleSave() {
     if (!form.name.trim()) {
@@ -103,7 +101,7 @@ export function AdminSeasonFormDialog({
   return (
     <AdminFormDialog
       open={open}
-      onOpenChange={handleOpenChange}
+      onOpenChange={onOpenChange}
       title={isEdit ? "Sửa mùa phụng vụ" : "Thêm mùa phụng vụ"}
       footer={
         <div className="flex justify-end gap-2">

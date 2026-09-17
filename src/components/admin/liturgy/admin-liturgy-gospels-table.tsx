@@ -12,7 +12,7 @@ import {
 } from "@/components/site/shared/ui/table/table";
 import { STATUS_LABELS } from "@/lib/liturgy/helpers";
 import type { LiturgyGospel } from "@/lib/liturgy/types";
-import { formatIsoDateToVi } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type AdminLiturgyGospelsTableProps = {
@@ -50,7 +50,7 @@ export function AdminLiturgyGospelsTable({
           gospels.map((gospel) => (
             <TableRow key={gospel.id}>
               <TableCell className="px-4 py-3">
-                {formatIsoDateToVi(gospel.date)}
+                {formatDate(gospel.date)}
                 {gospel.today ? (
                   <span className="ml-2 text-xs font-medium text-accent">
                     Hôm nay

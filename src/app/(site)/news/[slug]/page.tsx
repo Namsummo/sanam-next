@@ -5,8 +5,8 @@ import { Clock } from "lucide-react";
 import { notFound } from "next/navigation";
 import { NewsHtmlContent } from "@/components/site/news/news-html-content";
 import { PageHeader } from "@/components/site/shared/components/page/page-header";
-import { getNewsCategoryLabel } from "@/lib/news/categories";
-import { formatNewsDate } from "@/lib/format";
+import { getNewsCategoryLabel, getNewsSectionBySlug, getNewsSectionHref } from "@/lib/news/categories";
+import { formatDate } from "@/lib/format";
 import { getPublicNewsBySlug, getPublicNews } from "@/shared/services/news-api";
 import type { NewsArticle } from "@/lib/news/types";
 import { getBackgroundSettings } from "@/shared/services/background-settings-api";
@@ -82,6 +82,9 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
   }
 
   const categoryLabel = getNewsCategoryLabel(article.categoryId);
+  const categoryHref = getNewsSectionBySlug(article.categoryId)
+    ? getNewsSectionHref(article.categoryId!)
+    : "/news";
 
   return (
     <>
@@ -91,6 +94,9 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
         breadcrumbs={[
           { label: "Trang chủ", href: "/" },
           { label: "Tin tức", href: "/news" },
+          ...(categoryLabel
+            ? [{ label: categoryLabel, href: categoryHref }]
+            : []),
           { label: "Chi tiết" },
         ]}
         meta={
@@ -98,7 +104,7 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
             <li className="flex items-center gap-1.5">
               <Clock className="size-4 shrink-0" aria-hidden />
               <time dateTime={article.publishedAt}>
-                {formatNewsDate(article.publishedAt)}
+                {formatDate(article.publishedAt)}
               </time>
             </li>
           </ul>
@@ -142,7 +148,7 @@ export default async function NewsDetailBySlugPage({ params }: NewsDetailPagePro
 
             <div className="mt-10 border-border pt-8">
               <Link
-                href="/news"
+                href={categoryHref}
                 className="font-display text-base font-semibold uppercase text-primary transition-colors hover:text-accent"
               >
                 ← Quay lại tin tức
