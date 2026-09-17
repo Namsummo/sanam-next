@@ -4,6 +4,7 @@ import { CalendarClock, MapPin } from "lucide-react";
 
 import { NewsReadMoreLink } from "@/components/site/news/news-read-more-link";
 import { formatEventDateTime } from "@/lib/format";
+import { getEventCategoryLabel } from "@/lib/events/categories";
 import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import type { ParishEvent } from "@/lib/events/types";
 import { cn, resolveApiUrl } from "@/lib/utils";
@@ -36,7 +37,8 @@ const CARD_STYLES = {
 export function EventCard({ event, className }: EventCardProps) {
   const href = `/events/${event.slug ?? event.id}`;
   const imageSrc = resolveApiUrl(event.image) || DEFAULT_COVER;
-  const hasBadges = event.isFeatured || Boolean(event.categoryLabel);
+  const categoryLabel = getEventCategoryLabel(event.categorySlug) ?? event.categoryLabel;
+  const hasBadges = event.isFeatured || Boolean(categoryLabel);
 
   return (
     <article className={cn(CARD_STYLES.container, className)}>
@@ -71,11 +73,11 @@ export function EventCard({ event, className }: EventCardProps) {
             </span>
           )}
 
-          {event.categoryLabel && (
+          {categoryLabel && (
             <span
               className={cn(CARD_STYLES.badge, "bg-accent")}
             >
-              {event.categoryLabel}
+              {categoryLabel}
             </span>
           )}
         </div>

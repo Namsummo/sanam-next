@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import {
+  isNavGroupActive,
   isSiteNavActive,
   siteMainNav,
   siteWorshipLiveCta,
@@ -58,7 +59,7 @@ export function SiteMobileNav({ open, onClose }: SiteMobileNavProps) {
 
     return item.children.some((child) =>
       isSiteNavActive(pathname, child.href, { exact: true }),
-    );
+    ) || Boolean(item.href && isSiteNavActive(pathname, item.href));
   };
 
   return (
@@ -112,9 +113,7 @@ export function SiteMobileNav({ open, onClose }: SiteMobileNavProps) {
               }
 
               const groupOpen = isGroupExpanded(item);
-              const groupActive = item.children.some((child) =>
-                isSiteNavActive(pathname, child.href, { exact: true }),
-              );
+              const groupActive = isNavGroupActive(pathname, item);
 
               return (
                 <li key={item.label}>

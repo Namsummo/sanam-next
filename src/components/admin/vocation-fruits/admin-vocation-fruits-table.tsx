@@ -15,7 +15,7 @@ import {
 } from "@/components/site/shared/ui/table/table";
 import { AdminPagination } from "@/components/admin/shared/admin-pagination";
 import { cn } from "@/lib/utils";
-import type { VocationFruit } from "@/lib/vocation/types";
+import type { VocationFruit, VocationType } from "@/lib/vocation/types";
 import Image from "next/image";
 
 const actionButtonClassName =
@@ -32,6 +32,17 @@ type AdminVocationFruitsTableProps = {
   onDelete: (fruitId: string) => void;
 };
 
+
+function getVocationTitle(vocationType: VocationType) {
+  switch (vocationType) {
+    case "brother":
+      return "Thầy";
+    case "sister":
+      return "Dì";
+    case "priest":
+      return "Cha";
+  }
+}
 export function AdminVocationFruitsTable({
   fruits,
   editingId,
@@ -86,7 +97,7 @@ export function AdminVocationFruitsTable({
                       />
                     ) : null}
                     <div>
-                      <p className="font-medium text-card-foreground">{fruit.fullName}</p>
+                      <p className="font-medium text-card-foreground">{getVocationTitle(fruit.vocationType)} {fruit.person?.saintName} {fruit.fullName}</p>
                       {fruit.currentAssignment ? (
                         <p className="mt-0.5 text-xs text-muted-foreground">
                           {fruit.currentAssignment}

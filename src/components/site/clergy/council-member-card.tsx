@@ -74,14 +74,21 @@ export function CouncilMemberCard({
       >
         {member.position}
       </p>
+      <h2
+        className={cn(
+          "font-display font-bold tracking-tight text-accent! leading-snug",
+        )}
+      >
+        {member.saintName}
+      </h2>
       <h3
         className={cn(
-          "font-display font-bold tracking-tight text-primary leading-snug",
+          "mt-0.5 font-display font-bold tracking-tight text-primary leading-snug",
           styles.name,
         )}
       >
         {member.fullName}
       </h3>
-    </article>
+    </article >
   );
 }

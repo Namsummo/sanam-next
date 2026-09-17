@@ -21,42 +21,46 @@ function getEventStartDateTime(event: ParishEvent): Date {
   return date;
 }
 
-function sortEventsForDisplay(events: ParishEvent[]): ParishEvent[] {
+const HOME_EVENT_COUNT = 4;
+
+function isUpcomingEvent(event: ParishEvent, today: Date): boolean {
+  const endDate = event.endDate ?? event.startDate;
+  return parseDateOnly(endDate).getTime() >= today.getTime();
+}
+
+function sortFeaturedEvents(events: ParishEvent[]): ParishEvent[] {
   return [...events].sort((a, b) => {
-    if (a.isFeatured !== b.isFeatured) {
-      return a.isFeatured ? -1 : 1;
-    }
-
-    if (a.isFeatured && b.isFeatured) {
-      const orderA = a.featuredOrder ?? Number.MAX_SAFE_INTEGER;
-      const orderB = b.featuredOrder ?? Number.MAX_SAFE_INTEGER;
-      if (orderA !== orderB) return orderA - orderB;
-    }
-
+    const orderA = a.featuredOrder ?? Number.MAX_SAFE_INTEGER;
+    const orderB = b.featuredOrder ?? Number.MAX_SAFE_INTEGER;
+    if (orderA !== orderB) return orderA - orderB;
     return getEventStartDateTime(a).getTime() - getEventStartDateTime(b).getTime();
   });
 }
 
 export async function EventsHomeSection() {
-  const res = await getPublicEvents({ limit: 50 });
-  const events = res.events.map(toParishEvent);
+  const [featuredRes, publicRes] = await Promise.all([
+    getPublicEvents({ featured: true, limit: 20 }),
+    getPublicEvents({ limit: 50 }),
+  ]);
 
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
+  const featuredById = new Map<string, ParishEvent>();
+  for (const event of [...featuredRes.events, ...publicRes.events].map(toParishEvent)) {
+    if (event.isFeatured) featuredById.set(event.id, event);
+  }
+  const featured = sortFeaturedEvents([...featuredById.values()]);
+  const featuredIds = new Set(featured.map((event) => event.id));
 
-  const upcoming = events.filter((event) => {
-    const endDate = event.endDate ?? event.startDate;
-    return parseDateOnly(endDate).getTime() >= now.getTime();
-  });
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  const displayPool =
-    upcoming.length > 0
-      ? upcoming
-      : [...events].sort(
-        (a, b) => getEventStartDateTime(b).getTime() - getEventStartDateTime(a).getTime(),
-      );
+  const upcomingFill = publicRes.events
+    .map(toParishEvent)
+    .filter((event) => !featuredIds.has(event.id) && isUpcomingEvent(event, today))
+    .sort(
+      (a, b) => getEventStartDateTime(a).getTime() - getEventStartDateTime(b).getTime(),
+    );
 
-  const displayEvents = sortEventsForDisplay(displayPool).slice(0, 4);
+  const displayEvents = [...featured, ...upcomingFill].slice(0, HOME_EVENT_COUNT);
 
   if (displayEvents.length === 0) {
     return null;

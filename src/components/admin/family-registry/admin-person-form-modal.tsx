@@ -238,14 +238,27 @@ export function AdminPersonFormModal({
 
         <FieldSeparator>Thông tin Giáo hội</FieldSeparator>
 
-        <ControlledField control={form.control} name="giaoHo" label="Giáo họ">
+        <ControlledField control={form.control} name="giaoHo" label="Giáo họ/ Giáo khu">
           {({ controlProps }) => (
-            <Input placeholder="Giáo họ..." {...controlProps} />
+            <Input placeholder="Giáo họ/ Giáo khu..." {...controlProps} />
           )}
         </ControlledField>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ControlledField control={form.control} name="giaoXu" label="Giáo xứ">
+          <ControlledField
+            control={form.control}
+            name="giaoXu"
+            label={
+              <>
+                Giáo xứ <RequiredMark />
+              </>
+            }
+            rules={{
+              required: "Vui lòng nhập giáo xứ",
+              validate: (value) =>
+                Boolean(value.trim()) || "Vui lòng nhập giáo xứ",
+            }}
+          >
             {({ controlProps }) => (
               <Input placeholder="Giáo xứ..." {...controlProps} />
             )}
@@ -264,14 +277,14 @@ export function AdminPersonFormModal({
 
         <FieldSeparator>Bí tích</FieldSeparator>
 
-        <SacramentFields form={form} prefix="baptism" label="Rửa tội" />
+        <SacramentFields form={form} prefix="baptism" label="1.Rửa tội" />
         <SacramentFields
           form={form}
           prefix="firstCommunion"
-          label="Rước lễ lần đầu"
+          label="2.Rước lễ lần đầu"
         />
-        <SacramentFields form={form} prefix="confirmation" label="Thêm sức" />
-        <SacramentFields form={form} prefix="marriage" label="Hôn phối" />
+        <SacramentFields form={form} prefix="confirmation" label="3.Thêm sức" />
+        <SacramentFields form={form} prefix="marriage" label="4.Hôn phối" />
 
         <FieldSeparator />
 
@@ -330,11 +343,11 @@ function SacramentFields({
         <ControlledField
           control={form.control}
           name={churchField}
-          label="Nhà thờ"
+          label="Địa điểm"
         >
           {({ controlProps }) => (
             <Input
-              placeholder="Nhà thờ Sa Nam"
+              placeholder="Giáo xứ, Giáo phận..."
               {...controlProps}
               value={controlProps.value ?? ""}
             />

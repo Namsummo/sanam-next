@@ -14,7 +14,10 @@ import { AdminVocationFruitFilters } from "@/components/admin/vocation-fruits/ad
 import { AdminVocationFruitsTable } from "@/components/admin/vocation-fruits/admin-vocation-fruits-table";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import { getAccessToken } from "@/lib/admin/auth-session";
+import type { Person } from "@/lib/family-registry/types";
 import type { VocationFruit, VocationType } from "@/lib/vocation/types";
+import { getAllPersons } from "@/shared/services/family-registry-api";
+import { uploadImage } from "@/shared/services/news-api";
 import {
   getAllVocationFruits,
   createVocationFruit,
@@ -42,6 +45,7 @@ export function AdminVocationFruitsManager() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | VocationType>("all");
   const [formOpen, setFormOpen] = useState(false);
+  const [persons, setPersons] = useState<Person[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<VocationFruit | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -84,6 +88,17 @@ export function AdminVocationFruitsManager() {
     // eslint-disable-next-line
     fetchFruits();
   }, [fetchFruits]);
+
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) return;
+
+    getAllPersons(token)
+      .then(setPersons)
+      .catch(() => {
+        setPersons([]);
+      });
+  }, []);
 
   function closeForm() {
     setFormOpen(false);
@@ -139,11 +154,11 @@ export function AdminVocationFruitsManager() {
 
     try {
       const data = {
-        personId: values.personId,
+        personId: values.personId.trim(),
         vocationType: values.vocationType,
-        religiousOrder: values.religiousOrder.trim() || undefined,
-        currentAssignment: values.currentAssignment.trim() || undefined,
-        vocationYear: values.vocationYear ? Number(values.vocationYear) : undefined,
+        religiousOrder: values.religiousOrder.trim() || null,
+        currentAssignment: values.currentAssignment.trim() || null,
+        vocationYear: values.vocationYear ? Number(values.vocationYear) : null,
       };
 
       if (editingId) {
@@ -231,8 +246,30 @@ export function AdminVocationFruitsManager() {
         open={formOpen}
         defaultValues={formDefaults}
         editingId={editingId}
+        persons={persons}
         onClose={closeForm}
         onSubmit={handleFormSubmit}
+        onUploadImage={async (file) => {
+          const token = getAccessToken();
+          if (!token) throw new Error("Not authenticated");
+          return uploadImage(token, file);
+        }}
+        onPersonCreated={(person) => {
+          setPersons((current) => {
+            const personId = person.id || (person as Person & { _id?: string })._id;
+            if (
+              !personId ||
+              current.some(
+                (item) =>
+                  item.id === personId ||
+                  (item as Person & { _id?: string })._id === personId,
+              )
+            ) {
+              return current;
+            }
+            return [person, ...current];
+          });
+        }}
       />
 
       <AdminConfirmDialog

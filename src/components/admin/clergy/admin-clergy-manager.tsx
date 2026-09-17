@@ -31,8 +31,10 @@ import {
   toggleClergyHomepageVisibility,
 } from "@/shared/services/clergy-api";
 import { uploadEventImage } from "@/shared/services/events-api";
+import { getAllPersons } from "@/shared/services/family-registry-api";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import type { ClergyMember } from "@/lib/clergy/types";
+import type { Person } from "@/lib/family-registry/types";
 
 const SEARCH_DEBOUNCE_MS = 1000;
 const PAGE_SIZE = 11;
@@ -55,6 +57,7 @@ export function AdminClergyManager() {
   const [formOpen, setFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ClergyMember | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [persons, setPersons] = useState<Person[]>([]);
   const [extraCouncilTerms, setExtraCouncilTerms] = useState<OrganizationTerm[]>(
     () => loadExtraCouncilTerms(),
   );
@@ -107,11 +110,7 @@ export function AdminClergyManager() {
         ...(typeFilter !== "all" ? { type: typeFilter } : {}),
         ...(termFilter !== "all" ? { termId: termFilter } : {}),
       });
-      setMembers(
-        res.members
-          .map(toClergyMember)
-          .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999)),
-      );
+      setMembers(res.members.map(toClergyMember));
       setTotalItems(res.pagination.total);
       setTotalPages(res.pagination.totalPages);
     } catch (err) {
@@ -126,6 +125,17 @@ export function AdminClergyManager() {
     // eslint-disable-next-line
     fetchMembers();
   }, [fetchMembers]);
+
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) return;
+
+    getAllPersons(token)
+      .then(setPersons)
+      .catch(() => {
+        setPersons([]);
+      });
+  }, []);
 
   function closeForm() {
     setFormOpen(false);
@@ -233,7 +243,7 @@ export function AdminClergyManager() {
 
     try {
       const data = {
-        personId: values.personId,
+        personId: values.personId.trim(),
         type: values.type,
         position: values.position.trim(),
         motto: values.motto.trim() || undefined,
@@ -288,7 +298,7 @@ export function AdminClergyManager() {
           </div>
           <button type="button" className='bg-accent text-white px-4 py-2 rounded-xl cursor-pointer flex items-center gap-2 justify-center' onClick={openCreateForm}>
             <Plus className="size-4" aria-hidden />
-            Thêm thành viên
+            Thêm mục vụ
           </button>
         </div>
       </div>
@@ -338,16 +348,26 @@ export function AdminClergyManager() {
         defaultValues={formDefaults}
         editingId={editingId}
         councilTerms={councilTerms}
+        persons={persons}
         onClose={closeForm}
         onSubmit={handleFormSubmit}
         onUploadImage={handleUploadImage}
         onTermCreated={handleTermCreated}
+        onPersonCreated={(person) => {
+          setPersons((current) => {
+            const personId = person.id || (person as Person & { _id?: string })._id;
+            if (!personId || current.some((item) => item.id === personId || (item as Person & { _id?: string })._id === personId)) {
+              return current;
+            }
+            return [person, ...current];
+          });
+        }}
       />
 
       <AdminConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
-        title="Xóa thành viên"
+        title="Xóa mục vụ"
         description={`Bạn có chắc chắn muốn xóa "${deleteTarget?.fullName}"? Hành động này không thể hoàn tác.`}
         confirmLabel="Xóa"
         cancelLabel="Hủy"

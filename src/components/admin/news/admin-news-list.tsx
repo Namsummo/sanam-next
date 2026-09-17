@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { getAccessToken } from "@/lib/admin/auth-session";
@@ -9,13 +8,16 @@ import {
   getAllNews,
   deleteNews,
   toggleNewsVisibility,
+  getNewsById,
   type NewsArticleResponse,
   type PaginationInfo,
   getCategories,
   deleteCategory,
+  ensureNewsSections,
   type NewsCategoryResponse,
 } from "@/shared/services/news-api";
 import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
+import { AdminNewsFormModal } from "@/components/admin/news/admin-news-form";
 import {
   AdminNewsFilters,
   type NewsVisibilityFilter,
@@ -25,7 +27,7 @@ import {
   NEWS_PAGE_SIZE,
 } from "@/components/admin/news/admin-news-table";
 
-const SEARCH_DEBOUNCE_MS = 1500;
+const SEARCH_DEBOUNCE_MS = 800;
 
 export function AdminNewsList() {
   const router = useRouter();
@@ -33,72 +35,81 @@ export function AdminNewsList() {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [categories, setCategories] = useState<NewsCategoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [fetching, setFetching] = useState(false);
   const [searchDraft, setSearchDraft] = useState("");
   const [search, setSearch] = useState("");
-  const [visibility, setVisibility] = useState<NewsVisibilityFilter>("");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [visibility, setVisibility] = useState<NewsVisibilityFilter>("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<NewsArticleResponse | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
   const [deletingCategory, setDeletingCategory] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<NewsArticleResponse | null>(null);
 
-  const loadArticles = useCallback(async () => {
+  const loadArticles = useCallback(async (signal?: AbortSignal) => {
     const token = getAccessToken();
     if (!token) {
       router.push("/admin/login");
       return;
     }
 
-    setFetching(true);
     try {
       const data = await getAllNews(token, {
         page,
         limit: NEWS_PAGE_SIZE,
-        ...(visibility ? { visibility } : {}),
-        ...(categoryFilter ? { categoryId: categoryFilter } : {}),
+        ...(visibility !== "all" ? { visibility } : {}),
+        ...(categoryFilter !== "all" ? { categoryId: categoryFilter } : {}),
         ...(search ? { search } : {}),
+        signal,
       });
+      if (signal?.aborted) return;
       setArticles(data.articles);
       setPagination(data.pagination);
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       console.error("Failed to fetch articles:", err);
     } finally {
-      setLoading(false);
-      setFetching(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }, [categoryFilter, page, router, search, visibility]);
 
   useEffect(() => {
-    async function fetchData() {
-      await loadArticles();
-    }
-    fetchData();
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      void loadArticles(controller.signal);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
   }, [loadArticles]);
 
   useEffect(() => {
-    getCategories()
-      .then(setCategories)
-      .catch(() => undefined);
+    async function loadCategories() {
+      try {
+        const existing = await getCategories();
+        const token = getAccessToken();
+        setCategories(
+          token ? await ensureNewsSections(token, existing) : existing,
+        );
+      } catch {
+        // Keep empty if API is unavailable.
+      }
+    }
+
+    loadCategories();
   }, []);
 
   useEffect(() => {
     const trimmed = searchDraft.trim();
-
-    if (!trimmed) {
-      async function fetchData() {
-        setSearch("");
-        setPage(1);
-      }
-      fetchData();
-      return;
-    }
-
     const timer = window.setTimeout(() => {
       setSearch(trimmed);
       setPage(1);
-    }, SEARCH_DEBOUNCE_MS);
+    }, trimmed ? SEARCH_DEBOUNCE_MS : 0);
 
     return () => window.clearTimeout(timer);
   }, [searchDraft]);
@@ -111,8 +122,8 @@ export function AdminNewsList() {
   function handleClearFilters() {
     setSearchDraft("");
     setSearch("");
-    setVisibility("");
-    setCategoryFilter("");
+    setVisibility("all");
+    setCategoryFilter("all");
     setPage(1);
   }
 
@@ -139,6 +150,43 @@ export function AdminNewsList() {
       );
     } catch (err) {
       console.error("Failed to toggle visibility:", err);
+    }
+  }
+
+  function handleCreate() {
+    setEditingArticle(null);
+    setFormOpen(true);
+  }
+
+  async function handleEdit(id: string) {
+    const token = getAccessToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    try {
+      const article = await getNewsById(token, id);
+      setEditingArticle(article);
+      setFormOpen(true);
+    } catch (err) {
+      console.error("Failed to load article:", err);
+    }
+  }
+
+  function handleCloseForm() {
+    setFormOpen(false);
+    setEditingArticle(null);
+  }
+
+  async function handleFormSaved() {
+    await loadArticles();
+    try {
+      const existing = await getCategories();
+      const token = getAccessToken();
+      setCategories(token ? await ensureNewsSections(token, existing) : existing);
+    } catch {
+      // Keep current categories if refresh fails.
     }
   }
 
@@ -176,7 +224,7 @@ export function AdminNewsList() {
       await deleteCategory(token, deletingCategoryId);
       setCategories((prev) => prev.filter((category) => category._id !== deletingCategoryId));
       if (categoryFilter === deletingCategoryId) {
-        setCategoryFilter("");
+        setCategoryFilter("all");
       }
     } catch (err) {
       console.error(err);
@@ -193,13 +241,14 @@ export function AdminNewsList() {
         <h1 className="font-display text-2xl font-semibold text-card-foreground">
           Quản lý Tin tức
         </h1>
-        <Link
-          href="/admin/news/create"
+        <button
+          type="button"
+          onClick={handleCreate}
           className="inline-flex items-center gap-2 rounded-[10px] bg-accent px-5 py-2.5 font-display text-sm font-semibold uppercase text-white transition-colors hover:bg-accent/90"
         >
           <Plus className="size-4" />
           Thêm bài viết
-        </Link>
+        </button>
       </div>
 
       <AdminNewsFilters
@@ -222,14 +271,18 @@ export function AdminNewsList() {
       ) : articles.length === 0 ? (
         <div className="rounded-[20px] border border-dashed border-border bg-card p-12 text-center">
           <p className="text-muted-foreground">
-            {search || visibility || categoryFilter
+            {search || visibility !== "all" || categoryFilter !== "all"
               ? "Không tìm thấy bài viết phù hợp."
               : (
                 <>
                   Chưa có bài viết nào.{" "}
-                  <Link href="/admin/news/create" className="text-accent hover:underline">
+                  <button
+                    type="button"
+                    onClick={handleCreate}
+                    className="text-accent hover:underline"
+                  >
                     Tạo bài viết đầu tiên
-                  </Link>
+                  </button>
                 </>
               )}
           </p>
@@ -238,13 +291,20 @@ export function AdminNewsList() {
         <AdminNewsTable
           articles={articles}
           pagination={pagination}
-          fetching={fetching}
           onPageChange={setPage}
-          onEdit={(id) => router.push(`/admin/news/${id}/edit`)}
+          onEdit={handleEdit}
           onToggleVisibility={handleToggleVisibility}
           onDelete={handleDelete}
         />
       )}
+
+      <AdminNewsFormModal
+        key={formOpen ? editingArticle?._id ?? "new" : "closed"}
+        open={formOpen}
+        article={editingArticle}
+        onClose={handleCloseForm}
+        onSaved={handleFormSaved}
+      />
 
       <AdminConfirmDialog
         open={deleteTarget !== null}

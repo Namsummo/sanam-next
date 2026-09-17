@@ -1,4 +1,4 @@
-export type PublishStatus = "draft" | "published";
+export type PublishStatus = "published" | "draft";
 
 // Mùa phụng vụ
 

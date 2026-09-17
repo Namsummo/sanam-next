@@ -1,4 +1,6 @@
 import type { ClergyMember } from "@/lib/clergy/types";
+import type { Person } from "@/lib/family-registry/types";
+import { getPublicFamilyRegistryData } from "@/shared/services/family-registry-api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -11,7 +13,7 @@ function authHeaders(token: string): HeadersInit {
 export interface ApiClergyResponse {
   _id: string;
   personId: string;
-  person?: any;
+  person?: Person;
   type: 1 | 2;
   fullName: string;
   position: string;
@@ -23,6 +25,7 @@ export interface ApiClergyResponse {
   showOnHomepage?: boolean;
   image?: string | null;
   ordinationDate?: string | null;
+  saintName?: string | null;
   patronSaint?: string | null;
   patronDate?: string | null;
   hometown?: string | null;
@@ -41,6 +44,10 @@ export interface PaginatedClergyResponse {
   };
 }
 
+function asImageUrl(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
 export function toClergyMember(data: ApiClergyResponse): ClergyMember {
   return {
     id: data._id,
@@ -55,9 +62,9 @@ export function toClergyMember(data: ApiClergyResponse): ClergyMember {
     sortOrder: data.sortOrder ?? undefined,
     isVisible: data.isVisible,
     showOnHomepage: data.showOnHomepage ?? false,
-    image: data.image || undefined,
+    image: asImageUrl(data.image) || asImageUrl(data.person?.profileImage),
     ordinationDate: data.ordinationDate || undefined,
-    saintName: data.patronSaint || undefined,
+    saintName: data.saintName || data.patronSaint || data.person?.saintName || undefined,
     patronSaint: data.patronSaint || undefined,
     patronDate: data.patronDate || undefined,
     hometown: data.hometown || undefined,
@@ -89,7 +96,31 @@ export async function getPublicClergy(params?: {
   const query = searchParams.toString();
   const res = await fetch(`${API_BASE}/api/clergy${query ? `?${query}` : ""}`);
   if (!res.ok) throw new Error("Failed to fetch clergy members");
-  return res.json();
+
+  const data = (await res.json()) as { members: ApiClergyResponse[] };
+
+  // Public clergy does not populate `person` like /api/admin/clergy.
+  const personsById = await getPublicPersonMap();
+  return {
+    members: data.members.map((member) => ({
+      ...member,
+      person: member.person ?? personsById.get(member.personId),
+    })),
+  };
+}
+
+async function getPublicPersonMap(): Promise<Map<string, Person>> {
+  try {
+    const { persons } = await getPublicFamilyRegistryData();
+    return new Map(
+      persons.flatMap((person) => {
+        const id = person.id || (person as Person & { _id?: string })._id;
+        return id ? [[id, person] as const] : [];
+      }),
+    );
+  } catch {
+    return new Map();
+  }
 }
 
 export async function getPublicClergyTerms(): Promise<

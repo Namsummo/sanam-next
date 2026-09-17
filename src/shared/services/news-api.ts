@@ -1,3 +1,8 @@
+import {
+  NEWS_SECTIONS,
+  sortNewsCategoriesBySection,
+} from "@/lib/news/categories";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 function authHeaders(token: string): HeadersInit {
@@ -101,6 +106,7 @@ export async function getAllNews(
     visibility?: "visible" | "hidden";
     categoryId?: string;
     search?: string;
+    signal?: AbortSignal;
   },
 ): Promise<PaginatedResponse> {
   const searchParams = new URLSearchParams();
@@ -113,7 +119,7 @@ export async function getAllNews(
   const query = searchParams.toString();
   const res = await fetch(
     `${API_BASE}/api/admin/news${query ? `?${query}` : ""}`,
-    { headers: authHeaders(token) },
+    { headers: authHeaders(token), signal: params?.signal },
   );
   if (!res.ok) throw new Error("Failed to fetch news");
   return res.json();
@@ -208,6 +214,31 @@ export async function createCategory(
     throw new Error(err.message);
   }
   return res.json();
+}
+
+export async function ensureNewsSections(
+  token: string,
+  existing: NewsCategoryResponse[] = [],
+): Promise<NewsCategoryResponse[]> {
+  const bySlug = new Map(existing.map((category) => [category.slug, category]));
+  const next = [...existing];
+
+  for (const section of NEWS_SECTIONS) {
+    if (bySlug.has(section.id)) continue;
+    try {
+      const created = await createCategory(token, {
+        slug: section.id,
+        label: section.label,
+        sortOrder: section.sortOrder,
+      });
+      bySlug.set(created.slug, created);
+      next.push(created);
+    } catch {
+      // Editors without permission still see whatever the API already has.
+    }
+  }
+
+  return sortNewsCategoriesBySection(next);
 }
 
 export async function uploadImage(token: string, file: File): Promise<string> {

@@ -33,7 +33,7 @@ function emptyFeast(seasonId = "", rankId = ""): FeastPayload {
     name: "",
     rankId,
     seasonId,
-    status: "draft",
+    status: "published",
   };
 }
 
@@ -60,7 +60,15 @@ type AdminFeastFormDialogProps = {
   onDeleteRank: (id: string) => Promise<void>;
 };
 
-export function AdminFeastFormDialog({
+export function AdminFeastFormDialog(props: AdminFeastFormDialogProps) {
+  const instanceKey = props.open
+    ? (props.editingFeast?.id ?? "create")
+    : "closed";
+
+  return <FeastFormDialogInner key={instanceKey} {...props} />;
+}
+
+function FeastFormDialogInner({
   open,
   onOpenChange,
   editingFeast = null,
@@ -84,20 +92,6 @@ export function AdminFeastFormDialog({
   const [submitting, setSubmitting] = useState(false);
   const [deletingRank, setDeletingRank] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      setForm(
-        editingFeast
-          ? feastToFormState(editingFeast)
-          : emptyFeast(seasons[0]?.id ?? "", feastRanks[0]?.id ?? ""),
-      );
-      setShowRankForm(false);
-      setEditingRank(null);
-      setError(null);
-    }
-    onOpenChange(nextOpen);
-  };
 
   const seasonOptions = useMemo(
     () => seasons.map((season) => ({ value: season.id, label: season.name })),
@@ -183,7 +177,7 @@ export function AdminFeastFormDialog({
     <>
       <AdminFormDialog
         open={open}
-        onOpenChange={handleOpenChange}
+        onOpenChange={onOpenChange}
         title={isEdit ? "Sửa ngày lễ" : "Thêm ngày lễ"}
         footer={
           <div className="flex justify-end gap-2">
@@ -318,8 +312,8 @@ export function AdminFeastFormDialog({
                   }))
                 }
                 options={[
-                  { value: "draft", label: STATUS_LABELS.draft },
                   { value: "published", label: STATUS_LABELS.published },
+                  { value: "draft", label: STATUS_LABELS.draft },
                 ]}
               />
             </label>

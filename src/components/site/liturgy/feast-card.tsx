@@ -1,6 +1,6 @@
 import { getFeastRankLabel } from "@/lib/liturgy/helpers";
 import type { LiturgyFeast } from "@/lib/liturgy/types";
-import { formatIsoDateToVi } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type FeastCardProps = {
@@ -23,7 +23,7 @@ export function FeastCard({ feast, className }: FeastCardProps) {
         {feast.name}
       </h3>
       <p className="mt-2 font-sans text-sm text-foreground/70">
-        {formatIsoDateToVi(feast.date)}
+        {formatDate(feast.date)}
       </p>
     </article>
   );

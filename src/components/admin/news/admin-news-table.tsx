@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Eye, EyeOff, Pencil, Star, Trash2 } from "lucide-react";
 import { actionButtonClassName } from "@/components/admin/events/admin-events-table";
 import { AdminPagination } from "@/components/admin/shared/admin-pagination";
@@ -12,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/site/shared/ui/table/table";
-import { formatNewsDate } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { NewsArticleResponse, PaginationInfo } from "@/shared/services/news-api";
 
@@ -66,12 +65,13 @@ export function AdminNewsTable({
                 {startIndex + index + 1}
               </TableCell>
               <TableCell className="px-4 py-3 whitespace-normal">
-                <Link
-                  href={`/admin/news/${article._id}/edit`}
-                  className="font-medium text-card-foreground transition-colors hover:text-accent"
+                <button
+                  type="button"
+                  onClick={() => onEdit(article._id)}
+                  className="text-left font-medium text-card-foreground transition-colors hover:text-accent"
                 >
                   {article.title}
-                </Link>
+                </button>
               </TableCell>
               <TableCell className="px-4 py-3 text-card-foreground">
                 {article.categoryId?.label ?? "—"}
@@ -103,7 +103,7 @@ export function AdminNewsTable({
                 </button>
               </TableCell>
               <TableCell className="px-4 py-3 text-muted-foreground">
-                {formatNewsDate(article.publishedAt)}
+                {formatDate(article.publishedAt)}
               </TableCell>
               <TableCell className="px-4 py-3 text-right">
                 <div className="inline-flex items-center gap-2">

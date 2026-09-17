@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { Plus, Trash2, CheckCircle2, Circle } from "lucide-react";
 import { AdminOrganizationTermMembersTable } from "./admin-organization-term-members-table";
 import { AdminClergyNewTermForm } from "@/components/admin/clergy/admin-clergy-new-term-form";
+import { getAccessToken } from "@/lib/admin/auth-session";
 import {
   createEmptyExecutiveMember,
   normalizeExecutiveMembers,
@@ -25,8 +26,10 @@ import type {
   ExecutiveTerm,
   OrganizationTerm,
 } from "@/lib/organization/types";
+import type { Person } from "@/lib/family-registry/types";
 import { cn } from "@/lib/utils";
 import { slugify } from "@/shared/lib/slugify";
+import { getAllPersons } from "@/shared/services/family-registry-api";
 
 type AdminOrganizationMembersTabProps = {
   terms: ExecutiveTerm[];
@@ -41,13 +44,24 @@ export function AdminOrganizationMembersTab({
   onTermsChange,
   onError,
   onImportMessage,
-  onUploadImage,
 }: AdminOrganizationMembersTabProps) {
   const [showNewTermForm, setShowNewTermForm] = useState(false);
+  const [persons, setPersons] = useState<Person[]>([]);
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const importTermIndexRef = useRef<number | null>(null);
 
   const sortedTerms = useMemo(() => sortExecutiveTermsNewestFirst(terms), [terms]);
+
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) return;
+
+    getAllPersons(token)
+      .then(setPersons)
+      .catch(() => {
+        setPersons([]);
+      });
+  }, []);
 
   function findTermIndex(termKey: string): number {
     return terms.findIndex((term) => getExecutiveTermKey(term) === termKey);
@@ -296,6 +310,7 @@ export function AdminOrganizationMembersTab({
                 <AdminOrganizationTermMembersTable
                   termIndex={tIdx}
                   members={term.members}
+                  persons={persons}
                   onAddMember={() => handleAddMember(tIdx)}
                   onRemoveMember={(memberIndex) => handleRemoveMember(tIdx, memberIndex)}
                   onUpdateMember={(memberIndex, updates) =>
@@ -304,7 +319,6 @@ export function AdminOrganizationMembersTab({
                   onDownloadTemplate={downloadMembersExcelTemplate}
                   onImport={() => handleImportMembersClick(tIdx)}
                   onExport={() => handleExportMembers(tIdx)}
-                  onUploadImage={onUploadImage}
                 />
               </div>
             );

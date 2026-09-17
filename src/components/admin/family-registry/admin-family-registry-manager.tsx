@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useRef, useState } from "react";
-import { Plus, Search, Users } from "lucide-react";
+import { Plus, Search, User, Users } from "lucide-react";
 import { AdminPersonFormModal } from "./admin-person-form-modal";
 import { AdminFamilyFormModal } from "./admin-family-form-modal";
 import { AdminPersonsTable } from "./admin-persons-table";
@@ -45,7 +45,7 @@ export function AdminFamilyRegistryManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [tab, setTab] = useState<Tab>("families");
+  const [tab, setTab] = useState<Tab>("persons");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Person form
@@ -208,7 +208,6 @@ export function AdminFamilyRegistryManager() {
     }
   }
 
-  // ── Delete ───────────────────────────────────────────────────────
   async function handleConfirmDelete() {
     if (!deleteTarget) return;
     const token = getAccessToken();
@@ -238,21 +237,20 @@ export function AdminFamilyRegistryManager() {
     }
   }
 
-  // ── Search ───────────────────────────────────────────────────────
   const q = searchQuery.toLowerCase();
   const filteredPersons = q
     ? persons.filter(
-        (p) =>
-          p.fullName.toLowerCase().includes(q) ||
-          (p.saintName?.toLowerCase().includes(q) ?? false),
-      )
+      (p) =>
+        p.fullName.toLowerCase().includes(q) ||
+        (p.saintName?.toLowerCase().includes(q) ?? false),
+    )
     : persons;
   const filteredFamilies = q
     ? families.filter(
-        (f) =>
-          f.name.toLowerCase().includes(q) ||
-          f.familyCode.toLowerCase().includes(q),
-      )
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        f.familyCode.toLowerCase().includes(q),
+    )
     : families;
 
   if (loading) {
@@ -286,19 +284,21 @@ export function AdminFamilyRegistryManager() {
       <div className="flex items-center gap-2 border-b border-border pb-3">
         <button
           type="button"
+          className={`${tabBtn} ${tab === "persons" ? "bg-accent text-white" : "bg-muted text-card-foreground hover:bg-muted/80"}`}
+          onClick={() => setTab("persons")}
+        >
+          <User className="size-4" />
+          Hồ sơ cá nhân
+        </button>
+        <button
+          type="button"
           className={`${tabBtn} ${tab === "families" ? "bg-accent text-white" : "bg-muted text-card-foreground hover:bg-muted/80"}`}
           onClick={() => setTab("families")}
         >
           <Users className="size-4" />
           Gia đình
         </button>
-        <button
-          type="button"
-          className={`${tabBtn} ${tab === "persons" ? "bg-accent text-white" : "bg-muted text-card-foreground hover:bg-muted/80"}`}
-          onClick={() => setTab("persons")}
-        >
-          Hồ sơ cá nhân
-        </button>
+
 
         <div className="ml-auto flex items-center gap-2">
           <div className="relative">

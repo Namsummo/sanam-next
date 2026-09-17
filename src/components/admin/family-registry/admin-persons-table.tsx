@@ -12,7 +12,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { Person } from "@/lib/family-registry/types";
 import { GENDER_LABELS, MARITAL_STATUS_LABELS, PERSON_STATUS_LABELS } from "@/lib/family-registry/constants";
-import { formatDate, getPersonStatusBadgeClassName } from "@/lib/family-registry/helpers";
+import { getPersonStatusBadgeClassName } from "@/lib/family-registry/helpers";
+import { formatDate } from "@/lib/format";
 
 const actionBtn =
   "inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border bg-card px-3 text-sm text-card-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50";
@@ -66,7 +67,7 @@ export function AdminPersonsTable({
                   </TableCell>
                   <TableCell>{person.saintName || "—"}</TableCell>
                   <TableCell className="font-medium">{person.fullName}</TableCell>
-                  <TableCell className="tabular-nums">{formatDate(person.dateOfBirth)}</TableCell>
+                  <TableCell className="tabular-nums">{formatDate(person.dateOfBirth) || "—"}</TableCell>
                   <TableCell>{person.gender ? GENDER_LABELS[person.gender] ?? "—" : "—"}</TableCell>
                   <TableCell>
                     <span className={getPersonStatusBadgeClassName(person.status)}>

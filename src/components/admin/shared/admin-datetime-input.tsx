@@ -1,25 +1,49 @@
-import type { ChangeEvent, ComponentProps } from "react";
+"use client";
+
+import type { ChangeEvent, ComponentProps, MouseEvent } from "react";
 import { Calendar, Clock, X } from "lucide-react";
 import { Input } from "@/components/site/shared/ui/input/input";
 import { cn } from "@/lib/utils";
 
-const pickerIndicatorClass =
-  "[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0";
+const hideNativePickerClass =
+  "[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none";
+
+function openNativePicker(event: MouseEvent<HTMLButtonElement>) {
+  const input = event.currentTarget.parentElement?.querySelector("input");
+  if (!(input instanceof HTMLInputElement) || input.disabled) return;
+
+  try {
+    input.showPicker();
+  } catch {
+    input.focus();
+  }
+}
 
 type AdminDateInputProps = ComponentProps<typeof Input>;
 
-export function AdminDateInput({ className, ...props }: AdminDateInputProps) {
+export function AdminDateInput({
+  className,
+  disabled,
+  ...props
+}: AdminDateInputProps) {
   return (
     <div className="relative">
-      <Calendar
-        className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-        aria-hidden
-      />
+      <button
+        type="button"
+        tabIndex={-1}
+        disabled={disabled}
+        onClick={openNativePicker}
+        aria-label="Chọn ngày"
+        className="absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-muted-foreground transition-colors hover:text-card-foreground disabled:pointer-events-none disabled:opacity-50 hover:cursor-pointer"
+      >
+        <Calendar className="size-4" aria-hidden />
+      </button>
       <Input
         type="date"
+        disabled={disabled}
         className={cn(
           "pl-10 tabular-nums tracking-tight",
-          pickerIndicatorClass,
+          hideNativePickerClass,
           className,
         )}
         {...props}
@@ -34,6 +58,7 @@ export function AdminTimeInput({
   className,
   value,
   onChange,
+  disabled,
   ...props
 }: AdminTimeInputProps) {
   const stringValue = value == null ? "" : String(value);
@@ -48,18 +73,25 @@ export function AdminTimeInput({
 
   return (
     <div className="relative">
-      <Clock
-        className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-        aria-hidden
-      />
+      <button
+        type="button"
+        tabIndex={-1}
+        disabled={disabled}
+        onClick={openNativePicker}
+        aria-label="Chọn giờ"
+        className="absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-muted-foreground transition-colors hover:text-card-foreground disabled:pointer-events-none disabled:opacity-50"
+      >
+        <Clock className="size-4" aria-hidden />
+      </button>
       <Input
         type="time"
         value={value}
         onChange={onChange}
+        disabled={disabled}
         className={cn(
           "pl-10 tabular-nums tracking-tight",
           hasValue && "pr-10",
-          pickerIndicatorClass,
+          hideNativePickerClass,
           className,
         )}
         {...props}
@@ -68,8 +100,9 @@ export function AdminTimeInput({
         <button
           type="button"
           onClick={handleClear}
+          disabled={disabled}
           aria-label="Xóa giờ"
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-card-foreground"
+          className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground transition-colors hover:text-card-foreground disabled:pointer-events-none disabled:opacity-50"
         >
           <X className="size-4" />
         </button>

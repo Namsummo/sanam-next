@@ -11,6 +11,7 @@ import {
 } from "@/components/site/shared/ui/table/table";
 import { AdminPagination } from "@/components/admin/shared/admin-pagination";
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/format";
 import type { ApiUser } from "@/shared/services/users-api";
 
 export const USERS_PAGE_SIZE = 10;
@@ -41,20 +42,6 @@ const ROLE_BADGE_CLASSES = {
   editor: "bg-blue-100 text-blue-700 border-blue-200",
   viewer: "bg-slate-100 text-slate-600 border-slate-200",
 };
-
-function formatDate(dateString?: string) {
-  if (!dateString) return "-";
-  try {
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return "-";
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-  } catch {
-    return "-";
-  }
-}
 
 export function AdminUsersTable({
   users,
@@ -134,7 +121,7 @@ export function AdminUsersTable({
                     </span>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-sm text-card-foreground">
-                    {formatDate(user.dateOfBirth)}
+                    {formatDate(user.dateOfBirth) || "-"}
                   </TableCell>
                   <TableCell className="px-4 py-3 text-right">
                     <div className="inline-flex items-center gap-2 justify-end">

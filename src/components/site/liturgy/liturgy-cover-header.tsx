@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { cn, resolveApiUrl } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
-import { formatIsoDateToVi } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 
 type LiturgyCoverHeaderProps = {
   title: string;
@@ -23,7 +23,7 @@ export function LiturgyCoverHeader({
   return (
     <div className={cn("overflow-hidden rounded-2xl border border-border bg-card", className)}>
       {imageSrc ? (
-        <div className="relative aspect-21/9 w-full bg-muted">
+        <div className="relative aspect-16/9 w-full bg-muted">
           <Image
             src={imageSrc}
             alt={title}
@@ -41,7 +41,7 @@ export function LiturgyCoverHeader({
           <p className="mt-2 font-sans text-lg font-semibold text-foreground/70 italic">&ldquo;{subtitle}&rdquo;</p>
         ) : null}
         <span className="flex items-center gap-2 text-sm text-foreground/70">
-          <CalendarIcon className="size-4" /> {formatIsoDateToVi(date)}
+          <CalendarIcon className="size-4" /> {formatDate(date)}
         </span>
       </div>
     </div>

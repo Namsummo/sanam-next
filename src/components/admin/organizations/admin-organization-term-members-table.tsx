@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { Download, FileDown, FileUp, Plus, Search, Trash2 } from "lucide-react";
-import { MemberImageUploader } from "./member-image-uploader";
 import { EXECUTIVE_MEMBER_ROLES, normalizeExecutiveMemberRole } from "@/lib/organization/executive-member-roles";
 import {
   EXECUTIVE_MEMBERS_PAGE_SIZE,
@@ -12,6 +11,8 @@ import {
   paginateItems,
 } from "@/lib/organization/executive-members";
 import type { ExecutiveMember } from "@/lib/organization/types";
+import { formatPersonDisplayName } from "@/lib/family-registry/helpers";
+import type { Person } from "@/lib/family-registry/types";
 import { Input } from "@/components/site/shared/ui/input/input";
 import {
   Table,
@@ -21,26 +22,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/site/shared/ui/table/table";
-import { AdminPersonSelector } from "../shared/admin-person-selector";
 import { AdminOutlineButton } from "../shared/admin-outline-button";
 import { AdminSelect } from "../shared/admin-select";
 import { AdminPagination } from "../shared/admin-pagination";
 
+function getPersonRecordId(person: Person): string {
+  return person.id || (person as Person & { _id?: string })._id || "";
+}
+
+function formatPersonParish(person: Person): string | undefined {
+  const parts = [person.giaoHo, person.giaoXu].filter(
+    (part): part is string => Boolean(part?.trim()),
+  );
+  return parts.length > 0 ? parts.join(" - ") : undefined;
+}
+
 type AdminOrganizationTermMembersTableProps = {
   termIndex: number;
   members: ExecutiveMember[];
+  persons: Person[];
   onAddMember: () => void;
   onRemoveMember: (memberIndex: number) => void;
   onUpdateMember: (memberIndex: number, updates: Partial<ExecutiveMember>) => void;
   onDownloadTemplate?: () => void;
   onImport?: () => void;
   onExport?: () => void;
-  onUploadImage?: (file: File) => Promise<string>;
 };
 
 export function AdminOrganizationTermMembersTable({
   termIndex,
   members,
+  persons,
   onAddMember,
   onRemoveMember,
   onUpdateMember,
@@ -50,6 +62,31 @@ export function AdminOrganizationTermMembersTable({
 }: AdminOrganizationTermMembersTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+
+  const personOptions = useMemo(
+    () =>
+      persons
+        .map((person) => ({
+          value: getPersonRecordId(person),
+          label: formatPersonDisplayName(person),
+          description: formatPersonParish(person),
+          image:
+            typeof person.profileImage === "string" && person.profileImage.trim()
+              ? person.profileImage
+              : null,
+        }))
+        .filter((option) => option.value),
+    [persons],
+  );
+
+  const personsById = useMemo(() => {
+    return new Map(
+      persons.flatMap((person) => {
+        const id = getPersonRecordId(person);
+        return id ? [[id, person] as const] : [];
+      }),
+    );
+  }, [persons]);
 
   const filteredMembers = useMemo(
     () => filterIndexedExecutiveMembers(members, searchQuery),
@@ -73,6 +110,19 @@ export function AdminOrganizationTermMembersTable({
   function handleAddMemberClick() {
     onAddMember();
     setPage(getTotalPages(members.length + 1, EXECUTIVE_MEMBERS_PAGE_SIZE));
+  }
+
+  function handlePersonChange(memberIndex: number, personId: string, member: ExecutiveMember) {
+    const person = personsById.get(personId);
+    onUpdateMember(memberIndex, {
+      personId,
+      fullName: person?.fullName || member.fullName,
+      saintName: person?.saintName || member.saintName,
+      patronSaint: person?.saintName || member.patronSaint,
+      image: person?.profileImage || member.image,
+      birthday: person?.dateOfBirth || member.birthday,
+      parish: person?.giaoHo || member.parish,
+    });
   }
 
   return (
@@ -158,7 +208,7 @@ export function AdminOrganizationTermMembersTable({
           {members.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="px-4 py-8 text-center text-xs text-muted-foreground">
-                Chưa có thành viên nào trong ban điều hành khóa này. Hãy bấm "Thêm thành viên".
+                Chưa có thành viên nào trong ban điều hành khóa này. Hãy bấm &quot;Thêm thành viên&quot;.
               </TableCell>
             </TableRow>
           ) : filteredMembers.length === 0 ? (
@@ -174,20 +224,14 @@ export function AdminOrganizationTermMembersTable({
                   {getMemberSortOrder(member, memberIndex)}
                 </TableCell>
                 <TableCell className="min-w-[320px] px-2 whitespace-normal">
-                  <AdminPersonSelector
-                    value={member.personId || (member as any).id}
-                    onChange={(pId, p) => {
-                      onUpdateMember(memberIndex, {
-                        personId: pId,
-                        fullName: p?.fullName || member.fullName,
-                        saintName: p?.saintName || member.saintName,
-                        patronSaint: p?.saintName || member.patronSaint,
-                        image: p?.profileImage || member.image,
-                        birthday: p?.dateOfBirth || member.birthday,
-                        parish: p?.giaoHo || member.parish,
-                      });
-                    }}
-                    label=""
+                  <AdminSelect
+                    value={member.personId || ""}
+                    onChange={(personId) => handlePersonChange(memberIndex, personId, member)}
+                    options={personOptions}
+                    placeholder="Chọn giáo dân"
+                    searchable
+                    className="w-full"
+                    contentClassName="max-h-60"
                   />
                 </TableCell>
                 <TableCell className="min-w-[180px] px-2 whitespace-normal">
@@ -223,4 +267,3 @@ export function AdminOrganizationTermMembersTable({
     </div>
   );
 }
-

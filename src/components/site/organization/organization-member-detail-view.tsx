@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/site/shared/ui/table/table";
 import { DEFAULT_COVER } from "@/lib/image-constants";
-import { formatIsoDateToVi } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { getServiceRecordsByPersonId } from "@/lib/organization/mock-member-service-records";
 import { buildServiceHistoryRows } from "@/lib/organization/service-history";
 import type { MemberPerson, MemberServiceStatus } from "@/lib/organization/types";
@@ -68,7 +68,7 @@ export function OrganizationMemberDetailView({
                     Ngày sinh
                   </p>
                   <p className="text-sm font-semibold text-primary">
-                    {formatIsoDateToVi(person.dateOfBirth)}
+                    {formatDate(person.dateOfBirth)}
                   </p>
                 </div>
               </div>

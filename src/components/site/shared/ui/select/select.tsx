@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { Check, ChevronDown } from "lucide-react";
 import { cn, getAriaInvalidProps } from "@/lib/utils";
@@ -57,6 +58,8 @@ function SelectTrigger({
 function SelectContent({
   className,
   children,
+  header,
+  footer,
   side = "bottom",
   sideOffset = 4,
   align = "start",
@@ -67,7 +70,10 @@ function SelectContent({
   Pick<
     SelectPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset" | "alignItemWithTrigger"
-  >) {
+  > & {
+    header?: ReactNode;
+    footer?: ReactNode;
+  }) {
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Positioner
@@ -81,12 +87,16 @@ function SelectContent({
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            "relative z-50 max-h-(--available-height) min-w-(--anchor-width) overflow-x-hidden overflow-y-auto rounded-[10px] border border-border bg-card text-card-foreground shadow-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "relative z-50 flex max-h-(--available-height) min-w-(--anchor-width) flex-col overflow-hidden rounded-[10px] border border-border bg-card text-card-foreground shadow-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className,
           )}
           {...props}
         >
-          <SelectPrimitive.List className="p-1">{children}</SelectPrimitive.List>
+          {header ? <div className="shrink-0">{header}</div> : null}
+          <SelectPrimitive.List className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-1">
+            {children}
+          </SelectPrimitive.List>
+          {footer ? <div className="shrink-0">{footer}</div> : null}
         </SelectPrimitive.Popup>
       </SelectPrimitive.Positioner>
     </SelectPrimitive.Portal>

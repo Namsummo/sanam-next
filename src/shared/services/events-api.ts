@@ -1,3 +1,9 @@
+import {
+  EVENT_SECTIONS,
+  filterCanonicalEventCategories,
+  getEventCategoryLabel,
+  sortEventCategoriesBySection,
+} from "@/lib/events/categories";
 import type { EventStatus, ParishEvent } from "@/lib/events/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -57,11 +63,14 @@ export interface PaginatedEventsResponse {
 
 export function toParishEvent(data: ApiEventResponse): ParishEvent {
   let categoryId: string | undefined;
+  let categorySlug: string | undefined;
   let categoryLabel: string | undefined;
 
   if (typeof data.categoryId === "object" && data.categoryId) {
     categoryId = data.categoryId._id;
-    categoryLabel = data.categoryId.label;
+    categorySlug = data.categoryId.slug;
+    categoryLabel =
+      getEventCategoryLabel(data.categoryId.slug) ?? data.categoryId.label;
   } else if (typeof data.categoryId === "string") {
     categoryId = data.categoryId;
   }
@@ -80,8 +89,9 @@ export function toParishEvent(data: ApiEventResponse): ParishEvent {
     contentFormat: data.contentFormat,
     image: data.image || undefined,
     categoryId,
+    categorySlug,
     categoryLabel,
-    isFeatured: data.isFeatured,
+    isFeatured: Boolean(data.isFeatured),
     featuredOrder:
       data.featuredOrder != null && Number.isFinite(data.featuredOrder)
         ? data.featuredOrder
@@ -265,6 +275,31 @@ export async function createEventCategory(
     throw new Error(err.message);
   }
   return res.json();
+}
+
+export async function ensureEventSections(
+  token: string,
+  existing: ApiEventCategory[] = [],
+): Promise<ApiEventCategory[]> {
+  const bySlug = new Map(existing.map((category) => [category.slug, category]));
+  const next = [...existing];
+
+  for (const section of EVENT_SECTIONS) {
+    if (bySlug.has(section.id)) continue;
+    try {
+      const created = await createEventCategory(token, {
+        slug: section.id,
+        label: section.label,
+        sortOrder: section.sortOrder,
+      });
+      bySlug.set(created.slug, created);
+      next.push(created);
+    } catch {
+      // Editors without permission still see whatever the API already has.
+    }
+  }
+
+  return filterCanonicalEventCategories(sortEventCategoriesBySection(next));
 }
 
 export async function uploadEventImage(

@@ -1,17 +1,20 @@
-/** ISO 8601 date (YYYY-MM-DD) → DD/MM/YYYY */
-export function formatIsoDateToVi(isoDate?: string): string {
-  const trimmed = isoDate?.trim();
-  if (!trimmed) {
-    return "";
-  }
+/** Hiển thị ngày: DD/MM/YYYY. Chuỗi chỉ ngày (YYYY-MM-DD) tách phần để tránh lệch timezone. */
+export function formatDate(value?: string | null): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return "";
 
-  const parts = trimmed.split("-");
-  if (parts.length === 3) {
-    const [year, month, day] = parts;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const [year, month, day] = trimmed.split("-");
     return `${day}/${month}/${year}`;
   }
 
-  return trimmed;
+  const date = new Date(trimmed);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 const WEEKDAY_LABELS = [
@@ -32,15 +35,6 @@ export function formatWeekdayVi(isoDate: string): string {
   return WEEKDAY_LABELS[day] ?? "";
 }
 
-/** ISO 8601 datetime → ngày tháng tiếng Việt (vd. 20 thg 5, 2026) */
-export function formatNewsDate(iso: string): string {
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(iso));
-}
-
 export function formatEventTime(time?: string): string {
   const trimmed = time?.trim();
   if (!trimmed) {
@@ -59,15 +53,6 @@ export function formatEventTime(time?: string): string {
   return `${hours}h${minutes}`;
 }
 
-export function formatEventDate(isoDate: string): string {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(year, month - 1, day));
-}
-
 type EventDateTimeInput = {
   startDate: string;
   startTime?: string;
@@ -77,11 +62,11 @@ type EventDateTimeInput = {
 };
 
 export function formatEventDateTime(event: EventDateTimeInput): string {
-  const startDateLabel = formatEventDate(event.startDate);
+  const startDateLabel = formatDate(event.startDate);
 
   if (event.allDay) {
     if (event.endDate && event.endDate !== event.startDate) {
-      return `${startDateLabel} – ${formatEventDate(event.endDate)} (cả ngày)`;
+      return `${startDateLabel} – ${formatDate(event.endDate)} (cả ngày)`;
     }
     return `${startDateLabel} (cả ngày)`;
   }
@@ -101,7 +86,7 @@ export function formatEventDateTime(event: EventDateTimeInput): string {
     return startDateLabel;
   }
 
-  const endDateLabel = formatEventDate(endDate);
+  const endDateLabel = formatDate(endDate);
   const endTimeLabel = formatEventTime(event.endTime);
 
   if (startTimeLabel && endTimeLabel) {
@@ -115,12 +100,12 @@ export function getEventDateTimeDisplay(event: EventDateTimeInput): {
   date: string;
   time?: string;
 } {
-  const startDateLabel = formatEventDate(event.startDate);
+  const startDateLabel = formatDate(event.startDate);
 
   if (event.allDay) {
     if (event.endDate && event.endDate !== event.startDate) {
       return {
-        date: `${startDateLabel} – ${formatEventDate(event.endDate)}`,
+        date: `${startDateLabel} – ${formatDate(event.endDate)}`,
         time: "Cả ngày",
       };
     }
@@ -145,7 +130,7 @@ export function getEventDateTimeDisplay(event: EventDateTimeInput): {
     return { date: startDateLabel, time };
   }
 
-  const endDateLabel = formatEventDate(endDate);
+  const endDateLabel = formatDate(endDate);
   const endTimeLabel = formatEventTime(event.endTime);
   const date = `${startDateLabel} – ${endDateLabel}`;
 

@@ -46,7 +46,6 @@ type AdminEventsFiltersProps = AdminEventsFilterState & {
   onStatusFilterChange: (value: "all" | EventStatus) => void;
   onCategoryFilterChange: (value: "all" | string) => void;
   onClear: () => void;
-  onDeleteCategory?: (id: string) => void;
 };
 
 export function AdminEventsFilters({
@@ -58,18 +57,13 @@ export function AdminEventsFilters({
   onStatusFilterChange,
   onCategoryFilterChange,
   onClear,
-  onDeleteCategory,
 }: AdminEventsFiltersProps) {
-  const categoryLabelById = new Map(
-    categories.map((category) => [category._id, category.label]),
-  );
   const showClear = hasActiveEventFilters({ searchQuery, statusFilter, categoryFilter });
 
   const categoryOptions = useMemo(() => {
     const opts = categories.map((cat) => ({
       value: cat._id,
       label: cat.label,
-      showDelete: cat.eventCount === 0,
     }));
     return [{ value: "all", label: ALL_FILTER_VALUE }, ...opts];
   }, [categories]);
@@ -153,8 +147,6 @@ export function AdminEventsFilters({
             }}
             options={categoryOptions}
             placeholder={ALL_FILTER_VALUE}
-            searchable={categoryOptions.length > 5}
-            onDeleteOption={onDeleteCategory}
           />
         </div>
       </div>

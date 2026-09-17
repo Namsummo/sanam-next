@@ -32,7 +32,15 @@ type AdminReflectionFormDialogProps = {
   onUploadImage: (file: File) => Promise<string>;
 };
 
-export function AdminReflectionFormDialog({
+export function AdminReflectionFormDialog(props: AdminReflectionFormDialogProps) {
+  const instanceKey = props.open
+    ? (props.editingReflection?.id ?? "create")
+    : "closed";
+
+  return <ReflectionFormDialogInner key={instanceKey} {...props} />;
+}
+
+function ReflectionFormDialogInner({
   open,
   onOpenChange,
   editingReflection = null,
@@ -48,18 +56,6 @@ export function AdminReflectionFormDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      setForm(
-        editingReflection
-          ? reflectionToFormState(editingReflection)
-          : reflectionToFormState(createEmptyReflection()),
-      );
-      setError(null);
-    }
-    onOpenChange(nextOpen);
-  };
-
   async function handleSave() {
     if (!form.date.trim()) {
       setError("Vui lòng chọn ngày suy niệm");
@@ -67,6 +63,10 @@ export function AdminReflectionFormDialog({
     }
     if (!form.title.trim()) {
       setError("Vui lòng nhập tiêu đề suy niệm");
+      return;
+    }
+    if (!form.coverImage?.trim()) {
+      setError("Vui lòng tải ảnh bìa");
       return;
     }
     if (!form.content.trim()) {
@@ -97,7 +97,7 @@ export function AdminReflectionFormDialog({
   return (
     <AdminFormDialog
       open={open}
-      onOpenChange={handleOpenChange}
+      onOpenChange={onOpenChange}
       title={isEdit ? "Sửa suy niệm" : "Thêm suy niệm"}
       className="sm:max-w-3xl"
       footer={
@@ -163,7 +163,9 @@ export function AdminReflectionFormDialog({
             />
           </label>
           <div className="space-y-2 text-sm">
-            <span>Ảnh bìa</span>
+            <span>
+              Ảnh bìa <RequiredMark />
+            </span>
             <ImageUploader
               value={form.coverImage}
               onChange={(url) => setForm((prev) => ({ ...prev, coverImage: url }))}
@@ -187,8 +189,8 @@ export function AdminReflectionFormDialog({
                   setForm((prev) => ({ ...prev, status: value as PublishStatus }))
                 }
                 options={[
-                  { value: "draft", label: STATUS_LABELS.draft },
                   { value: "published", label: STATUS_LABELS.published },
+                  { value: "draft", label: STATUS_LABELS.draft },
                 ]}
               />
             </label>

@@ -6,7 +6,7 @@ import type {
   LiturgyReflection,
   SeasonWithFeasts,
 } from "@/lib/liturgy/types";
-import { formatIsoDateToVi, formatWeekdayVi } from "@/lib/format";
+import { formatDate, formatWeekdayVi } from "@/lib/format";
 import { DEFAULT_COVER, DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import { cn, resolveApiUrl } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
@@ -81,7 +81,7 @@ function GospelSection({ gospels }: { gospels: LiturgyGospel[] }) {
           <CoverImage
             src={featured.coverImage}
             alt={featuredTitle}
-            className="aspect-16/12 w-full"
+            className="aspect-16/9 w-full"
             priority
           />
           <div className="flex flex-col gap-3 p-5 pb-7 md:p-6 md:pb-8">
@@ -108,7 +108,7 @@ function GospelSection({ gospels }: { gospels: LiturgyGospel[] }) {
             <p className="flex items-center gap-2 font-sans text-sm text-foreground/60">
               <CalendarIcon className="size-4 shrink-0" aria-hidden />
               <time dateTime={featured.date}>
-                {formatIsoDateToVi(featured.date)}
+                {formatDate(featured.date)}
               </time>
             </p>
           </div>
@@ -127,14 +127,14 @@ function GospelSection({ gospels }: { gospels: LiturgyGospel[] }) {
                 <CoverImage
                   src={item.coverImage}
                   alt={item.liturgicalDayName}
-                  className="aspect-square w-20 shrink-0 rounded-xl md:w-24"
+                  className="aspect-16/9 w-28 shrink-0 rounded-xl md:w-32"
                 />
                 <div className="min-w-0 flex-1 self-center">
                   <p className="font-display text-base font-semibold text-primary md:text-lg">
                     {item.liturgicalDayName}
                   </p>
                   <p className="mt-1 font-sans text-sm text-foreground/65">
-                    {formatWeekdayVi(item.date)} - {formatIsoDateToVi(item.date)}
+                    {formatWeekdayVi(item.date)} - {formatDate(item.date)}
                   </p>
                 </div>
               </Link>
@@ -167,7 +167,7 @@ function ReflectionsSection({
               <CoverImage
                 src={item.coverImage}
                 alt={item.title}
-                className="aspect-16/10 w-full"
+                className="aspect-16/9 w-full"
               />
               <div className="flex flex-1 flex-col gap-2 p-5">
                 <h3 className="font-display text-xl font-semibold text-primary transition-colors group-hover:text-accent">
@@ -180,7 +180,7 @@ function ReflectionsSection({
                 ) : null}
                 <span className="mt-auto flex items-center gap-2 pt-2 font-sans text-sm text-foreground/60">
                   <CalendarIcon className="size-4" aria-hidden />{" "}
-                  {formatIsoDateToVi(item.date)}
+                  {formatDate(item.date)}
                 </span>
               </div>
             </Link>

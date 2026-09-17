@@ -43,7 +43,7 @@ export function createEmptyGospel(): LiturgyGospel {
     gospelTitle: "",
     gospelContent: "",
     prayerContent: undefined,
-    status: "draft",
+    status: "published",
   };
 }
 
@@ -56,7 +56,7 @@ export function createEmptyReflection(): LiturgyReflection {
     content: "",
     author: "",
     keyPoint: "",
-    status: "draft",
+    status: "published",
   };
 }
 

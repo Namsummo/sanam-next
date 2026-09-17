@@ -26,10 +26,13 @@ import {
 } from "@/components/site/shared/ui/select/select";
 import { AdminSelect } from "@/components/admin/shared/admin-select";
 import { ImageUploader } from "@/components/admin/shared/image-uploader";
-import { AdminEventNewCategoryForm } from "@/components/admin/events/admin-event-new-category-form";
-import { getEventCategories, deleteEventCategory, type ApiEventCategory } from "@/shared/services/events-api";
+import {
+  ensureEventSections,
+  getEventCategories,
+  type ApiEventCategory,
+} from "@/shared/services/events-api";
+import { filterCanonicalEventCategories } from "@/lib/events/categories";
 import { getAccessToken } from "@/lib/admin/auth-session";
-import { AdminConfirmDialog } from "@/components/admin/shared/admin-confirm-dialog";
 import { Button } from "@/components/site/shared/ui/button/button";
 import { BlogEditor } from "../shared/blog-editor";
 
@@ -64,57 +67,39 @@ export function AdminEventFormModal({
 
   const isFeatured = useWatch({ control: form.control, name: "isFeatured" });
   const imageValue = useWatch({ control: form.control, name: "image" });
+  const categoryId = useWatch({ control: form.control, name: "categoryId" });
 
   const [categories, setCategories] = useState<ApiEventCategory[]>([]);
-  const [showNewCategory, setShowNewCategory] = useState(false);
-  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      form.reset(defaultValues);
-      getEventCategories()
-        .then(setCategories)
-        .catch(() => { });
-    }
-  }, [defaultValues, form, open]);
+    if (!open) return;
 
-  async function handleConfirmDeleteCategory() {
-    if (!deletingCategoryId) return;
-    const token = getAccessToken();
-    if (!token) return;
+    form.reset(defaultValues);
 
-    setDeletingCategory(true);
-    try {
-      await deleteEventCategory(token, deletingCategoryId);
-      setCategories((prev) => prev.filter((c) => c._id !== deletingCategoryId));
-      if (form.watch("categoryId") === deletingCategoryId) {
-        form.setValue("categoryId", "");
+    async function loadCategories() {
+      try {
+        const existing = await getEventCategories();
+        const token = getAccessToken();
+        const next = token
+          ? await ensureEventSections(token, existing)
+          : filterCanonicalEventCategories(existing);
+        setCategories(next);
+      } catch {
+        setCategories([]);
       }
-    } catch (err) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : "Không thể xóa danh mục.");
-    } finally {
-      setDeletingCategory(false);
-      setDeletingCategoryId(null);
     }
-  }
+
+    void loadCategories();
+  }, [defaultValues, form, open]);
 
   const categoryOptions = useMemo(
     () =>
       categories.map((cat) => ({
         value: cat._id,
         label: cat.label,
-        showDelete: cat.eventCount === 0,
       })),
     [categories],
   );
-
-  const sessionUser =
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("sanam_admin_user") || "null")
-      : null;
-  const isAdmin = sessionUser?.role === "admin";
 
   return (
     <AdminFormDialog
@@ -262,38 +247,10 @@ export function AdminEventFormModal({
               Danh mục
             </label>
             <AdminSelect
-              value={form.watch("categoryId")}
+              value={categoryId}
               onChange={(value) => form.setValue("categoryId", value, { shouldDirty: true })}
               options={categoryOptions}
               placeholder={EMPTY_EVENT_CATEGORY_LABEL}
-              searchable={categoryOptions.length > 5}
-              onAdd={isAdmin ? () => setShowNewCategory(true) : undefined}
-              addLabel="Thêm danh mục mới"
-              onDeleteOption={(id) => setDeletingCategoryId(id)}
-            />
-
-            {showNewCategory ? (
-              <AdminEventNewCategoryForm
-                onClose={() => setShowNewCategory(false)}
-                onCreated={(category) => {
-                  setCategories((prev) => [...prev, category]);
-                  form.setValue("categoryId", category._id, { shouldDirty: true });
-                  setShowNewCategory(false);
-                }}
-              />
-            ) : null}
-
-            <AdminConfirmDialog
-              open={deletingCategoryId !== null}
-              onOpenChange={(open) => {
-                if (!open) setDeletingCategoryId(null);
-              }}
-              title="Xóa danh mục sự kiện?"
-              description="Hành động này sẽ xóa vĩnh viễn danh mục này khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
-              confirmLabel="Xóa"
-              onConfirm={handleConfirmDeleteCategory}
-              loading={deletingCategory}
-              variant="danger"
             />
           </div>
 
@@ -359,7 +316,7 @@ export function AdminEventFormModal({
             )}
           </ControlledField>
 
-          <ControlledField control={form.control} name="featuredOrder" label="Thứ tự nổi bật">
+          <ControlledField control={form.control} name="featuredOrder" label="Thứ tự nổi bật ở trang chủ">
             {({ controlProps }) => (
               <Input
                 {...controlProps}

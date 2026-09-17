@@ -32,7 +32,15 @@ type AdminGospelFormDialogProps = {
   onUploadImage: (file: File) => Promise<string>;
 };
 
-export function AdminGospelFormDialog({
+export function AdminGospelFormDialog(props: AdminGospelFormDialogProps) {
+  const instanceKey = props.open
+    ? (props.editingGospel?.id ?? "create")
+    : "closed";
+
+  return <GospelFormDialogInner key={instanceKey} {...props} />;
+}
+
+function GospelFormDialogInner({
   open,
   onOpenChange,
   editingGospel = null,
@@ -46,18 +54,6 @@ export function AdminGospelFormDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      setForm(
-        editingGospel
-          ? gospelToFormState(editingGospel)
-          : gospelToFormState(createEmptyGospel()),
-      );
-      setError(null);
-    }
-    onOpenChange(nextOpen);
-  };
-
   async function handleSave() {
     if (!form.date.trim()) {
       setError("Vui lòng chọn ngày phụng vụ");
@@ -69,6 +65,10 @@ export function AdminGospelFormDialog({
     }
     if (!form.theme?.trim()) {
       setError("Vui lòng nhập đoạn chủ đề");
+      return;
+    }
+    if (!form.coverImage?.trim()) {
+      setError("Vui lòng tải ảnh bìa");
       return;
     }
     if (!form.firstReadingTitle.trim() || !form.firstReadingContent.trim()) {
@@ -109,7 +109,7 @@ export function AdminGospelFormDialog({
   return (
     <AdminFormDialog
       open={open}
-      onOpenChange={handleOpenChange}
+      onOpenChange={onOpenChange}
       title={isEdit ? "Sửa lời Chúa" : "Thêm lời Chúa"}
       className="sm:max-w-3xl"
       footer={
@@ -183,7 +183,9 @@ export function AdminGospelFormDialog({
               />
             </label>
             <div className="space-y-2 text-sm">
-              <span>Ảnh bìa</span>
+              <span>
+                Ảnh bìa <RequiredMark />
+              </span>
               <ImageUploader
                 value={form.coverImage}
                 onChange={(url) => setForm((prev) => ({ ...prev, coverImage: url }))}
@@ -200,8 +202,8 @@ export function AdminGospelFormDialog({
                 setForm((prev) => ({ ...prev, status: value as PublishStatus }))
               }
               options={[
-                { value: "draft", label: STATUS_LABELS.draft },
                 { value: "published", label: STATUS_LABELS.published },
+                { value: "draft", label: STATUS_LABELS.draft },
               ]}
             />
           </label>
