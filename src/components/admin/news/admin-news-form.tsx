@@ -488,7 +488,11 @@ export function AdminNewsFormModal({
                 <FieldLabel>
                   Nội dung <RequiredMark />
                 </FieldLabel>
-                <BlogEditor content={content} onChange={setContent} />
+                <BlogEditor
+                  content={content}
+                  onChange={setContent}
+                  onUploadImage={handleImageUpload}
+                />
               </div>
             </div>
           </section>

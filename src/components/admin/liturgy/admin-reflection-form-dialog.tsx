@@ -203,6 +203,7 @@ function ReflectionFormDialogInner({
             <BlogEditor
               content={form.content}
               onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+              onUploadImage={onUploadImage}
             />
           </div>
         </div>

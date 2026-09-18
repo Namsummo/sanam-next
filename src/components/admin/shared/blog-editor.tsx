@@ -13,6 +13,8 @@ type BlogEditorProps = {
   content: string;
   onChange: (html: string) => void;
   className?: string;
+  /** Upload ảnh lên server rồi chèn URL — tránh nhúng base64 làm payload quá lớn (413). */
+  onUploadImage?: (file: File) => Promise<string>;
 };
 
 type QuillLike = {
@@ -57,10 +59,18 @@ function pickImageFile(): Promise<File | null> {
   });
 }
 
+function assertImageFileSize(file: File) {
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    throw new Error(`Ảnh không được vượt quá ${MAX_IMAGE_SIZE_MB} MB.`);
+  }
+}
+
 function readImageFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
-    if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      reject(new Error(`Ảnh không được vượt quá ${MAX_IMAGE_SIZE_MB} MB.`));
+    try {
+      assertImageFileSize(file);
+    } catch (err) {
+      reject(err);
       return;
     }
 
@@ -82,25 +92,21 @@ function toYouTubeEmbedUrl(url: string): string | null {
   try {
     const u = new URL(url.trim());
 
-    // youtu.be/VIDEO_ID
     if (u.hostname === "youtu.be") {
       const id = u.pathname.slice(1).split("/")[0];
       return id ? `https://www.youtube.com/embed/${id}` : null;
     }
 
     if (u.hostname.includes("youtube.com")) {
-      // youtube.com/watch?v=VIDEO_ID
       if (u.pathname === "/watch") {
         const id = u.searchParams.get("v");
         return id ? `https://www.youtube.com/embed/${id}` : null;
       }
 
-      // youtube.com/embed/VIDEO_ID (đã là embed)
       if (u.pathname.startsWith("/embed/")) {
         return `https://www.youtube.com/embed/${u.pathname.split("/")[2]}`;
       }
 
-      // youtube.com/shorts/VIDEO_ID
       if (u.pathname.startsWith("/shorts/")) {
         const id = u.pathname.split("/")[2];
         return id ? `https://www.youtube.com/embed/${id}` : null;
@@ -111,23 +117,6 @@ function toYouTubeEmbedUrl(url: string): string | null {
   } catch {
     return null;
   }
-}
-
-function handleImage(this: HandlerContext) {
-  void (async () => {
-    const file = await pickImageFile();
-    if (!file) return;
-
-    try {
-      const dataUrl = await readImageFile(file);
-      const range = this.quill.getSelection(true);
-      const index = range?.index ?? this.quill.getLength();
-      this.quill.insertEmbed(index, "image", dataUrl, "user");
-      this.quill.setSelection(index + 1, 0, "silent");
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Không thêm được ảnh.");
-    }
-  })();
 }
 
 function handleVideo(this: HandlerContext) {
@@ -142,23 +131,62 @@ function handleVideo(this: HandlerContext) {
   this.quill.setSelection(index + 1, 0, "silent");
 }
 
-export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
+export function BlogEditor({
+  content,
+  onChange,
+  className,
+  onUploadImage,
+}: BlogEditorProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const quillStaticRef = useRef<QuillStatic | null>(null);
+  const onUploadImageRef = useRef(onUploadImage);
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
   const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  useEffect(() => {
+    onUploadImageRef.current = onUploadImage;
+  }, [onUploadImage]);
+
+  const resolveImageSrc = useCallback(async (file: File): Promise<string> => {
+    assertImageFileSize(file);
+    const upload = onUploadImageRef.current;
+    if (upload) {
+      return upload(file);
+    }
+    // Fallback: base64 — dễ gây 413 nếu nhiều JPG/PNG lớn.
+    return readImageFile(file);
+  }, []);
 
   const modules = useMemo(
     () => ({
       toolbar: {
         container: TOOLBAR_OPTIONS,
         handlers: {
-          image: handleImage,
+          image(this: HandlerContext) {
+            void (async () => {
+              const file = await pickImageFile();
+              if (!file) return;
+
+              try {
+                setUploadingImage(true);
+                const src = await resolveImageSrc(file);
+                const range = this.quill.getSelection(true);
+                const index = range?.index ?? this.quill.getLength();
+                this.quill.insertEmbed(index, "image", src, "user");
+                this.quill.setSelection(index + 1, 0, "silent");
+              } catch (err) {
+                window.alert(err instanceof Error ? err.message : "Không thêm được ảnh.");
+              } finally {
+                setUploadingImage(false);
+              }
+            })();
+          },
           video: handleVideo,
         },
       },
     }),
-    [],
+    [resolveImageSrc],
   );
 
   const getQuill = useCallback((): QuillLike | null => {
@@ -247,19 +275,20 @@ export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
       if (!file) return;
 
       try {
-        const dataUrl = await readImageFile(file);
+        setUploadingImage(true);
+        const src = await resolveImageSrc(file);
         const blot = findBlot(img);
         if (!blot) return;
 
         const index = quill.getIndex(blot);
         quill.deleteText(index, 1, "user");
-        quill.insertEmbed(index, "image", dataUrl, "user");
+        quill.insertEmbed(index, "image", src, "user");
         quill.setSelection(index + 1, 0, "silent");
 
         requestAnimationFrame(() => {
           const replaced =
             Array.from(quill.root.querySelectorAll("img")).find(
-              (el) => el.getAttribute("src") === dataUrl,
+              (el) => el.getAttribute("src") === src,
             ) ?? null;
 
           if (replaced) selectImage(replaced);
@@ -267,9 +296,11 @@ export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
         });
       } catch (err) {
         window.alert(err instanceof Error ? err.message : "Không đổi được ảnh.");
+      } finally {
+        setUploadingImage(false);
       }
     })();
-  }, [clearImageSelection, findBlot, getQuill, selectImage, selectedImage]);
+  }, [clearImageSelection, findBlot, getQuill, resolveImageSrc, selectImage, selectedImage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -355,6 +386,12 @@ export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
         className="min-h-100"
       />
 
+      {uploadingImage ? (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 text-sm font-medium text-card-foreground">
+          Đang tải ảnh lên...
+        </div>
+      ) : null}
+
       {selectedImage && toolbarPos ? (
         <div
           data-image-toolbar
@@ -383,8 +420,11 @@ export function BlogEditor({ content, onChange, className }: BlogEditorProps) {
       ) : null}
 
       <p className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
-        Ảnh: JPG, PNG, WebP hoặc GIF, tối đa {MAX_IMAGE_SIZE_MB} MB. Click vào ảnh để đổi/xóa.
-        Video: nút video → dán link YouTube (watch, youtu.be, shorts) để nhúng player.
+        Ảnh: JPG, PNG, WebP hoặc GIF, tối đa {MAX_IMAGE_SIZE_MB} MB
+        {onUploadImage
+          ? " — ảnh được upload lên server rồi chèn link."
+          : " — đang nhúng base64 (dễ lỗi 413 nếu nhiều ảnh lớn)."}{" "}
+        Click vào ảnh để đổi/xóa. Video: nút video → dán link YouTube.
       </p>
     </div>
   );

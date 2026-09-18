@@ -11,6 +11,7 @@ import {
   DEFAULT_INTRODUCE_SETTINGS,
   type IntroduceSettingsData,
 } from "@/shared/services/introduce-settings-api";
+import { uploadImage } from "@/shared/services/news-api";
 
 export function IntroduceEditor() {
   const [settings, setSettings] = useState<IntroduceSettingsData>(DEFAULT_INTRODUCE_SETTINGS);
@@ -120,6 +121,11 @@ export function IntroduceEditor() {
           <BlogEditor
             content={settings.content}
             onChange={(html) => setSettings((prev) => ({ ...prev, content: html }))}
+            onUploadImage={async (file) => {
+              const token = getAccessToken();
+              if (!token) throw new Error("Not authenticated");
+              return uploadImage(token, file);
+            }}
           />
         </div>
 

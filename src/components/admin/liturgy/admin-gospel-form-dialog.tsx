@@ -225,6 +225,7 @@ function GospelFormDialogInner({
                 setForm((prev) => ({ ...prev, firstReadingContent: content }))
               }
               className="min-h-40"
+              onUploadImage={onUploadImage}
             />
           </fieldset>
 
@@ -243,6 +244,7 @@ function GospelFormDialogInner({
                 setForm((prev) => ({ ...prev, secondReadingContent: content }))
               }
               className="min-h-40"
+              onUploadImage={onUploadImage}
             />
           </fieldset>
 
@@ -263,6 +265,7 @@ function GospelFormDialogInner({
                 setForm((prev) => ({ ...prev, gospelContent: content }))
               }
               className="min-h-40"
+              onUploadImage={onUploadImage}
             />
           </fieldset>
 
@@ -274,6 +277,7 @@ function GospelFormDialogInner({
                 setForm((prev) => ({ ...prev, prayerContent: content }))
               }
               className="min-h-40"
+              onUploadImage={onUploadImage}
             />
           </fieldset>
         </div>

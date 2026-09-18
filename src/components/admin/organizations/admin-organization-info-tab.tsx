@@ -117,6 +117,7 @@ export function AdminOrganizationInfoTab({
           <BlogEditor
             content={historyValue ?? ""}
             onChange={(html) => setValue("history", html, { shouldDirty: true })}
+            onUploadImage={onUploadImage}
           />
         </div>
       </FieldGroup>

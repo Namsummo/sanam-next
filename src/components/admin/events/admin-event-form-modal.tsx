@@ -236,6 +236,7 @@ export function AdminEventFormModal({
                 {...controlProps}
                 content={controlProps.value as string}
                 className="min-h-75"
+                onUploadImage={onUploadImage}
               />
             )}
           </ControlledField>
