@@ -62,9 +62,30 @@ export async function generateMetadata({
     return { title: "Không tìm thấy" };
   }
 
+  // Page-level openGraph replaces the root one, so the fallback image is repeated here.
+  const image = article.coverImage
+    ? resolveApiUrl(article.coverImage)
+    : "/images/default-cover.jpg";
+
   return {
     title: article.title,
     description: article.excerpt,
+    openGraph: {
+      type: "article",
+      locale: "vi_VN",
+      siteName: "Giáo xứ Sa Nam",
+      url: `/news/${article.slug}`,
+      title: article.title,
+      description: article.excerpt,
+      publishedTime: article.publishedAt,
+      images: [{ url: image, alt: article.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      images: [image],
+    },
   };
 }
 

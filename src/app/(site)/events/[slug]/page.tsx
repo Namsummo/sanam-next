@@ -19,6 +19,7 @@ import {
 import { DEFAULT_COVER_ALT } from "@/lib/image-constants";
 import type { ParishEvent } from "@/lib/events/types";
 import { NewsHtmlContent } from "@/components/site/news/news-html-content";
+import { resolveApiUrl } from "@/lib/utils";
 
 type EventDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -46,9 +47,28 @@ export async function generateMetadata({
     const data = await getPublicEventBySlug(decoded);
     const event = toParishEvent(data);
 
+    const description = `${formatEventDateTime(event)} — ${event.location}`;
+    // Page-level openGraph replaces the root one, so the fallback image is repeated here.
+    const image = event.image ? resolveApiUrl(event.image) : "/images/default-cover.jpg";
+
     return {
-      title: 'Sự kiện',
-      description: `${formatEventDateTime(event)} — ${event.location}`,
+      title: event.name,
+      description,
+      openGraph: {
+        type: "article",
+        locale: "vi_VN",
+        siteName: "Giáo xứ Sa Nam",
+        url: `/events/${event.slug ?? decoded}`,
+        title: event.name,
+        description,
+        images: [{ url: image, alt: event.name }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: event.name,
+        description,
+        images: [image],
+      },
     };
   } catch {
     return { title: "Không tìm thấy" };
